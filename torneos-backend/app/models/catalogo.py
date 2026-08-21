@@ -93,6 +93,17 @@ class Edicion(Base):
     reglamento_url: Mapped[str | None] = mapped_column(String(500))
     version_reglamento: Mapped[str | None] = mapped_column(String(40))
 
+    # Canal de Discord al que se publican los avisos de esta edición. Solo
+    # se aceptan URLs de webhook de Discord — ver PREFIJOS_WEBHOOK_VALIDOS
+    # en app/core/notificaciones.py, es una guarda contra SSRF, no cosmética.
+    discord_webhook_url: Mapped[str | None] = mapped_column(String(500))
+
+    # False = torneo abierto: el equipo que se inscribe queda aprobado al
+    # instante, sin que el organizador revise uno por uno. NO afecta ninguna
+    # otra regla — cupos, plazo, roster y elegibilidad se siguen validando
+    # exactamente igual y antes de aprobar nada.
+    requiere_aprobacion: Mapped[bool] = mapped_column(Boolean, default=True)
+
     # Configurables, nunca hardcodeados
     sistema_puntaje: Mapped[dict] = mapped_column(JSON, default=dict)
     criterios_desempate: Mapped[list] = mapped_column(JSON, default=list)

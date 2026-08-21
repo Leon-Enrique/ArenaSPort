@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import CurrentUser, DbSession, RequiereOrganizador
+from app.core import notificaciones
 from app.domain import sorteo
 from app.domain.enums import EstadoPartida, ModeloCompetencia
 from app.domain.partidas import (
+    CHECKIN_MINUTOS_ANTES,
     ErrorPartida,
     ResultadoCheckin,
     bo_para_ronda,
@@ -67,7 +70,48 @@ def _obtener_partida(db: Session, fase_id: int, partida_id: int) -> Partida:
     return partida
 
 
-def _auto_abrir_checkins_vencidos(db: Session, partidas: list[Partida]) -> None:
+def _equipos_y_nombres(partida: Partida) -> tuple[list[int], str]:
+    """Los ids de los equipos de una partida y su nombre para mostrar
+    ("Dragons vs Wolves")."""
+    equipo_ids = [p.equipo_id for p in partida.participaciones]
+    nombres = " vs ".join(p.equipo.nombre for p in partida.participaciones)
+    return equipo_ids, nombres or f"Partida #{partida.id}"
+
+
+def _notificar_partida(
+    db: Session,
+    background_tasks: BackgroundTasks,
+    partida: Partida,
+    *,
+    tipo: str,
+    titulo_plantilla: str,
+    cuerpo: str,
+) -> None:
+    """Avisa a los planteles de ambos equipos de la partida. La edición sale
+    de la fase — es la dueña del webhook y del slug de la URL."""
+    fase = db.get(Fase, partida.fase_id)
+    edicion = fase.edicion
+    equipo_ids, nombres = _equipos_y_nombres(partida)
+
+    usuarios = notificaciones.usuarios_de_equipos(db, equipo_ids, edicion.id)
+    if not usuarios:
+        return
+
+    notificaciones.notificar(
+        db,
+        background_tasks,
+        tipo=tipo,
+        usuarios=usuarios,
+        titulo=titulo_plantilla.format(partida=nombres),
+        cuerpo=cuerpo,
+        url=f"/torneos/{edicion.slug}",
+        edicion=edicion,
+    )
+
+
+def _auto_abrir_checkins_vencidos(
+    db: Session, partidas: list[Partida], background_tasks: BackgroundTasks
+) -> None:
     """Abre solo el check-in de cualquier partida programada cuyo horario ya
     llegó — así el organizador no tiene que apretar "Abrir Check-in" a mano
     en cada cruce, solo cargar el horario una vez con /programar.
@@ -75,6 +119,10 @@ def _auto_abrir_checkins_vencidos(db: Session, partidas: list[Partida]) -> None:
     Se llama desde los GET de partidas (piggyback en la lectura, no hace
     falta un scheduler aparte corriendo en segundo plano): cada vez que
     alguien mira el bracket, de paso se ponen al día las que ya vencieron.
+
+    El aviso sale una sola vez por partida sin necesitar ningún registro de
+    "ya notificada": la transición PROGRAMADA -> CHECK_IN ocurre una única
+    vez, y las recargas siguientes ya no entran en este `if`.
     """
     ahora = _ahora()
     cambio = False
@@ -83,6 +131,12 @@ def _auto_abrir_checkins_vencidos(db: Session, partidas: list[Partida]) -> None:
             p.estado = EstadoPartida.CHECK_IN
             p.checkin_abre_at = ahora
             p.checkin_cierra_at = p.programada_para
+            _notificar_partida(
+                db, background_tasks, p,
+                tipo="checkin_abierto",
+                titulo_plantilla="Check-in abierto: {partida}",
+                cuerpo="Confirmá tu presencia ahora. Si no hacés check-in a tiempo, la partida se pierde por walkover.",
+            )
             cambio = True
     if cambio:
         db.commit()
@@ -245,6 +299,7 @@ def crear_partida(
 def listar_partidas_de_fase(
     fase_id: int,
     db: DbSession,
+    background_tasks: BackgroundTasks,
     estado: EstadoPartida | None = None,
     resueltas: bool | None = None,
 ) -> list[Partida]:
@@ -257,7 +312,9 @@ def listar_partidas_de_fase(
     """
     _obtener_fase(db, fase_id)
     _auto_abrir_checkins_vencidos(
-        db, db.query(Partida).filter(Partida.fase_id == fase_id, Partida.estado == EstadoPartida.PROGRAMADA).all()
+        db,
+        db.query(Partida).filter(Partida.fase_id == fase_id, Partida.estado == EstadoPartida.PROGRAMADA).all(),
+        background_tasks,
     )
     _auto_resolver_reportes_vencidos(
         db, db.query(Partida).filter(Partida.fase_id == fase_id, Partida.estado == EstadoPartida.REPORTADA).all()
@@ -280,16 +337,19 @@ def listar_partidas_de_fase(
 
 
 @router.get("/{partida_id}", response_model=PartidaRead)
-def obtener_partida(fase_id: int, partida_id: int, db: DbSession) -> Partida:
+def obtener_partida(
+    fase_id: int, partida_id: int, db: DbSession, background_tasks: BackgroundTasks
+) -> Partida:
     partida = _obtener_partida(db, fase_id, partida_id)
-    _auto_abrir_checkins_vencidos(db, [partida])
+    _auto_abrir_checkins_vencidos(db, [partida], background_tasks)
     _auto_resolver_reportes_vencidos(db, [partida])
     return partida
 
 
 @router.patch("/{partida_id}/programar", response_model=PartidaRead)
 def programar_partida(
-    fase_id: int, partida_id: int, datos: ProgramarPartidaIn, db: DbSession, _organizador: RequiereOrganizador
+    fase_id: int, partida_id: int, datos: ProgramarPartidaIn, db: DbSession,
+    background_tasks: BackgroundTasks, _organizador: RequiereOrganizador,
 ) -> Partida:
     """Fija el horario de una partida — el check-in se abre solo
     `CHECKIN_MINUTOS_ANTES` antes de esa hora, sin que haga falta abrirlo
@@ -302,6 +362,19 @@ def programar_partida(
             422, f"Solo se puede programar una partida en 'programada' (estado actual: {partida.estado})."
         )
     partida.programada_para = datos.programada_para
+
+    fase = db.get(Fase, partida.fase_id)
+    cuando = datos.programada_para.astimezone(ZoneInfo(fase.edicion.zona_horaria))
+    _notificar_partida(
+        db, background_tasks, partida,
+        tipo="partida_programada",
+        titulo_plantilla="Horario confirmado: {partida}",
+        cuerpo=(
+            f"Se juega el {cuando:%d/%m a las %H:%M} ({fase.edicion.zona_horaria}). "
+            f"El check-in se abre {CHECKIN_MINUTOS_ANTES} minutos antes."
+        ),
+    )
+
     db.commit()
     db.refresh(partida)
     return partida
@@ -358,7 +431,7 @@ def enviar_mensaje(
 @router.post("/{partida_id}/abrir-checkin", response_model=PartidaRead)
 def abrir_checkin(
     fase_id: int, partida_id: int, datos: AbrirCheckinIn, db: DbSession,
-    _organizador: RequiereOrganizador,
+    background_tasks: BackgroundTasks, _organizador: RequiereOrganizador,
 ) -> Partida:
     """El organizador abre la ventana de check-in de una partida programada."""
     partida = _obtener_partida(db, fase_id, partida_id)
@@ -374,6 +447,17 @@ def abrir_checkin(
     partida.estado = EstadoPartida.CHECK_IN
     partida.checkin_abre_at = ahora
     partida.checkin_cierra_at = ahora + timedelta(minutes=datos.minutos)
+
+    _notificar_partida(
+        db, background_tasks, partida,
+        tipo="checkin_abierto",
+        titulo_plantilla="Check-in abierto: {partida}",
+        cuerpo=(
+            f"Confirmá tu presencia dentro de los próximos {datos.minutos} minutos. "
+            "Si no hacés check-in a tiempo, la partida se pierde por walkover."
+        ),
+    )
+
     db.commit()
     db.refresh(partida)
     return partida

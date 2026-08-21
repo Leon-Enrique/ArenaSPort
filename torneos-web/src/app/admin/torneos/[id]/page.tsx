@@ -205,6 +205,7 @@ export default function TorneoDetailPage() {
                     { href: `/admin/torneos/${torneoId}/ediciones/${ed.id}/participantes`, label: 'Participantes', icon: <Users size={12} /> },
                     { href: `/admin/torneos/${torneoId}/ediciones/${ed.id}/fases`, label: 'Fases', icon: <Swords size={12} /> },
                     { href: `/admin/torneos/${torneoId}/ediciones/${ed.id}/disputas`, label: 'Disputas', icon: <ShieldAlert size={12} /> },
+                    { href: `/admin/torneos/${torneoId}/ediciones/${ed.id}/configuracion`, label: 'Configuración', icon: <Settings size={12} /> },
                   ].map(link => (
                     <Link
                       key={link.href}

@@ -7,8 +7,8 @@
  */
 
 import {
-  ApiCampoIdentidad, ApiDisputa, ApiEdicion, ApiEquipoResumen, ApiFase, ApiInscripcion,
-  ApiInscripcionCreada, ApiJuego, ApiMensajePartida, ApiMiInscripcion, ApiMiPartida, ApiPartida, ApiReporteResultado,
+  ApiBandejaNotificaciones, ApiCampoIdentidad, ApiDisputa, ApiEdicion, ApiEquipoResumen, ApiFase, ApiInscripcion,
+  ApiInscripcionCreada, ApiJuego, ApiMensajePartida, ApiMiInscripcion, ApiMiPartida, ApiNotificacion, ApiPartida, ApiReporteResultado,
   ApiResumenEdicion, ApiTablaGrupo, ApiTokenOut, ApiTorneo, ApiUsuario, ApiUsuarioAdmin,
 } from '@/lib/api-types';
 import {
@@ -142,6 +142,34 @@ class ApiClient {
 
   async cambiarEstadoEdicion(edicionId: string, estado: string): Promise<ApiEdicion> {
     return this.request<ApiEdicion>(`/ediciones/${edicionId}/estado?estado=${estado}`, { method: 'POST' });
+  }
+
+  /** Ajustes de una edición ya creada. Solo se mandan los campos a cambiar:
+   *  el backend usa exclude_unset, así que omitir uno lo deja como estaba. */
+  async updateEdicion(edicionId: string, data: {
+    max_equipos?: number | null; fecha_inicio?: string | null; bolsa_premios?: string | null;
+    reglamento_url?: string | null; discord_webhook_url?: string | null; requiere_aprobacion?: boolean;
+  }): Promise<ApiEdicion> {
+    return this.request<ApiEdicion>(`/ediciones/${edicionId}`, { method: 'PATCH', body: JSON.stringify(data) });
+  }
+
+  async probarWebhook(edicionId: string): Promise<{ mensaje: string }> {
+    return this.request<{ mensaje: string }>(`/ediciones/${edicionId}/probar-webhook`, { method: 'POST' });
+  }
+
+  // ──────────────────────────────────────────
+  // NOTIFICACIONES
+  // ──────────────────────────────────────────
+  async getNotificaciones(): Promise<ApiBandejaNotificaciones> {
+    return this.request<ApiBandejaNotificaciones>('/notificaciones');
+  }
+
+  async marcarNotificacionLeida(id: number): Promise<ApiNotificacion> {
+    return this.request<ApiNotificacion>(`/notificaciones/${id}/leer`, { method: 'POST' });
+  }
+
+  async marcarTodasLeidas(): Promise<ApiBandejaNotificaciones> {
+    return this.request<ApiBandejaNotificaciones>('/notificaciones/leer-todas', { method: 'POST' });
   }
 
   // ──────────────────────────────────────────

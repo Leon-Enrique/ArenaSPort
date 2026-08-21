@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
@@ -55,6 +55,7 @@ export default function InscribirseTorneoPage() {
   const [acceptRules, setAcceptRules] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const bannerError = useRef<HTMLDivElement>(null);
   const [resultado, setResultado] = useState<ApiInscripcionCreada | null>(null);
 
   useEffect(() => {
@@ -165,11 +166,28 @@ export default function InscribirseTorneoPage() {
       });
       setResultado(data);
     } catch (err) {
-      setErrorMsg(err instanceof ApiError ? err.message : 'No se pudo enviar la inscripción. Intentá de nuevo.');
+      const mensaje = err instanceof ApiError ? err.message : 'No se pudo enviar la inscripción. Intentá de nuevo.';
+      setErrorMsg(mensaje);
+      // El formulario es largo: sin esto el usuario aprieta "Enviar", el
+      // banner aparece arriba fuera de pantalla y parece que no pasó nada.
+      requestAnimationFrame(() => {
+        bannerError.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  /** Filas cuyo jugador el backend nombró en el error (ej. "Lyon ya está
+   *  inscrito en el equipo 'Dragons'"). Marcarlas evita que el capitán tenga
+   *  que cruzar el texto del mensaje contra el roster a ojo. */
+  const filasEnConflicto = new Set<number>();
+  if (errorMsg) {
+    jugadores.forEach((j, idx) => {
+      const valores = Object.values(j.identidad).map(v => v.trim()).filter(v => v.length >= 2);
+      if (valores.some(v => errorMsg.includes(v))) filasEnConflicto.add(idx);
+    });
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#070710] text-slate-100 selection:bg-violet-600 selection:text-white">
@@ -288,7 +306,9 @@ export default function InscribirseTorneoPage() {
                     <div
                       key={idx}
                       className={`p-3.5 rounded-2xl border space-y-2.5 text-xs transition-all ${
-                        jugador.esSuplente ? 'bg-cyan-950/20 border-cyan-500/40' : 'bg-violet-950/20 border-violet-500/40'
+                        filasEnConflicto.has(idx)
+                          ? 'bg-rose-950/30 border-rose-500 ring-1 ring-rose-500/50'
+                          : jugador.esSuplente ? 'bg-cyan-950/20 border-cyan-500/40' : 'bg-violet-950/20 border-violet-500/40'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -375,8 +395,16 @@ export default function InscribirseTorneoPage() {
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle size={15} /> <span>{errorMsg}</span>
+                <div ref={bannerError} className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2">
+                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                  <span>
+                    {errorMsg}
+                    {filasEnConflicto.size > 0 && (
+                      <span className="block text-rose-400/70 mt-1">
+                        Marcamos en rojo {filasEnConflicto.size === 1 ? 'al jugador' : 'a los jugadores'} que hay que corregir.
+                      </span>
+                    )}
+                  </span>
                 </div>
               )}
 

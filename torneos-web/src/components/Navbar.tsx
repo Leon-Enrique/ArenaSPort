@@ -6,6 +6,7 @@ import { Shield, Trophy, LayoutDashboard, LogIn, ChevronDown, User, LogOut, Spar
 import { Usuario } from '@/types';
 import { api } from '@/lib/api';
 import AuthModal from '@/components/AuthModal';
+import NotificacionesBell from '@/components/NotificacionesBell';
 
 const TOKEN_KEY = 'torneos_auth_token';
 
@@ -71,6 +72,7 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-3">
+            {usuario && <NotificacionesBell />}
             {usuario ? (
               <div className="relative">
                 <button

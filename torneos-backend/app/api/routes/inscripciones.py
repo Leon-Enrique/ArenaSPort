@@ -2,10 +2,11 @@ import os
 import random
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession, RequiereOrganizador, UsuarioOpcional
+from app.core import notificaciones
 from app.domain.enums import EstadoInscripcion
 from app.domain.roster import (
     ConfigJuego,
@@ -74,10 +75,16 @@ def _normalizar_y_validar_roster(
         query = query.where(Jugador.inscripcion_id != excluir_inscripcion_id)
     ya_inscritos = db.scalars(query).all()
     if ya_inscritos:
-        nicks = ", ".join(j.nick for j in ya_inscritos)
+        # Nombrar el equipo, no solo el nick: con "Lyon ya está inscrito" el
+        # capitán no sabe si es homónimo o si alguien de su plantel se anotó
+        # por su cuenta en otro lado. Con el equipo lo resuelve solo.
+        detalles = "; ".join(
+            f"{j.nick} ya está inscrito en el equipo '{j.inscripcion.equipo.nombre}'"
+            for j in ya_inscritos
+        )
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            f"Estos jugadores ya están inscritos en otro equipo: {nicks}.",
+            f"{detalles}. Un jugador no puede estar en dos equipos de la misma edición.",
         )
 
     return resultado
@@ -172,7 +179,17 @@ def inscribir_equipo(
     db.add(equipo)
     db.flush()
 
-    inscripcion = Inscripcion(edicion_id=edicion_id, equipo_id=equipo.id)
+    # Torneo abierto: el equipo queda adentro sin revisión manual. Ojo con el
+    # orden — todo lo que valida esta función (cupos, plazo, roster,
+    # elegibilidad, nombre duplicado) ya corrió arriba. "Abierto" es sin
+    # revisión, no sin reglas.
+    aprobacion_automatica = not edicion.requiere_aprobacion
+    inscripcion = Inscripcion(
+        edicion_id=edicion_id,
+        equipo_id=equipo.id,
+        estado=EstadoInscripcion.APROBADA if aprobacion_automatica else EstadoInscripcion.PENDIENTE,
+        revisada_at=datetime.now().astimezone() if aprobacion_automatica else None,
+    )
     db.add(inscripcion)
     db.flush()
 
@@ -193,9 +210,16 @@ def inscribir_equipo(
     db.commit()
     db.refresh(inscripcion)
 
+    avisos = list(resultado.avisos)
+    if aprobacion_automatica:
+        avisos.append(
+            "Este torneo tiene inscripción abierta: tu equipo ya quedó aprobado, "
+            "no hace falta esperar la revisión del organizador."
+        )
+
     return InscripcionCreada(
         inscripcion=InscripcionRead.model_validate(inscripcion),
-        avisos=resultado.avisos,
+        avisos=avisos,
     )
 
 
@@ -365,6 +389,7 @@ def obtener_inscripcion(
 @router.post("/{inscripcion_id}/revisar", response_model=InscripcionRead)
 def revisar_inscripcion(
     edicion_id: int, inscripcion_id: int, datos: RevisionInscripcion, db: DbSession,
+    background_tasks: BackgroundTasks,
     _organizador: RequiereOrganizador,
 ) -> Inscripcion:
     """Aprobar o rechazar. Nunca se borra una inscripción: cambia de estado."""
@@ -381,9 +406,50 @@ def revisar_inscripcion(
     inscripcion.estado = datos.estado
     inscripcion.motivo_rechazo = datos.motivo_rechazo
     inscripcion.revisada_at = datetime.now().astimezone()
+
+    edicion = _obtener_edicion(db, edicion_id)
+    _notificar_revision(db, background_tasks, edicion, inscripcion, datos)
+
     db.commit()
     db.refresh(inscripcion)
     return inscripcion
+
+
+def _notificar_revision(
+    db: DbSession,
+    background_tasks: BackgroundTasks,
+    edicion: Edicion,
+    inscripcion: Inscripcion,
+    datos: RevisionInscripcion,
+) -> None:
+    """Avisa al plantel el veredicto. Solo para aprobada/rechazada: 'retirada'
+    y 'descalificada' son acciones con contexto propio que el organizador ya
+    conversa aparte, un aviso automático seco ahí haría más ruido que bien."""
+    if datos.estado not in (EstadoInscripcion.APROBADA, EstadoInscripcion.RECHAZADA):
+        return
+
+    usuarios = notificaciones.usuarios_de_equipos(db, [inscripcion.equipo_id], edicion.id)
+    if not usuarios:
+        return
+
+    nombre_equipo = inscripcion.equipo.nombre
+    if datos.estado == EstadoInscripcion.APROBADA:
+        titulo = f"Inscripción aprobada: {nombre_equipo}"
+        cuerpo = f"{nombre_equipo} quedó adentro de {edicion.nombre}. Atentos al sorteo de llaves."
+    else:
+        titulo = f"Inscripción rechazada: {nombre_equipo}"
+        cuerpo = f"{nombre_equipo} no fue aceptado en {edicion.nombre}.\nMotivo: {datos.motivo_rechazo}"
+
+    notificaciones.notificar(
+        db,
+        background_tasks,
+        tipo="inscripcion_revisada",
+        usuarios=usuarios,
+        titulo=titulo,
+        cuerpo=cuerpo,
+        url=f"/torneos/{edicion.slug}",
+        edicion=edicion,
+    )
 
 
 @router.post("/sembrar-automatico", response_model=list[InscripcionRead])

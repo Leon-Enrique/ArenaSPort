@@ -4,7 +4,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, evidencias, fases, inscripciones, partidas, torneos, usuarios
+from app.api.routes import (
+    auth,
+    evidencias,
+    fases,
+    inscripciones,
+    notificaciones,
+    partidas,
+    torneos,
+    usuarios,
+)
 from app.core.config import settings
 from app.db.database import Base, SessionLocal, engine, es_sqlite
 from app.db.seed import sembrar_juegos
@@ -57,6 +66,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(auth.router_local, prefix="/api")
 app.include_router(usuarios.router, prefix="/api")
+app.include_router(notificaciones.router, prefix="/api")
 app.include_router(evidencias.router, prefix="/api")
 app.include_router(torneos.router_juegos, prefix="/api")
 app.include_router(torneos.router_torneos, prefix="/api")

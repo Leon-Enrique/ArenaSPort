@@ -46,7 +46,25 @@ export interface ApiEdicion {
   fecha_inicio: string | null;
   bolsa_premios: string | null;
   reglamento_url: string | null;
+  discord_webhook_url: string | null;
+  requiere_aprobacion: boolean;
   equipos_aprobados: number;
+}
+
+export interface ApiNotificacion {
+  id: number;
+  tipo: string;
+  titulo: string;
+  cuerpo: string;
+  url: string | null;
+  edicion_id: number | null;
+  leida_at: string | null;
+  created_at: string;
+}
+
+export interface ApiBandejaNotificaciones {
+  items: ApiNotificacion[];
+  no_leidas: number;
 }
 
 export interface ApiFase {

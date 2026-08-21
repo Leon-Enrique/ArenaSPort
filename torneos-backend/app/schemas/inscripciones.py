@@ -43,7 +43,30 @@ class EdicionRead(BaseModel):
     fecha_inicio: datetime | None
     bolsa_premios: str | None
     reglamento_url: str | None
+    discord_webhook_url: str | None
+    requiere_aprobacion: bool
     equipos_aprobados: int = 0
+
+
+class EdicionUpdate(BaseModel):
+    """Ajustes de una edición ya creada. Todo opcional: solo se toca lo que
+    viene. Para distinguir "no lo mandes" de "ponelo en null" se usa
+    `model_dump(exclude_unset=True)` en la ruta.
+    """
+
+    max_equipos: int | None = Field(default=None, ge=2)
+    fecha_inicio: datetime | None = None
+    bolsa_premios: str | None = Field(default=None, max_length=120)
+    reglamento_url: str | None = Field(default=None, max_length=500)
+    discord_webhook_url: str | None = Field(default=None, max_length=500)
+    requiere_aprobacion: bool | None = None
+
+    @field_validator("fecha_inicio")
+    @classmethod
+    def _con_zona_horaria(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
 
 
 class EdicionCreate(BaseModel):

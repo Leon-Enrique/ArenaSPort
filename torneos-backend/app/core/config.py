@@ -1,8 +1,34 @@
+from pathlib import Path
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Todas las rutas de este archivo se anclan acá, al paquete, y NO al
+# directorio desde el que se lanzó el proceso.
+#
+# Con `env_file=".env"` a secas, arrancar uvicorn desde la raíz del repo (o
+# desde cualquier otro lado) no encuentra el archivo y la app cae a los
+# valores por defecto de abajo sin decir nada. Los dos que duelen:
+#
+#   - DATABASE_URL -> crea y usa una base SQLite vacía distinta. Pasó de
+#     verdad durante el desarrollo, no es hipotético.
+#   - ALMACENAMIENTO_LOCAL_DIR -> las evidencias ya subidas quedan en la
+#     carpeta vieja y `/evidencias/archivo/{clave}` empieza a devolver 404;
+#     la captura que respalda una disputa desaparece de la nada.
+RAIZ_BACKEND = Path(__file__).resolve().parents[2]
+
+
+def anclar_a_raiz(ruta: str) -> str:
+    """Convierte una ruta relativa en absoluta respecto de la raíz del
+    backend. Las rutas ya absolutas se devuelven intactas."""
+    if not ruta:
+        return ruta
+    p = Path(ruta)
+    return ruta if p.is_absolute() else str((RAIZ_BACKEND / p).resolve())
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=RAIZ_BACKEND / ".env", extra="ignore")
 
     DATABASE_URL: str = "sqlite:///./torneos.db"
     DEBUG: bool = True
@@ -31,6 +57,25 @@ class Settings(BaseSettings):
     R2_SECRET_ACCESS_KEY: str = ""
     R2_BUCKET: str = ""
     R2_PUBLIC_BASE_URL: str = ""  # URL pública o de tu dominio propio delante del bucket
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _anclar_sqlite(cls, value: str) -> str:
+        """`sqlite:///./torneos.db` es relativo al directorio de trabajo, así
+        que el mismo valor apunta a archivos distintos según desde dónde se
+        lance el proceso. Postgres y las rutas absolutas quedan intactas."""
+        prefijo = "sqlite:///"
+        if not value.startswith(prefijo):
+            return value
+        ruta = value[len(prefijo):]
+        if not ruta or Path(ruta).is_absolute():
+            return value
+        return f"{prefijo}{Path(anclar_a_raiz(ruta)).as_posix()}"
+
+    @field_validator("ALMACENAMIENTO_LOCAL_DIR")
+    @classmethod
+    def _anclar_directorio_evidencias(cls, value: str) -> str:
+        return anclar_a_raiz(value)
 
     @property
     def origenes_cors(self) -> list[str]:

@@ -1,17 +1,24 @@
 from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
 from slugify import slugify
 
 from app.api.deps import DbSession, RequiereOrganizador
+from app.core import notificaciones
 from app.domain.enums import EstadoEdicion, EstadoInscripcion, EstadoPartida
 from app.models import Edicion, Fase, Inscripcion, Jugador, Juego, Partida, ParticipacionEnPartida, Torneo
 from app.schemas.fases import FaseRead, InfoJuegoResumen, PartidaResumen, ResumenEdicionOut
 from app.schemas.inscripciones import (
     EdicionCreate,
     EdicionRead,
+    EdicionUpdate,
     JuegoRead,
     TorneoCreate,
     TorneoRead,
 )
+
+
+class ResultadoPruebaWebhook(BaseModel):
+    mensaje: str
 
 router_juegos = APIRouter(prefix="/juegos", tags=["juegos"])
 router_torneos = APIRouter(prefix="/torneos", tags=["torneos"])
@@ -175,6 +182,65 @@ def obtener_edicion(edicion_id: int, db: DbSession) -> Edicion:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
     edicion.equipos_aprobados = _contar_equipos_aprobados(db, edicion_id)
     return edicion
+
+
+@router_ediciones.patch("/{edicion_id}", response_model=EdicionRead)
+def actualizar_edicion(
+    edicion_id: int, datos: EdicionUpdate, db: DbSession, _organizador: RequiereOrganizador
+) -> Edicion:
+    """Ajustes de una edición ya creada — hasta ahora lo único editable
+    después del alta era el estado.
+
+    `exclude_unset` es lo que hace que mandar solo `{"requiere_aprobacion":
+    true}` no borre la bolsa de premios de paso.
+    """
+    edicion = db.get(Edicion, edicion_id)
+    if not edicion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
+
+    cambios = datos.model_dump(exclude_unset=True)
+
+    if cambios.get("discord_webhook_url"):
+        try:
+            cambios["discord_webhook_url"] = notificaciones.validar_url_webhook(
+                cambios["discord_webhook_url"]
+            )
+        except notificaciones.ErrorWebhook as e:
+            raise HTTPException(422, str(e)) from e
+
+    for campo, valor in cambios.items():
+        setattr(edicion, campo, valor)
+
+    db.commit()
+    db.refresh(edicion)
+    edicion.equipos_aprobados = _contar_equipos_aprobados(db, edicion_id)
+    return edicion
+
+
+@router_ediciones.post("/{edicion_id}/probar-webhook", response_model=ResultadoPruebaWebhook)
+def probar_webhook(
+    edicion_id: int, db: DbSession, _organizador: RequiereOrganizador
+) -> ResultadoPruebaWebhook:
+    """Manda un mensaje de prueba al canal. Sin esto, configurar un webhook
+    es a ciegas: el envío real es una tarea de fondo que se traga los errores
+    a propósito, así que un webhook mal pegado no se notaría hasta que un
+    equipo reclame que nunca le avisaron."""
+    edicion = db.get(Edicion, edicion_id)
+    if not edicion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
+    if not edicion.discord_webhook_url:
+        raise HTTPException(422, "Esta edición no tiene webhook de Discord configurado.")
+
+    try:
+        notificaciones.enviar_a_discord_estricto(
+            edicion.discord_webhook_url,
+            "Prueba de configuración",
+            f"Si ves este mensaje, los avisos de **{edicion.nombre}** van a llegar a este canal.",
+        )
+    except notificaciones.ErrorWebhook as e:
+        raise HTTPException(422, str(e)) from e
+
+    return ResultadoPruebaWebhook(mensaje="Mensaje enviado. Revisá el canal de Discord.")
 
 
 @router_ediciones.post("/{edicion_id}/estado", response_model=EdicionRead)
