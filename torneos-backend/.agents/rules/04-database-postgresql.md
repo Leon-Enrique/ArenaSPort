@@ -1,0 +1,196 @@
+# PostgreSQL + SQLAlchemy + Alembic
+
+## Objetivo
+
+PostgreSQL es la base de datos **objetivo**. SQLite solo como fallback temporal de desarrollo.
+
+- URL en `.env`: `DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/torneos`
+- Nunca commitear `.env`; documentar en `.env.example`.
+- Driver: `psycopg` (v3) en `requirements.txt`.
+
+## Capas (`app/db/` y `app/models/`)
+
+| Archivo | Responsabilidad |
+|---------|-----------------|
+| `db/database.py` | `engine`, `SessionLocal`, `Base`, `get_db()` |
+| `db/seed.py` | Catálogo de juegos + datos iniciales idempotentes |
+| `models/*.py` | Tablas SQLAlchemy (una clase = una tabla) |
+
+Los routers **no** crean engines ni sesiones; solo reciben `DbSession` (ver
+`03-fastapi-backend.mdc`).
+
+---
+
+## LA TABLA CENTRAL: partida y participaciones
+
+Esta es la decisión de esquema que hace o rompe el proyecto multi-juego.
+
+```python
+class Partida(Base):
+    __tablename__ = "partidas"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fase_id: Mapped[int] = mapped_column(ForeignKey("fases.id"), index=True)
+    # numero_caida: en multi-equipo, cuál caída de la ronda es (1..6). Null en directo.
+    numero_caida: Mapped[int | None] = mapped_column(Integer)
+    estado: Mapped[EstadoPartida] = mapped_column(
+        Enum(EstadoPartida, native_enum=False), nullable=False, index=True
+    )
+    programada_para: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    participaciones: Mapped[list["ParticipacionEnPartida"]] = relationship(
+        back_populates="partida", cascade="all, delete-orphan"
+    )
+
+
+class ParticipacionEnPartida(Base):
+    __tablename__ = "participaciones_partida"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    partida_id: Mapped[int] = mapped_column(ForeignKey("partidas.id"), index=True)
+    equipo_id: Mapped[int] = mapped_column(ForeignKey("equipos.id"), index=True)
+
+    # Enfrentamiento directo
+    mapas_ganados: Mapped[int | None] = mapped_column(Integer)
+    es_ganador: Mapped[bool | None] = mapped_column(Boolean)
+
+    # Multi-equipo (battle royale)
+    posicion: Mapped[int | None] = mapped_column(Integer)
+    bajas: Mapped[int | None] = mapped_column(Integer)
+
+    # Calculado por el sistema de puntaje de la edición, en ambos modelos
+    puntos: Mapped[int | None] = mapped_column(Integer)
+```
+
+**Nunca** `equipo_a_id` / `equipo_b_id` en `partidas`. Con 2 participaciones representas MLBB;
+con 18 representas Free Fire. Es el mismo esquema.
+
+Constraints:
+- `UNIQUE (partida_id, equipo_id)` — un equipo no participa dos veces en la misma partida.
+- `CHECK (posicion IS NULL OR posicion >= 1)`
+- `CHECK (bajas IS NULL OR bajas >= 0)`
+- `CHECK (mapas_ganados IS NULL OR mapas_ganados >= 0)`
+
+La cantidad válida de participaciones (exactamente 2 en directo, entre 12 y 25 en multi-equipo)
+se valida en la capa de servicio contra la configuración de la fase — un `CHECK` de DB no puede
+expresarlo.
+
+---
+
+## Catálogo de juegos e identidad de jugador
+
+La configuración de cada juego es **datos**, no código:
+
+```python
+class Juego(Base):
+    __tablename__ = "juegos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    codigo: Mapped[str] = mapped_column(String(40), unique=True)   # "mlbb", "free_fire"
+    nombre: Mapped[str] = mapped_column(String(120))
+    modelo_competencia_default: Mapped[ModeloCompetencia] = mapped_column(
+        Enum(ModeloCompetencia, native_enum=False)
+    )
+    titulares_requeridos: Mapped[int] = mapped_column(Integer)
+    suplentes_maximos: Mapped[int] = mapped_column(Integer)
+    # Definición de qué campos de identidad pide este juego y cuáles forman la clave única
+    campos_identidad: Mapped[dict] = mapped_column(JSONB)
+```
+
+La identidad del jugador va en `JSONB` (`{"nick": "...", "id_juego": "...", "server": "..."}`)
+**más** una columna derivada `clave_identidad` (String, generada al guardar) para el índice único.
+JSONB da flexibilidad entre juegos; la columna derivada da la garantía de unicidad que el JSONB
+solo no te da de forma barata.
+
+- `UNIQUE (edicion_id, clave_identidad)` — impide que un jugador esté en dos equipos de la
+  misma edición. Además de la validación en servicio; no confiar solo en una de las dos.
+
+La tabla de puntos por posición de battle royale también va en `JSONB` en la configuración de
+la edición, nunca como constante en Python.
+
+---
+
+## SQLAlchemy 2.0
+
+- Heredar de `Base` definido en `app.db.database`.
+- Usar `Mapped[T]` + `mapped_column()` (no Column legacy).
+- `__tablename__` en plural snake_case (`equipos`, `partidas`, `participaciones_partida`).
+- **Regla obligatoria**: toda columna de fecha/hora usa `DateTime(timezone=True)`. Nunca
+  `DateTime` sin zona. Un torneo con equipos de Bolivia, Perú y Argentina coordinando horarios
+  no tolera ambigüedad de zona — una partida programada a la hora equivocada es una
+  descalificación injusta.
+- **Marcadores, posiciones, bajas, puntos**: `Integer`, nunca `Float` ni `Numeric`. Son conteos
+  discretos. (Si algún día hay premios en dinero, esa columna sí es `Numeric`, nunca `Float`.)
+- **Enums de estado** (`EstadoPartida`, `EstadoInscripcion`, `ModeloCompetencia`, `TipoSancion`):
+  `Enum` de SQLAlchemy con `native_enum=False` o tabla de catálogo. Nunca strings libres — un
+  typo en `"confirmda"` rompe el filtro en silencio.
+- **JSONB solo para lo que varía por juego** (identidad, tabla de puntos, config de formato).
+  Todo lo que es común a todos los juegos va en columnas tipadas. JSONB no es excusa para
+  esquema difuso.
+- Índices en columnas de filtro frecuente (`edicion_id`, `fase_id`, `grupo_id`, `estado`,
+  `programada_para`, `equipo_id`).
+- Relaciones con `relationship()` + `ForeignKey`; evitar N+1 con `joinedload`/`selectinload`.
+  La llave completa o la tabla acumulada de una edición es la consulta más pesada del sistema:
+  cargarla con `selectinload` explícito, nunca dejando que el ORM haga una query por fila.
+- Nombres de columna en DB: snake_case.
+- Exportar modelos en `app/models/__init__.py` para que Alembic los detecte.
+
+## Sesiones y transacciones
+
+- `get_db()` hace yield + `close()` en `finally`.
+- Un `commit()` por operación de escritura; `rollback()` en excepción.
+- **Confirmar un resultado y avanzar el ganador en la llave es una sola transacción.** Si el
+  avance falla, el resultado no queda confirmado. Una llave a medio avanzar es peor que una sin avanzar.
+- **Cargar una caída completa de battle royale es una sola transacción**: las 12–25
+  participaciones entran juntas o no entra ninguna. Media tabla cargada es peor que nada.
+- **Bloqueo optimista o `SELECT ... FOR UPDATE`** al confirmar resultados: dos capitanes
+  reportando la misma partida en simultáneo es un caso real.
+- No pasar sesiones entre threads; Postgres maneja concurrencia real.
+
+## Convenciones de negocio en DB
+
+(El detalle vive en `02-esports-business.mdc`; aquí solo cómo se modela.)
+
+- **Resultados inmutables**: la tabla de resultados es append-only en la práctica. Una corrección
+  inserta un nuevo registro que referencia al anterior con motivo y autor; no se hace `UPDATE`
+  sobre el resultado original. Reconstruir "qué se sabía en cada momento" tiene que ser posible.
+- **Tabla de posiciones**: no es fuente de verdad. Si se materializa por rendimiento, debe existir
+  un procedimiento de recálculo total desde `participaciones_partida`, ejecutable a demanda.
+- **Puntos**: se guardan calculados en la participación (para no recalcular en cada lectura), pero
+  siempre son derivables de posición/bajas/marcador + la configuración de puntaje de la edición.
+  Si cambia la configuración, hay que poder recalcular todo.
+- Timestamps `created_at` / `updated_at` con `timezone=True` en todas las tablas transaccionales.
+- Soft delete con `esta_activo` en catálogos (equipos, jugadores). **Nunca `DELETE` físico** de un
+  equipo o jugador que ya participó: rompe el historial y descuadra la tabla.
+- Semilla del sorteo guardada por fase (auditoría de sorteo y de rotación de lobbies).
+
+## Alembic
+
+```
+torneos-backend/
+├── alembic/
+│   ├── env.py          # target_metadata = Base.metadata
+│   └── versions/
+└── alembic.ini
+```
+
+1. **Cambio de esquema** → nueva revisión (`alembic revision --autogenerate`), revisar SQL a mano.
+2. **No** usar `Base.metadata.create_all()` en producción.
+3. `env.py` debe importar todos los modelos.
+4. Nombres de revisión descriptivos: `add_participaciones_partida`, `juego_campos_identidad`.
+5. Aplicar con `alembic upgrade head` antes de levantar API en entornos compartidos.
+6. Agregar un juego nuevo **no debe requerir migración** — si la requiere, el diseño falló.
+
+## Evitar
+
+- `equipo_a_id` / `equipo_b_id` en la tabla de partidas.
+- Columnas fijas de identidad de jugador (`id_juego`, `server_id`) en vez de definición por juego.
+- Tabla de puntos por posición hardcodeada en Python.
+- Queries raw sin necesidad (`text()` sin parametrizar).
+- Lógica de avance de llave o cálculo de puntos en triggers de DB (mantener en Python — es la
+  regla más propensa a cambiar y necesita tests).
+- Modificar esquema a mano en Postgres sin revisión Alembic equivalente.
+- Mezclar datos de seed con migraciones de estructura.
+- `DateTime` sin `timezone=True` en cualquier columna.
+- `UPDATE` directo sobre un resultado ya confirmado.
+- `DELETE` físico de equipos, jugadores o partidas con historial.

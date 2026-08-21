@@ -1,0 +1,469 @@
+import os
+import random
+from datetime import datetime
+
+from fastapi import APIRouter, HTTPException, Query, status
+from sqlalchemy import select
+
+from app.api.deps import CurrentUser, DbSession, RequiereOrganizador, UsuarioOpcional
+from app.domain.enums import EstadoInscripcion
+from app.domain.roster import (
+    ConfigJuego,
+    ErrorRoster,
+    JugadorEntrada,
+    normalizar_roster,
+)
+from app.models import Edicion, Equipo, Inscripcion, Jugador, ParticipacionEnPartida
+from app.schemas.inscripciones import (
+    InscripcionCreada,
+    InscripcionCreate,
+    InscripcionRead,
+    RevisionInscripcion,
+)
+
+router = APIRouter(prefix="/ediciones/{edicion_id}/inscripciones", tags=["inscripciones"])
+
+
+def _obtener_edicion(db: DbSession, edicion_id: int) -> Edicion:
+    edicion = db.get(Edicion, edicion_id)
+    if not edicion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
+    return edicion
+
+
+def _normalizar_y_validar_roster(
+    db: DbSession,
+    edicion_id: int,
+    juego,
+    datos_jugadores: list,
+    capitan_declarado: str | None,
+    excluir_inscripcion_id: int | None = None,
+):
+    """Compartido entre crear y editar una inscripción. `excluir_inscripcion_id`
+    es lo que hace que editar el propio roster no choque con la regla de
+    elegibilidad contra uno mismo — sin esto, guardar sin cambios te diría
+    que tus propios jugadores 'ya están inscritos en otro equipo'.
+    """
+    config = ConfigJuego(
+        titulares_requeridos=juego.titulares_requeridos,
+        suplentes_maximos=juego.suplentes_maximos,
+        campos_requeridos=juego.campos_requeridos(),
+        campos_clave=juego.campos_clave(),
+    )
+
+    entradas = [
+        JugadorEntrada(
+            identidad=j.identidad,
+            es_suplente=j.es_suplente,
+            es_capitan=j.es_capitan,
+            discord_id=j.discord_id,
+        )
+        for j in datos_jugadores
+    ]
+
+    try:
+        resultado = normalizar_roster(entradas, config, capitan_declarado)
+    except ErrorRoster as e:
+        raise HTTPException(422, str(e)) from e
+
+    claves = [j.clave_identidad for j in resultado.jugadores]
+    query = select(Jugador).where(
+        Jugador.edicion_id == edicion_id, Jugador.clave_identidad.in_(claves)
+    )
+    if excluir_inscripcion_id is not None:
+        query = query.where(Jugador.inscripcion_id != excluir_inscripcion_id)
+    ya_inscritos = db.scalars(query).all()
+    if ya_inscritos:
+        nicks = ", ".join(j.nick for j in ya_inscritos)
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Estos jugadores ya están inscritos en otro equipo: {nicks}.",
+        )
+
+    return resultado
+
+
+def _verificar_capitan_de_inscripcion(db: DbSession, usuario, inscripcion: Inscripcion) -> None:
+    """Como en partidas.py: el organizador puede actuar en nombre de
+    cualquiera; si no, tiene que ser específicamente el capitán declarado
+    de ESTA inscripción."""
+    if usuario.es_organizador:
+        return
+    es_capitan = any(
+        j.discord_id == usuario.discord_id and j.es_capitan for j in inscripcion.jugadores
+    )
+    if not es_capitan:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Solo el capitán de este equipo (o el organizador) puede editar la inscripción.",
+        )
+
+
+@router.post("", response_model=InscripcionCreada, status_code=status.HTTP_201_CREATED)
+def inscribir_equipo(
+    edicion_id: int, datos: InscripcionCreate, db: DbSession
+) -> InscripcionCreada:
+    """Registro público de un equipo. Sin login, sin WhatsApp.
+
+    Aplica las reglas de roster del organizador y devuelve los avisos de lo que
+    el sistema asumió (suplentes, capitán) para que el equipo pueda corregir.
+    """
+    edicion = _obtener_edicion(db, edicion_id)
+
+    if not edicion.acepta_inscripciones:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Las inscripciones no están abiertas (estado: {edicion.estado}).",
+        )
+
+    if edicion.inscripcion_cierra:
+        ahora = datetime.now().astimezone()
+        if ahora > edicion.inscripcion_cierra:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT, "El plazo de inscripción ya cerró."
+            )
+
+    if edicion.max_equipos:
+        inscritos = (
+            db.query(Inscripcion)
+            .filter(
+                Inscripcion.edicion_id == edicion_id,
+                Inscripcion.estado.in_(
+                    [EstadoInscripcion.PENDIENTE, EstadoInscripcion.APROBADA]
+                ),
+            )
+            .count()
+        )
+        if inscritos >= edicion.max_equipos:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"Ya se llenaron los {edicion.max_equipos} cupos.",
+            )
+
+    resultado = _normalizar_y_validar_roster(
+        db, edicion_id, edicion.juego, datos.jugadores, datos.capitan_declarado
+    )
+
+    nombre_normalizado = datos.nombre_equipo.strip()
+    duplicado = (
+        db.query(Inscripcion)
+        .join(Equipo)
+        .filter(
+            Inscripcion.edicion_id == edicion_id,
+            Equipo.nombre.ilike(nombre_normalizado),
+            Inscripcion.estado != EstadoInscripcion.RECHAZADA,
+        )
+        .first()
+    )
+    if duplicado:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Ya hay un equipo inscrito con el nombre '{nombre_normalizado}'.",
+        )
+
+    equipo = Equipo(
+        nombre=nombre_normalizado,
+        tag=datos.tag,
+        logo_url=datos.logo_url,
+        contacto_nombre=datos.contacto_nombre,
+        contacto_whatsapp=datos.contacto_whatsapp,
+        contacto_discord=datos.contacto_discord,
+    )
+    db.add(equipo)
+    db.flush()
+
+    inscripcion = Inscripcion(edicion_id=edicion_id, equipo_id=equipo.id)
+    db.add(inscripcion)
+    db.flush()
+
+    for j in resultado.jugadores:
+        db.add(
+            Jugador(
+                inscripcion_id=inscripcion.id,
+                edicion_id=edicion_id,
+                identidad=j.identidad,
+                clave_identidad=j.clave_identidad,
+                orden=j.orden,
+                es_suplente=j.es_suplente,
+                es_capitan=j.es_capitan,
+                discord_id=j.discord_id,
+            )
+        )
+
+    db.commit()
+    db.refresh(inscripcion)
+
+    return InscripcionCreada(
+        inscripcion=InscripcionRead.model_validate(inscripcion),
+        avisos=resultado.avisos,
+    )
+
+
+@router.patch("/{inscripcion_id}", response_model=InscripcionCreada)
+def editar_inscripcion(
+    edicion_id: int, inscripcion_id: int, datos: InscripcionCreate, db: DbSession, usuario: CurrentUser
+) -> InscripcionCreada:
+    """El capitán (o el organizador) edita nombre, contacto o roster
+    completo de un equipo ya inscrito.
+
+    Mismo patrón que usa Toornament: mientras la inscripción está
+    'pendiente' se edita libremente; si ya estaba 'aprobada', editar la
+    devuelve a 'pendiente' — el organizador tiene que revisarla de nuevo,
+    a propósito, para que un cambio no pase colado sin que nadie lo note.
+    Una vez que el equipo ya fue colocado en una fase (tiene partidas
+    generadas), no se puede editar más — ahí el cambio lo hace el
+    organizador directo si hace falta.
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    _verificar_capitan_de_inscripcion(db, usuario, inscripcion)
+
+    if inscripcion.estado not in (EstadoInscripcion.PENDIENTE, EstadoInscripcion.APROBADA):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"No se puede editar una inscripción en estado '{inscripcion.estado}' — "
+            "contactá al organizador si necesitás un cambio.",
+        )
+
+    ya_en_fase = (
+        db.query(ParticipacionEnPartida)
+        .filter(ParticipacionEnPartida.equipo_id == inscripcion.equipo_id)
+        .first()
+    )
+    if ya_en_fase:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Este equipo ya fue colocado en una fase del torneo (tiene partidas "
+            "generadas) — a partir de acá, cualquier cambio lo tiene que hacer "
+            "el organizador directamente.",
+        )
+
+    edicion = _obtener_edicion(db, edicion_id)
+    resultado = _normalizar_y_validar_roster(
+        db,
+        edicion_id,
+        edicion.juego,
+        datos.jugadores,
+        datos.capitan_declarado,
+        excluir_inscripcion_id=inscripcion_id,
+    )
+
+    nombre_normalizado = datos.nombre_equipo.strip()
+    duplicado = (
+        db.query(Inscripcion)
+        .join(Equipo)
+        .filter(
+            Inscripcion.edicion_id == edicion_id,
+            Inscripcion.id != inscripcion_id,
+            Equipo.nombre.ilike(nombre_normalizado),
+            Inscripcion.estado != EstadoInscripcion.RECHAZADA,
+        )
+        .first()
+    )
+    if duplicado:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Ya hay otro equipo inscrito con el nombre '{nombre_normalizado}'.",
+        )
+
+    equipo = inscripcion.equipo
+    equipo.nombre = nombre_normalizado
+    equipo.tag = datos.tag
+    equipo.logo_url = datos.logo_url
+    equipo.contacto_nombre = datos.contacto_nombre
+    equipo.contacto_whatsapp = datos.contacto_whatsapp
+    equipo.contacto_discord = datos.contacto_discord
+
+    # Reemplazo completo del roster: se borran los jugadores viejos y se
+    # crean los nuevos ya normalizados. Es más simple y más seguro que
+    # tratar de calcular un diff — con equipos de 5 a 7 personas no vale
+    # la pena la complejidad de un merge fila por fila.
+    for j_viejo in list(inscripcion.jugadores):
+        db.delete(j_viejo)
+    db.flush()
+
+    for j in resultado.jugadores:
+        db.add(
+            Jugador(
+                inscripcion_id=inscripcion.id,
+                edicion_id=edicion_id,
+                identidad=j.identidad,
+                clave_identidad=j.clave_identidad,
+                orden=j.orden,
+                es_suplente=j.es_suplente,
+                es_capitan=j.es_capitan,
+                discord_id=j.discord_id,
+            )
+        )
+
+    volvio_a_pendiente = inscripcion.estado == EstadoInscripcion.APROBADA
+    if volvio_a_pendiente:
+        inscripcion.estado = EstadoInscripcion.PENDIENTE
+        inscripcion.revisada_at = None
+
+    db.commit()
+    db.refresh(inscripcion)
+
+    avisos = list(resultado.avisos)
+    if volvio_a_pendiente:
+        avisos.append(
+            "Esta inscripción ya estaba aprobada — al editarla volvió a "
+            "'pendiente' y el organizador tiene que revisarla de nuevo."
+        )
+
+    return InscripcionCreada(
+        inscripcion=InscripcionRead.model_validate(inscripcion),
+        avisos=avisos,
+    )
+
+
+def _redactar_para_publico(inscripciones: list[Inscripcion], usuario) -> list[InscripcionRead]:
+    """El discord_id es un identificador real de una persona (a veces
+    menor de edad) — no tiene por qué ser público solo porque la lista de
+    equipos sí lo es. Se muestra completo únicamente si quien pregunta es
+    organizador; para cualquier otro caso (incluido "nadie logueado", que
+    es el 99% de las visitas a esta pantalla) se oculta.
+    """
+    es_organizador = usuario is not None and usuario.es_organizador
+    resultado = []
+    for insc in inscripciones:
+        leida = InscripcionRead.model_validate(insc)
+        if not es_organizador:
+            for j in leida.jugadores:
+                j.discord_id = None
+        resultado.append(leida)
+    return resultado
+
+
+@router.get("", response_model=list[InscripcionRead])
+def listar_inscripciones(
+    edicion_id: int,
+    db: DbSession,
+    usuario: UsuarioOpcional,
+    estado: EstadoInscripcion | None = Query(default=None),
+) -> list[InscripcionRead]:
+    _obtener_edicion(db, edicion_id)
+    q = db.query(Inscripcion).filter(Inscripcion.edicion_id == edicion_id)
+    if estado:
+        q = q.filter(Inscripcion.estado == estado)
+    inscripciones = q.order_by(Inscripcion.created_at).all()
+    return _redactar_para_publico(inscripciones, usuario)
+
+
+@router.get("/{inscripcion_id}", response_model=InscripcionRead)
+def obtener_inscripcion(
+    edicion_id: int, inscripcion_id: int, db: DbSession, usuario: UsuarioOpcional
+) -> InscripcionRead:
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+    return _redactar_para_publico([inscripcion], usuario)[0]
+
+
+@router.post("/{inscripcion_id}/revisar", response_model=InscripcionRead)
+def revisar_inscripcion(
+    edicion_id: int, inscripcion_id: int, datos: RevisionInscripcion, db: DbSession,
+    _organizador: RequiereOrganizador,
+) -> Inscripcion:
+    """Aprobar o rechazar. Nunca se borra una inscripción: cambia de estado."""
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    if datos.estado == EstadoInscripcion.RECHAZADA and not datos.motivo_rechazo:
+        raise HTTPException(
+            422,
+            "Para rechazar hay que indicar el motivo.",
+        )
+
+    inscripcion.estado = datos.estado
+    inscripcion.motivo_rechazo = datos.motivo_rechazo
+    inscripcion.revisada_at = datetime.now().astimezone()
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion
+
+
+@router.post("/sembrar-automatico", response_model=list[InscripcionRead])
+def sembrar_automatico(
+    edicion_id: int, db: DbSession, _organizador: RequiereOrganizador, semilla: int | None = None
+) -> list[Inscripcion]:
+    """Asigna un número de siembra (1..N) a los equipos aprobados.
+
+    Aleatorio pero reproducible: si no se pasa semilla, se genera una y se
+    puede consultar después — el sorteo tiene que poder demostrarse ante un
+    reclamo, no ser una caja negra.
+    """
+    aprobadas = (
+        db.query(Inscripcion)
+        .filter(
+            Inscripcion.edicion_id == edicion_id,
+            Inscripcion.estado == EstadoInscripcion.APROBADA,
+        )
+        .order_by(Inscripcion.id)
+        .all()
+    )
+    if len(aprobadas) < 2:
+        raise HTTPException(422, "Hacen falta al menos 2 equipos aprobados para sembrar.")
+
+    semilla_usada = semilla if semilla is not None else int.from_bytes(os.urandom(4), "big")
+    rng = random.Random(semilla_usada)
+    orden = list(range(len(aprobadas)))
+    rng.shuffle(orden)
+
+    for numero_seed, idx in enumerate(orden, start=1):
+        aprobadas[idx].seed = numero_seed
+
+    db.commit()
+    for i in aprobadas:
+        db.refresh(i)
+
+    return sorted(aprobadas, key=lambda i: i.seed)
+
+
+@router.patch("/{inscripcion_id}/seed", response_model=InscripcionRead)
+def fijar_seed_manual(
+    edicion_id: int, inscripcion_id: int, seed: int, db: DbSession, _organizador: RequiereOrganizador
+) -> Inscripcion:
+    """Ajuste manual de un seed puntual — el organizador corrige un caso,
+    no re-sortea todo el torneo por eso."""
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+    inscripcion.seed = seed
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion
+
+
+@router.patch(
+    "/{inscripcion_id}/jugadores/{jugador_id}/vincular-discord",
+    response_model=InscripcionRead,
+)
+def vincular_discord(
+    edicion_id: int,
+    inscripcion_id: int,
+    jugador_id: int,
+    discord_id: str,
+    db: DbSession,
+    _organizador: RequiereOrganizador,
+) -> Inscripcion:
+    """El equipo se inscribió sin loguearse (es el caso normal); esto vincula
+    a un jugador con su cuenta real de Discord después, para que pueda
+    reportar resultados. Solo el organizador lo hace — evita que cualquiera
+    se autoproclame capitán de un equipo ajeno.
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    jugador = db.get(Jugador, jugador_id)
+    if not jugador or jugador.inscripcion_id != inscripcion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese jugador no es de esta inscripción.")
+
+    jugador.discord_id = discord_id
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion

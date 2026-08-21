@@ -1,0 +1,66 @@
+---
+description: Checklist obligatorio antes de publicar a internet (producción). Consultar cuando el usuario mencione deploy, producción, subir a internet o hosting.
+alwaysApply: false
+---
+
+# Pre-deploy — recordar al usuario
+
+Antes de subir la plataforma a internet, revisar con el usuario:
+
+## Vistas públicas en vivo
+- [ ] **Auto-refresh de llave y tabla de posiciones** — polling cada **15–30 s** durante noche
+      de torneo. Pausar si `document.hidden`.
+- [ ] Intervalo más corto en producción que en local (local puede 60 s).
+- [ ] Caché de la vista pública con invalidación al confirmar un resultado — la final se ve
+      mucho más de lo que se juega.
+- [ ] La vista pública renderiza correctamente **los dos modelos**: llave para enfrentamiento
+      directo, tabla acumulada por caídas para multi-equipo. Probar ambas antes de publicar.
+
+## Infra
+- [ ] `CORS` en backend: orígenes reales (dominio web + admin), no solo localhost ni `*`.
+- [ ] Variables de entorno producción (DATABASE_URL, JWT secret ≥32 chars, DISCORD_BOT_TOKEN,
+      VITE_API_URL / proxy).
+- [ ] `DEBUG=false` y `RUN_SEED=false` (bloqueados por la API si no).
+- [ ] HTTPS en API y fronts.
+- [ ] `alembic upgrade head` en el servidor.
+- [ ] Seeds solo en staging; no re-seed destructivo en prod (borrar una edición en curso es
+      irreversible en la práctica: los capitanes ya no van a volver a mandar los datos).
+- [ ] Confirmá que `/docs` no responde en producción.
+- [ ] Rate limit en endpoints de reporte de resultado y de inscripción.
+
+## Datos y evidencia
+- [ ] **Backup automático de la DB antes de cada noche de torneo**, y verificado que se puede
+      restaurar. No sirve un backup que nunca probaste.
+- [ ] Almacenamiento de capturas de evidencia definido (S3/R2/volumen) con retención — las
+      capturas son la prueba en una disputa, no pueden vivir solo en el disco efímero.
+      En battle royale son la tabla completa de la caída: son más grandes y más críticas.
+- [ ] Zona horaria del servidor en UTC y verificado que la web muestra hora de Bolivia (UTC-4).
+
+## Catálogo de juegos
+- [ ] El juego de la edición está cargado con su configuración completa (tamaño de equipo,
+      campos de identidad, modelo de competencia).
+- [ ] Probado que se puede crear una edición de un segundo juego **sin tocar código**. Si hace
+      falta un deploy para agregar un juego, el diseño falló — arreglarlo antes de escalar.
+
+## Bot de Discord
+- [ ] Token de producción distinto al de desarrollo.
+- [ ] El bot apunta a la API de producción, no a localhost.
+- [ ] Verificado que no hay un override de `on_interaction` (intercepta los slash commands y el
+      CommandTree deja de procesarlos).
+- [ ] Manejo de caída de la API: el bot responde "no disponible", no se queda colgado.
+
+## Antes de abrir inscripciones
+- [ ] Reglamento publicado y versionado (la versión vigente queda registrada en la edición —
+      si cambias una regla a mitad de torneo, tiene que quedar rastro).
+- [ ] **Sistema de puntaje configurado y publicado** antes de la primera partida. En multi-equipo
+      la tabla de puntos por posición debe estar visible para todos desde el inicio: cambiarla
+      después es la discusión más fea que vas a tener.
+- [ ] Criterios de desempate configurados y **probados con datos de prueba** antes de que
+      importen de verdad.
+- [ ] Ventana de tolerancia para walkover definida y comunicada.
+- [ ] Roles y permisos verificados: un capitán no puede reportar por otro equipo.
+
+## Opcional post-MVP
+- [ ] Notificación por Discord/WhatsApp al generarse el emparejamiento o el lobby.
+- [ ] Exportación de llave y tabla como imagen para compartir.
+- [ ] Página pública de estadísticas por jugador y por equipo.
