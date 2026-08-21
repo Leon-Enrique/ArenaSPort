@@ -2,13 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
+import { escucharChat } from '@/lib/eventos';
 import { Partida, Usuario } from '@/types';
 import { ApiMensajePartida } from '@/lib/api-types';
 import {
   X, LogIn, Loader2, CheckCircle2, AlertCircle, Trophy, AlertTriangle, Send
 } from 'lucide-react';
-
-const POLL_MS = 4000;
 
 const TOKEN_KEY = 'torneos_auth_token';
 
@@ -35,6 +34,10 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
   const [mensajes, setMensajes] = useState<ApiMensajePartida[]>([]);
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [enviandoMensaje, setEnviandoMensaje] = useState(false);
+  // Con el polling anterior, un envío fallido se recuperaba solo en el
+  // siguiente ciclo y no valía la pena avisar. Ahora no hay siguiente ciclo:
+  // si falla, el mensaje se perdió y el capitán tiene que saberlo.
+  const [errorChat, setErrorChat] = useState<string | null>(null);
   const mensajesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,17 +62,27 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
   const soyOrganizador = usuario?.rol === 'organizador';
   const puedoChatear = soyCapitan || soyOrganizador;
 
+  // El historial se pide una sola vez al abrir; a partir de ahí los mensajes
+  // nuevos llegan empujados por el stream. Antes esto era un GET cada 4
+  // segundos por cada modal abierto.
   useEffect(() => {
     if (!puedoChatear) return;
     let activo = true;
-    const cargarMensajes = () => {
-      api.getMensajesPartida(partida.faseId, partida.id)
-        .then(m => { if (activo) setMensajes(m); })
-        .catch(() => {});
-    };
-    cargarMensajes();
-    const interval = setInterval(cargarMensajes, POLL_MS);
-    return () => { activo = false; clearInterval(interval); };
+
+    api.getMensajesPartida(partida.faseId, partida.id)
+      .then(m => { if (activo) setMensajes(m); })
+      .catch(() => {});
+
+    const cortar = escucharChat(partida.id, (mensaje) => {
+      if (!activo) return;
+      setMensajes(previos => (
+        // El que escribe ya agregó su mensaje al mandarlo, y el stream se lo
+        // devuelve igual: sin este chequeo lo vería duplicado.
+        previos.some(m => m.id === mensaje.id) ? previos : [...previos, mensaje]
+      ));
+    });
+
+    return () => { activo = false; cortar(); };
   }, [puedoChatear, partida.faseId, partida.id]);
 
   useEffect(() => {
@@ -80,16 +93,21 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
     e.preventDefault();
     if (!nuevoMensaje.trim() || !puedoChatear) return;
     setEnviandoMensaje(true);
+    setErrorChat(null);
     try {
-      await api.enviarMensajePartida(partida.faseId, partida.id, {
+      // La respuesta ya trae el mensaje creado: se agrega con eso en vez de
+      // volver a pedir la lista entera. El stream lo va a devolver también,
+      // y el chequeo por id de arriba evita que se vea dos veces.
+      const creado = await api.enviarMensajePartida(partida.faseId, partida.id, {
         equipo_id: miParticipacion ? Number(miParticipacion.equipoId) : undefined,
         texto: nuevoMensaje.trim(),
       });
       setNuevoMensaje('');
-      const actualizados = await api.getMensajesPartida(partida.faseId, partida.id);
-      setMensajes(actualizados);
+      setMensajes(previos => (
+        previos.some(m => m.id === creado.id) ? previos : [...previos, creado]
+      ));
     } catch {
-      // se reintenta solo con el próximo poll — no hace falta molestar con un error acá
+      setErrorChat('No se pudo enviar el mensaje. Revisá la conexión y probá de nuevo.');
     } finally {
       setEnviandoMensaje(false);
     }
@@ -312,6 +330,11 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                   })
                 )}
               </div>
+              {errorChat && (
+                <p className="text-[11px] text-rose-300 pt-2 flex items-center gap-1.5">
+                  <AlertCircle size={12} className="shrink-0" /> {errorChat}
+                </p>
+              )}
               <form onSubmit={handleEnviarMensaje} className="flex gap-2 pt-2">
                 <input
                   type="text" value={nuevoMensaje} onChange={e => setNuevoMensaje(e.target.value)}

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,10 +12,12 @@ from app.api.routes import (
     inscripciones,
     notificaciones,
     partidas,
+    stream,
     torneos,
     usuarios,
 )
 from app.core.config import settings
+from app.core.eventos import PUBLICADOR
 from app.db.database import Base, SessionLocal, engine, es_sqlite
 from app.db.seed import sembrar_juegos
 
@@ -43,6 +46,12 @@ async def lifespan(app: FastAPI):
                 log.info("Catálogo: %s juegos agregados", nuevos)
         finally:
             db.close()
+
+    # Los handlers de este proyecto son `def`, así que FastAPI los corre en
+    # el threadpool. Para que puedan empujar eventos a los streams SSE, el
+    # hub necesita saber a qué loop pedirle el trabajo — ver
+    # app/core/eventos.py.
+    PUBLICADOR.vincular_loop(asyncio.get_running_loop())
 
     yield
 
@@ -75,6 +84,7 @@ app.include_router(inscripciones.router, prefix="/api")
 app.include_router(fases.router, prefix="/api")
 app.include_router(partidas.router, prefix="/api")
 app.include_router(partidas.router_disputas, prefix="/api")
+app.include_router(stream.router, prefix="/api")
 
 
 @app.get("/api/health", tags=["health"])

@@ -9,11 +9,12 @@ import SwissBracketView from '@/components/torneos/SwissBracketView';
 import TeamsList from '@/components/torneos/TeamsList';
 import PartidaDetailModal from '@/components/torneos/PartidaDetailModal';
 import { api, mapFase, mapPartida, mapResumenAEdicion } from '@/lib/api';
+import { escucharEdicion } from '@/lib/eventos';
 import { ApiFase, ApiResumenEdicion, ApiTablaGrupo } from '@/lib/api-types';
 import { Partida } from '@/types';
 import {
   Trophy, Shield, Users, Calendar, Award, FileText,
-  Sword, Layers, Loader2,
+  Sword, Layers, Loader2, Radio,
 } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = {
@@ -51,6 +52,27 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
 
   const esFaseSuiza = activeFase?.formato === 'suizo';
   const esFaseDeTabla = activeFase?.formato === 'round_robin' || esFaseSuiza;
+
+  // Bracket en vivo. El evento solo dice QUÉ partida cambió, no cómo quedó:
+  // se vuelve a pedir la fase para que el permiso de quien mira lo siga
+  // decidiendo el endpoint de siempre y no el stream.
+  //
+  // Solo se refresca si el cambio es de la fase que se está viendo. Sin ese
+  // filtro, un torneo con varias fases activas recargaría la pantalla por
+  // partidas de otra etapa que ni se ven.
+  const [enVivo, setEnVivo] = useState(false);
+
+  useEffect(() => {
+    return escucharEdicion(
+      edicion.id,
+      (evento) => {
+        if (!activeFase || evento.fase_id === activeFase.id) {
+          setRefreshKey(k => k + 1);
+        }
+      },
+      setEnVivo,
+    );
+  }, [edicion.id, activeFase?.id]);
 
   useEffect(() => {
     if (!activeFase) return;
@@ -94,6 +116,14 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
             {activeFase && (
               <span className="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-800">
                 Formato: {formatoTexto}
+              </span>
+            )}
+            {enVivo && (
+              <span
+                title="Los resultados se actualizan solos, sin recargar la página."
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-950/60 border border-rose-500/40 text-rose-300"
+              >
+                <Radio size={11} className="animate-pulse" /> EN VIVO
               </span>
             )}
           </div>

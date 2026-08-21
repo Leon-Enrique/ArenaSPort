@@ -245,6 +245,19 @@ class ApiClient {
     return this.request<ApiMensajePartida[]>(`/fases/${faseId}/partidas/${partidaId}/mensajes`);
   }
 
+  /**
+   * Canjea la sesión por un ticket corto para abrir un stream privado.
+   *
+   * El navegador no deja mandar el header Authorization en un EventSource, y
+   * poner el JWT en la query string lo dejaría escrito en los logs de acceso
+   * del servidor y del proxy. El ticket sirve una sola vez y vive un minuto.
+   */
+  async pedirTicketDeStream(): Promise<{ ticket: string; vence_en_segundos: number }> {
+    return this.request<{ ticket: string; vence_en_segundos: number }>('/stream/ticket', {
+      method: 'POST',
+    });
+  }
+
   async enviarMensajePartida(faseId: string, partidaId: string, data: {
     equipo_id?: number; texto: string;
   }): Promise<ApiMensajePartida> {

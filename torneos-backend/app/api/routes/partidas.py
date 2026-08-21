@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import CurrentUser, DbSession, RequiereOrganizador
 from app.core import notificaciones
+from app.core.eventos import PUBLICADOR, topico_chat, topico_edicion
 from app.domain import sorteo
 from app.domain.enums import EstadoPartida, ModeloCompetencia
 from app.domain.partidas import (
@@ -54,6 +55,33 @@ router_disputas = APIRouter(prefix="/disputas", tags=["disputas"])
 
 def _ahora() -> datetime:
     return datetime.now().astimezone()
+
+
+def _publicar_cambio(db: Session, partida: Partida, tipo: str = "partida_actualizada") -> None:
+    """Avisa a los streams SSE de la edición que esta partida cambió.
+
+    Manda solo identificadores y el estado nuevo, no la partida serializada:
+    el cliente ya sabe pedir los datos que necesita y con el permiso que le
+    corresponde. Si el evento cargara la partida entera, el stream tendría
+    que repetir las reglas de redacción de cada endpoint — y ahí es donde se
+    filtra un campo que no debía salir.
+
+    Se llama SIEMPRE después del commit: un suscriptor que reciba el aviso va
+    a volver a consultar de inmediato, y si la transacción todavía no cerró
+    leería el estado viejo.
+    """
+    fase = db.get(Fase, partida.fase_id)
+    if fase is None:
+        return
+    PUBLICADOR.publicar(
+        topico_edicion(fase.edicion_id),
+        tipo,
+        {
+            "partida_id": partida.id,
+            "fase_id": partida.fase_id,
+            "estado": str(partida.estado),
+        },
+    )
 
 
 def _obtener_fase(db: Session, fase_id: int) -> Fase:
@@ -140,6 +168,9 @@ def _auto_abrir_checkins_vencidos(
             cambio = True
     if cambio:
         db.commit()
+        for p in partidas:
+            if p.estado == EstadoPartida.CHECK_IN:
+                _publicar_cambio(db, p, "checkin_abierto")
 
 
 def _auto_resolver_reportes_vencidos(db: Session, partidas: list[Partida]) -> None:
@@ -172,6 +203,7 @@ def _auto_resolver_reportes_vencidos(db: Session, partidas: list[Partida]) -> No
         db.refresh(p)
         sorteo.avanzar_ganador(db, p)
         db.refresh(p)
+        _publicar_cambio(db, p, "resultado_confirmado")
 
 
 def _verificar_capitan_del_equipo(db: Session, usuario: Usuario, equipo_id: int) -> None:
@@ -377,6 +409,7 @@ def programar_partida(
 
     db.commit()
     db.refresh(partida)
+    _publicar_cambio(db, partida, "partida_programada")
     return partida
 
 
@@ -425,6 +458,19 @@ def enviar_mensaje(
     db.add(mensaje)
     db.commit()
     db.refresh(mensaje)
+
+    PUBLICADOR.publicar(
+        topico_chat(partida_id),
+        "mensaje_nuevo",
+        {
+            "id": mensaje.id,
+            "partida_id": partida_id,
+            "equipo_id": mensaje.equipo_id,
+            "autor_nombre": mensaje.autor_nombre,
+            "texto": mensaje.texto,
+            "created_at": mensaje.created_at,
+        },
+    )
     return mensaje
 
 
@@ -460,6 +506,7 @@ def abrir_checkin(
 
     db.commit()
     db.refresh(partida)
+    _publicar_cambio(db, partida, "checkin_abierto")
     return partida
 
 
@@ -506,6 +553,7 @@ def confirmar_checkin(
 
     db.commit()
     db.refresh(partida)
+    _publicar_cambio(db, partida, "checkin_confirmado")
     return partida
 
 
@@ -556,6 +604,7 @@ def resolver_checkin(
         sorteo.avanzar_ganador(db, partida)
         db.refresh(partida)
 
+    _publicar_cambio(db, partida, "checkin_resuelto")
     return partida
 
 
@@ -625,6 +674,8 @@ def reportar_resultado(
     db.add(reporte)
     db.commit()
     db.refresh(reporte)
+    db.refresh(partida)
+    _publicar_cambio(db, partida, "resultado_reportado")
     return reporte
 
 
@@ -666,6 +717,7 @@ def confirmar_resultado(
     db.refresh(partida)
     sorteo.avanzar_ganador(db, partida)
     db.refresh(partida)
+    _publicar_cambio(db, partida, "resultado_confirmado")
     return partida
 
 
@@ -701,6 +753,8 @@ def impugnar_resultado(
     db.add(disputa)
     db.commit()
     db.refresh(disputa)
+    db.refresh(partida)
+    _publicar_cambio(db, partida, "resultado_impugnado")
     return disputa
 
 
@@ -743,6 +797,7 @@ def resolver_reporte_vencido(
     db.refresh(partida)
     sorteo.avanzar_ganador(db, partida)
     db.refresh(partida)
+    _publicar_cambio(db, partida, "resultado_confirmado")
     return partida
 
 
@@ -836,6 +891,7 @@ def corregir_resultado(
         sorteo.avanzar_ganador(db, partida)
         db.refresh(partida)
 
+    _publicar_cambio(db, partida, "resultado_corregido")
     return CorreccionAplicadaOut(
         partida=partida,
         reporte=reporte,
@@ -887,6 +943,8 @@ def reportar_problema(
     db.add(disputa)
     db.commit()
     db.refresh(disputa)
+    db.refresh(partida)
+    _publicar_cambio(db, partida, "problema_reportado")
     return disputa
 
 
@@ -1000,4 +1058,6 @@ def resolver_disputa(
         db.refresh(partida)
         sorteo.avanzar_ganador(db, partida)
 
+    db.refresh(partida)
+    _publicar_cambio(db, partida, "disputa_resuelta")
     return disputa
