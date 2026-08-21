@@ -89,9 +89,23 @@ def validar_marcador(bo: int, marcador_propio: int, marcador_rival: int) -> Resu
         raise ErrorPartida("El marcador no puede terminar en empate.")
 
     mapas_para_ganar = bo // 2 + 1
-    if max(marcador_propio, marcador_rival) < mapas_para_ganar:
+    mapas_del_ganador = max(marcador_propio, marcador_rival)
+
+    if mapas_del_ganador < mapas_para_ganar:
         raise ErrorPartida(
             f"En un BO{bo} hace falta llegar a {mapas_para_ganar} mapas para ganar."
+        )
+
+    # La serie se corta apenas alguien llega a los mapas necesarios: no se
+    # juega un mapa más después de eso. Sin este límite entraban marcadores
+    # que no existen (3-0 en un BO3, 5-0 o 4-1 en un BO5) — y como
+    # `mapas_favor` alimenta la diferencia de mapas, que es criterio de
+    # desempate de la tabla, un marcador inflado puede cambiar quién
+    # clasifica.
+    if mapas_del_ganador > mapas_para_ganar:
+        raise ErrorPartida(
+            f"En un BO{bo} la serie termina al llegar a {mapas_para_ganar} mapas: "
+            f"un marcador de {mapas_del_ganador} no es posible."
         )
 
     return ResultadoValidado(gana_reportante=marcador_propio > marcador_rival)

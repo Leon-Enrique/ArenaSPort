@@ -12,9 +12,18 @@ directo a la ronda siguiente como si ya hubiera ganado. Esto evita crear
 partidas con un solo lado ocupado que nunca se van a poder jugar; el
 "bye estructural" es invisible salvo que el organizador audite el árbol.
 
-Validado por simulación para n=2..64, incluyendo valores irregulares
-(5, 6, 7, 9, 11, 13, 17, 45, 48): el total de cruces siempre cierra en
-2n-2 (llave alta + llave baja + gran final).
+Cuentas verificadas por tests para n=3..64 (ver tests/test_eliminacion_doble.py):
+
+  - Partidas JUGABLES (las que no son bye): siempre 2n-2. Es la cuenta que
+    importa — cada equipo salvo el campeón pierde dos veces y cada partida
+    real produce una sola derrota.
+  - Filas generadas en total: n + cuadro - 2, donde `cuadro` es la potencia
+    de 2 que envuelve a n. Incluye los cruces bye de la llave alta, que se
+    auto-resuelven sin jugarse. Solo coincide con 2n-2 cuando n ya es
+    potencia de 2 y por lo tanto no hay ningún bye.
+
+La distinción no es cosmética: contar las filas totales y esperar 2n-2 da un
+falso error para todo n irregular, que es la mayoría de los torneos reales.
 """
 
 from dataclasses import dataclass

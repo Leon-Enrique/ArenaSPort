@@ -1,0 +1,35 @@
+name: Tests
+
+# Todavía no hay remoto configurado: este workflow no corre hasta que el
+# repo se publique en GitHub. Queda listo para ese momento.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: torneos-backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            torneos-backend/requirements.txt
+            torneos-backend/requirements-dev.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+
+      - name: Correr los tests
+        # Sin .env en el runner, la configuración cae a sus valores por
+        # defecto (SQLite) — que es justo lo que estos tests necesitan.
+        run: python -m pytest
