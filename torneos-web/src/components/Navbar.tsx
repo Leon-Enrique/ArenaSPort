@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Shield, Trophy, LayoutDashboard, LogIn, ChevronDown, User, LogOut, Sparkles } from 'lucide-react';
+import { Shield, Trophy, LayoutDashboard, LogIn, ChevronDown, User, LogOut, Sparkles, Users } from 'lucide-react';
 import { Usuario } from '@/types';
 import { api } from '@/lib/api';
 import AuthModal from '@/components/AuthModal';
@@ -58,6 +58,10 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             <Link href="/" className="px-3.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-2">
               <Trophy className="w-4 h-4 text-purple-400" /> Torneos
+            </Link>
+
+            <Link href="/equipos" className="px-3.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-2">
+              <Users className="w-4 h-4 text-cyan-400" /> Equipos
             </Link>
 
             {usuario?.rol === 'organizador' ? (

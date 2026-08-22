@@ -10,6 +10,7 @@ import {
   ApiBandejaNotificaciones, ApiCampoIdentidad, ApiDisputa, ApiEdicion, ApiEquipoResumen, ApiFase, ApiInscripcion,
   ApiInscripcionCreada, ApiJuego, ApiMensajePartida, ApiMiInscripcion, ApiMiPartida, ApiNotificacion, ApiPartida, ApiReporteResultado,
   ApiResumenEdicion, ApiTablaGrupo, ApiTokenOut, ApiTorneo, ApiUsuario, ApiUsuarioAdmin,
+  ApiEquipoEnListado, ApiMiEquipo, ApiPerfilEquipo, ApiPerfilJugador,
 } from '@/lib/api-types';
 import {
   Disputa, Edicion, Equipo, Fase, Inscripcion, Jugador, Juego, Partida,
@@ -149,6 +150,7 @@ class ApiClient {
   async updateEdicion(edicionId: string, data: {
     max_equipos?: number | null; fecha_inicio?: string | null; bolsa_premios?: string | null;
     reglamento_url?: string | null; discord_webhook_url?: string | null; requiere_aprobacion?: boolean;
+    requiere_equipo_permanente?: boolean;
   }): Promise<ApiEdicion> {
     return this.request<ApiEdicion>(`/ediciones/${edicionId}`, { method: 'PATCH', body: JSON.stringify(data) });
   }
@@ -245,6 +247,42 @@ class ApiClient {
     return this.request<ApiMensajePartida[]>(`/fases/${faseId}/partidas/${partidaId}/mensajes`);
   }
 
+  // ──────────────────────────────────────────
+  // PERFILES PÚBLICOS
+  // ──────────────────────────────────────────
+  async getEquipos(buscar?: string): Promise<ApiEquipoEnListado[]> {
+    const q = buscar?.trim() ? `?buscar=${encodeURIComponent(buscar.trim())}` : '';
+    return this.request<ApiEquipoEnListado[]>(`/equipos${q}`);
+  }
+
+  async getPerfilEquipo(equipoId: number | string): Promise<ApiPerfilEquipo> {
+    return this.request<ApiPerfilEquipo>(`/equipos/${equipoId}`);
+  }
+
+  /** Los equipos permanentes del usuario, para el selector de inscripción. */
+  async getMisEquipos(): Promise<ApiMiEquipo[]> {
+    return this.request<ApiMiEquipo[]>('/equipos/mios');
+  }
+
+  async crearEquipo(data: { nombre: string; tag?: string; logo_url?: string }): Promise<ApiMiEquipo> {
+    return this.request<ApiMiEquipo>('/equipos', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async editarEquipo(
+    equipoId: number,
+    data: { nombre?: string; tag?: string; logo_url?: string },
+  ): Promise<ApiMiEquipo> {
+    return this.request<ApiMiEquipo>(`/equipos/${equipoId}`, {
+      method: 'PATCH', body: JSON.stringify(data),
+    });
+  }
+
+  async getPerfilJugador(juegoCodigo: string, claveIdentidad: string): Promise<ApiPerfilJugador> {
+    return this.request<ApiPerfilJugador>(
+      `/jugadores/${encodeURIComponent(juegoCodigo)}/${encodeURIComponent(claveIdentidad)}`,
+    );
+  }
+
   /**
    * Canjea la sesión por un ticket corto para abrir un stream privado.
    *
@@ -314,6 +352,8 @@ class ApiClient {
   }
 
   async createInscripcion(edicionId: string, data: {
+    /** Para sumar este torneo al historial de un equipo permanente ya existente. */
+    equipo_id?: number;
     nombre_equipo: string;
     tag?: string;
     contacto_nombre?: string;

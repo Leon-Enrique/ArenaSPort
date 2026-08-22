@@ -23,12 +23,32 @@ from app.domain.enums import EstadoInscripcion
 
 
 class Equipo(Base):
+    """Un equipo, que puede vivir más allá de un torneo.
+
+    Es la entidad PERMANENTE; el plantel de un torneo puntual es la
+    `Inscripcion` con sus `Jugador`. Es la misma separación que hacen
+    Battlefy (Team vs Tournament Roster) y Toornament: el equipo se conserva,
+    el plantel se arma de nuevo en cada edición.
+
+    `propietario_usuario_id` es quién lo administra. Nulo a propósito en dos
+    casos que siguen existiendo: los equipos creados por una inscripción
+    anónima (la plataforma deja anotarse sin cuenta, y esa es una ventaja
+    para torneos de base que no queremos perder) y los 53 equipos que ya
+    estaban antes de que esto existiera. Sin dueño, el equipo funciona igual
+    dentro de su torneo — lo único que no puede es reutilizarse en el
+    siguiente, porque nadie puede demostrar que le pertenece.
+    """
+
     __tablename__ = "equipos"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     nombre: Mapped[str] = mapped_column(String(120), index=True)
     tag: Mapped[str | None] = mapped_column(String(12))
     logo_url: Mapped[str | None] = mapped_column(String(500))
+
+    propietario_usuario_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"), index=True
+    )
 
     contacto_nombre: Mapped[str | None] = mapped_column(String(120))
     contacto_whatsapp: Mapped[str | None] = mapped_column(String(40))

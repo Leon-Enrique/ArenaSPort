@@ -106,11 +106,106 @@ def _verificar_capitan_de_inscripcion(db: DbSession, usuario, inscripcion: Inscr
         )
 
 
+def _resolver_equipo(
+    db: DbSession, edicion, datos: InscripcionCreate, usuario, nombre_normalizado: str
+) -> tuple[Equipo, list[str]]:
+    """Decide con qué `Equipo` se inscribe: uno permanente ya existente, o
+    uno nuevo.
+
+    Es el punto donde se gana (o se pierde) el historial acumulado. Antes esto
+    creaba siempre una fila nueva, así que un equipo que jugó cinco torneos
+    eran cinco equipos distintos y su perfil no podía mostrar nada.
+
+    Tres caminos:
+      - `equipo_id` explícito: reutiliza ese equipo. Exige ser el dueño —
+        heredar el historial y los títulos de otro sería suplantarlo.
+      - La edición exige equipo permanente: sin `equipo_id` no se pasa.
+      - Ninguno de los dos: se crea uno nuevo, como siempre. Si quien
+        inscribe está logueado queda como dueño, así el mismo equipo se puede
+        reutilizar el año que viene.
+    """
+    avisos: list[str] = []
+
+    if datos.equipo_id is not None:
+        equipo = db.get(Equipo, datos.equipo_id)
+        if not equipo:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese equipo no existe.")
+        if usuario is None:
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED,
+                "Para inscribir un equipo existente hay que iniciar sesión.",
+            )
+        es_duenio = equipo.propietario_usuario_id == usuario.id
+        if not es_duenio and not usuario.es_organizador:
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "Este equipo no es tuyo. Solo su dueño puede inscribirlo.",
+            )
+
+        ya_inscrito = (
+            db.query(Inscripcion)
+            .filter(
+                Inscripcion.edicion_id == edicion.id,
+                Inscripcion.equipo_id == equipo.id,
+                Inscripcion.estado != EstadoInscripcion.RECHAZADA,
+            )
+            .first()
+        )
+        if ya_inscrito:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Este equipo ya está inscrito en esta edición.",
+            )
+
+        # El nombre puede cambiar de temporada a temporada; el historial va
+        # con el equipo, no con el texto.
+        if nombre_normalizado and nombre_normalizado.lower() != equipo.nombre.lower():
+            avisos.append(
+                f"El equipo pasó a llamarse '{nombre_normalizado}' "
+                f"(antes '{equipo.nombre}'). Su historial se mantiene."
+            )
+            equipo.nombre = nombre_normalizado
+        return equipo, avisos
+
+    if edicion.requiere_equipo_permanente:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Este torneo pide inscribirse con un equipo permanente: creá tu "
+            "equipo (o elegí uno que ya tengas) y volvé a intentar.",
+        )
+
+    equipo = Equipo(
+        nombre=nombre_normalizado,
+        tag=datos.tag,
+        logo_url=datos.logo_url,
+        contacto_nombre=datos.contacto_nombre,
+        contacto_whatsapp=datos.contacto_whatsapp,
+        contacto_discord=datos.contacto_discord,
+        propietario_usuario_id=usuario.id if usuario else None,
+    )
+    db.add(equipo)
+    db.flush()
+    if usuario is None:
+        avisos.append(
+            "Te inscribiste sin iniciar sesión, así que este equipo no queda "
+            "asociado a ninguna cuenta y no vas a poder reutilizarlo en otro "
+            "torneo. Si querés que acumule historial, pedile al organizador "
+            "que lo vincule."
+        )
+    return equipo, avisos
+
+
 @router.post("", response_model=InscripcionCreada, status_code=status.HTTP_201_CREATED)
 def inscribir_equipo(
-    edicion_id: int, datos: InscripcionCreate, db: DbSession
+    edicion_id: int, datos: InscripcionCreate, db: DbSession, usuario: UsuarioOpcional
 ) -> InscripcionCreada:
-    """Registro público de un equipo. Sin login, sin WhatsApp.
+    """Registro de un equipo en un torneo.
+
+    Sigue sin exigir login por defecto: anotarse sin cuenta es una ventaja
+    real para torneos de base y no se toca. Lo que cambia es que, si quien
+    inscribe SÍ tiene sesión, puede reutilizar un equipo suyo y arrastrar su
+    historial — y el organizador puede exigirlo por torneo con
+    `requiere_equipo_permanente`.
 
     Aplica las reglas de roster del organizador y devuelve los avisos de lo que
     el sistema asumió (suplentes, capitán) para que el equipo pueda corregir.
@@ -168,16 +263,7 @@ def inscribir_equipo(
             f"Ya hay un equipo inscrito con el nombre '{nombre_normalizado}'.",
         )
 
-    equipo = Equipo(
-        nombre=nombre_normalizado,
-        tag=datos.tag,
-        logo_url=datos.logo_url,
-        contacto_nombre=datos.contacto_nombre,
-        contacto_whatsapp=datos.contacto_whatsapp,
-        contacto_discord=datos.contacto_discord,
-    )
-    db.add(equipo)
-    db.flush()
+    equipo, avisos_equipo = _resolver_equipo(db, edicion, datos, usuario, nombre_normalizado)
 
     # Torneo abierto: el equipo queda adentro sin revisión manual. Ojo con el
     # orden — todo lo que valida esta función (cupos, plazo, roster,
@@ -210,7 +296,7 @@ def inscribir_equipo(
     db.commit()
     db.refresh(inscripcion)
 
-    avisos = list(resultado.avisos)
+    avisos = list(resultado.avisos) + avisos_equipo
     if aprobacion_automatica:
         avisos.append(
             "Este torneo tiene inscripción abierta: tu equipo ya quedó aprobado, "

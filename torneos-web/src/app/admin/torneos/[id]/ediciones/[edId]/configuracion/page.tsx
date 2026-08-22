@@ -23,6 +23,7 @@ export default function ConfiguracionEdicionPage() {
 
   const [webhook, setWebhook] = useState('');
   const [requiereAprobacion, setRequiereAprobacion] = useState(true);
+  const [requiereEquipoPermanente, setRequiereEquipoPermanente] = useState(false);
   const [bolsaPremios, setBolsaPremios] = useState('');
   const [reglamentoUrl, setReglamentoUrl] = useState('');
   const [maxEquipos, setMaxEquipos] = useState('');
@@ -33,6 +34,7 @@ export default function ConfiguracionEdicionPage() {
         setEdicion(ed);
         setWebhook(ed.discord_webhook_url ?? '');
         setRequiereAprobacion(ed.requiere_aprobacion);
+        setRequiereEquipoPermanente(ed.requiere_equipo_permanente);
         setBolsaPremios(ed.bolsa_premios ?? '');
         setReglamentoUrl(ed.reglamento_url ?? '');
         setMaxEquipos(ed.max_equipos ? String(ed.max_equipos) : '');
@@ -49,6 +51,7 @@ export default function ConfiguracionEdicionPage() {
       const actualizada = await api.updateEdicion(edicionId, {
         discord_webhook_url: webhook.trim() || null,
         requiere_aprobacion: requiereAprobacion,
+        requiere_equipo_permanente: requiereEquipoPermanente,
         bolsa_premios: bolsaPremios.trim() || null,
         reglamento_url: reglamentoUrl.trim() || null,
         max_equipos: maxEquipos ? Number(maxEquipos) : null,
@@ -186,6 +189,24 @@ export default function ConfiguracionEdicionPage() {
               revisar uno por uno. Se siguen validando el cupo máximo, el plazo de inscripción, el
               roster completo y que ningún jugador esté ya en otro equipo — &quot;abierto&quot; es
               sin revisión, no sin reglas.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-violet-500/40 transition-all">
+          <input
+            type="checkbox"
+            checked={requiereEquipoPermanente}
+            onChange={e => setRequiereEquipoPermanente(e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-violet-500"
+          />
+          <span>
+            <span className="block text-sm font-semibold text-white">Exigir equipo permanente</span>
+            <span className="block text-xs text-white/40 mt-1 leading-relaxed">
+              Para anotarse hay que iniciar sesión y elegir un equipo ya creado, así este torneo
+              suma al historial de ese equipo. Prendelo si querés que los perfiles acumulen
+              récord entre temporadas. Apagado —el default— cualquiera se inscribe sin cuenta,
+              que es lo más cómodo para un torneo de base.
             </span>
           </span>
         </label>

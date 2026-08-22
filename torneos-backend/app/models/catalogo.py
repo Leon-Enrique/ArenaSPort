@@ -93,6 +93,19 @@ class Edicion(Base):
     reglamento_url: Mapped[str | None] = mapped_column(String(500))
     version_reglamento: Mapped[str | None] = mapped_column(String(40))
 
+    # Si está en True, para inscribirse hay que elegir un equipo permanente
+    # ya existente (y por lo tanto tener cuenta). En False —el default— se
+    # puede seguir anotando un equipo suelto sin loguearse.
+    #
+    # Es configurable por edición, no global, copiando lo que hace
+    # Toornament: forzar cuenta en todos los torneos agregaría fricción
+    # justo en el embudo que más importa (que los equipos se anoten), así
+    # que la decisión la toma el organizador de cada torneo. El que quiere
+    # historial acumulado lo prende; el torneo de base sigue como está.
+    requiere_equipo_permanente: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0"
+    )
+
     # Canal de Discord al que se publican los avisos de esta edición. Solo
     # se aceptan URLs de webhook de Discord — ver PREFIJOS_WEBHOOK_VALIDOS
     # en app/core/notificaciones.py, es una guarda contra SSRF, no cosmética.

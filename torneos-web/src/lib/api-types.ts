@@ -48,6 +48,7 @@ export interface ApiEdicion {
   reglamento_url: string | null;
   discord_webhook_url: string | null;
   requiere_aprobacion: boolean;
+  requiere_equipo_permanente: boolean;
   equipos_aprobados: number;
 }
 
@@ -275,4 +276,88 @@ export interface ApiReporteResultado {
   motivo: string | null;
   aplicado_por_usuario_id: number | null;
   created_at: string;
+}
+
+// ──────────────────────────────────────────
+// PERFILES PÚBLICOS (equipos y jugadores)
+// ──────────────────────────────────────────
+
+export interface ApiRecord {
+  jugadas: number;
+  ganadas: number;
+  perdidas: number;
+  mapas_favor: number;
+  mapas_contra: number;
+  diferencia_mapas: number;
+  byes: number;
+  /** null cuando el equipo todavía no jugó: 0% seria mentir sobre alguien que no debutó. */
+  porcentaje_victorias: number | null;
+}
+
+export interface ApiJugadorDePerfil {
+  nick: string;
+  es_capitan: boolean;
+  es_suplente: boolean;
+}
+
+export interface ApiParticipacionEnTorneo {
+  edicion_id: number;
+  edicion_nombre: string;
+  edicion_slug: string;
+  torneo_nombre: string;
+  juego_nombre: string;
+  estado_edicion: string;
+  record: ApiRecord;
+  ronda_maxima: number | null;
+  campeon: boolean;
+  roster: ApiJugadorDePerfil[];
+}
+
+export interface ApiPerfilEquipo {
+  id: number;
+  nombre: string;
+  tag: string | null;
+  logo_url: string | null;
+  created_at: string;
+  record_global: ApiRecord;
+  torneos_jugados: number;
+  titulos: number;
+  historial: ApiParticipacionEnTorneo[];
+}
+
+export interface ApiEquipoEnListado {
+  id: number;
+  nombre: string;
+  tag: string | null;
+  logo_url: string | null;
+  torneos_jugados: number;
+  partidas_ganadas: number;
+}
+
+export interface ApiEquipoDeJugador {
+  equipo_id: number;
+  equipo_nombre: string;
+  equipo_tag: string | null;
+  edicion_nombre: string;
+  edicion_slug: string;
+  torneo_nombre: string;
+  es_capitan: boolean;
+  es_suplente: boolean;
+}
+
+export interface ApiPerfilJugador {
+  clave_identidad: string;
+  juego_codigo: string;
+  juego_nombre: string;
+  nicks_usados: string[];
+  equipos: ApiEquipoDeJugador[];
+  torneos_jugados: number;
+}
+
+export interface ApiMiEquipo {
+  id: number;
+  nombre: string;
+  tag: string | null;
+  logo_url: string | null;
+  torneos_jugados: number;
 }

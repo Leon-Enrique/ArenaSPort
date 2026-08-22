@@ -45,6 +45,7 @@ class EdicionRead(BaseModel):
     reglamento_url: str | None
     discord_webhook_url: str | None
     requiere_aprobacion: bool
+    requiere_equipo_permanente: bool
     equipos_aprobados: int = 0
 
 
@@ -60,6 +61,7 @@ class EdicionUpdate(BaseModel):
     reglamento_url: str | None = Field(default=None, max_length=500)
     discord_webhook_url: str | None = Field(default=None, max_length=500)
     requiere_aprobacion: bool | None = None
+    requiere_equipo_permanente: bool | None = None
 
     @field_validator("fecha_inicio")
     @classmethod
@@ -132,6 +134,14 @@ class JugadorEntradaIn(BaseModel):
 
 
 class InscripcionCreate(BaseModel):
+    equipo_id: int | None = Field(
+        default=None,
+        description=(
+            "Para inscribir un equipo permanente que ya existe, y que el "
+            "torneo sume a su historial. Requiere sesión iniciada y ser su "
+            "dueño. Sin esto se crea un equipo nuevo, como siempre."
+        ),
+    )
     nombre_equipo: str = Field(min_length=2, max_length=120)
     tag: str | None = Field(default=None, max_length=12)
     logo_url: str | None = None

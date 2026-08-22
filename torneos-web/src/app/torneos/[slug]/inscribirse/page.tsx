@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { api, ApiError, mapResumenAEdicion } from '@/lib/api';
-import { ApiInscripcionCreada, ApiResumenEdicion } from '@/lib/api-types';
+import { ApiInscripcionCreada, ApiMiEquipo, ApiResumenEdicion } from '@/lib/api-types';
 import { Edicion, Usuario } from '@/types';
 import {
   Trophy, Users, CheckCircle2, ArrowLeft, Crown,
@@ -58,6 +58,11 @@ export default function InscribirseTorneoPage() {
   const bannerError = useRef<HTMLDivElement>(null);
   const [resultado, setResultado] = useState<ApiInscripcionCreada | null>(null);
 
+  // Equipos permanentes del usuario. Elegir uno hace que el torneo sume al
+  // historial de ESE equipo en vez de crear uno nuevo y suelto.
+  const [misEquipos, setMisEquipos] = useState<ApiMiEquipo[]>([]);
+  const [equipoElegidoId, setEquipoElegidoId] = useState<number | null>(null);
+
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return;
@@ -65,8 +70,23 @@ export default function InscribirseTorneoPage() {
     api.getMe().then(u => {
       setUsuario(u);
       setContactoNombre(prev => prev || u.nombre);
-    }).catch(() => {});
+      return api.getMisEquipos();
+    })
+      .then(equipos => setMisEquipos(equipos || []))
+      .catch(() => {});
   }, []);
+
+  // Al elegir un equipo se copian su nombre y tag al formulario: son
+  // editables, porque un equipo puede cambiar de nombre entre temporadas
+  // sin dejar de ser el mismo.
+  const elegirEquipo = (id: number | null) => {
+    setEquipoElegidoId(id);
+    const equipo = misEquipos.find(e => e.id === id);
+    if (equipo) {
+      setNombreEquipo(equipo.nombre);
+      setTag(equipo.tag || '');
+    }
+  };
 
   useEffect(() => {
     if (!edicion) return;
@@ -151,6 +171,7 @@ export default function InscribirseTorneoPage() {
     setIsSubmitting(true);
     try {
       const data = await api.createInscripcion(edicion.id, {
+        equipo_id: equipoElegidoId ?? undefined,
         nombre_equipo: nombreEquipo.trim(),
         tag: tag.trim() || undefined,
         contacto_nombre: contactoNombre.trim() || undefined,
@@ -266,6 +287,51 @@ export default function InscribirseTorneoPage() {
                 <h4 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                   <Trophy size={14} className="text-violet-400" /> Datos del Equipo
                 </h4>
+
+                {misEquipos.length > 0 && (
+                  <div className="space-y-2 p-4 rounded-2xl bg-violet-950/20 border border-violet-500/25">
+                    <label className="block text-xs font-semibold text-violet-200">
+                      ¿Con cuál de tus equipos te inscribís?
+                    </label>
+                    <p className="text-[11px] text-white/40 leading-relaxed">
+                      Si elegís uno tuyo, este torneo se suma a su historial. Si creás
+                      uno nuevo, arranca de cero.
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {misEquipos.map(eq => (
+                        <button
+                          key={eq.id}
+                          type="button"
+                          onClick={() => elegirEquipo(eq.id)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
+                            equipoElegidoId === eq.id
+                              ? 'bg-violet-600 border-violet-400 text-white'
+                              : 'bg-[#0a0a14] border-white/10 text-white/60 hover:text-white hover:border-violet-500/40'
+                          }`}
+                        >
+                          {eq.nombre}
+                          {eq.torneos_jugados > 0 && (
+                            <span className="ml-1.5 font-normal opacity-60">
+                              · {eq.torneos_jugados} {eq.torneos_jugados === 1 ? 'torneo' : 'torneos'}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => elegirEquipo(null)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
+                          equipoElegidoId === null
+                            ? 'bg-white/10 border-white/30 text-white'
+                            : 'bg-[#0a0a14] border-white/10 text-white/60 hover:text-white'
+                        }`}
+                      >
+                        + Equipo nuevo
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-white/60 mb-1.5">Nombre del Equipo *</label>

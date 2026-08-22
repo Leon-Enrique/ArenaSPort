@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Users, Shield, Crown, Search, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { ApiInscripcion } from '@/lib/api-types';
@@ -63,13 +64,19 @@ export default function TeamsList({ edicionId, maxEquipos, equiposCount }: Teams
           {filtered.map(insc => {
             const capitan = insc.jugadores.find(j => j.es_capitan);
             return (
-              <div key={insc.id} className="bg-[#0e101d] border border-slate-800 rounded-2xl p-4 space-y-3 hover:border-cyan-500/40 transition-all">
+              <Link
+                key={insc.id}
+                href={`/equipos/${insc.equipo.id}`}
+                className="block bg-[#0e101d] border border-slate-800 rounded-2xl p-4 space-y-3 hover:border-cyan-500/40 transition-all group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-600 to-indigo-700 flex items-center justify-center font-black text-white text-sm shrink-0">
                     {insc.equipo.tag || insc.equipo.nombre.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-white truncate">{insc.equipo.nombre}</p>
+                    <p className="font-bold text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
+                      {insc.equipo.nombre}
+                    </p>
                     {capitan && (
                       <span className="text-[11px] text-white/40 flex items-center gap-1 truncate">
                         <Crown size={10} className="text-amber-400 shrink-0" /> {capitan.identidad.nick || capitan.identidad.nombre || 'Capitán'}
@@ -77,10 +84,13 @@ export default function TeamsList({ edicionId, maxEquipos, equiposCount }: Teams
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-white/40">
-                  <Shield size={11} /> {insc.jugadores.length} jugadores registrados
+                <div className="flex items-center justify-between text-[11px] text-white/40">
+                  <span className="flex items-center gap-1.5">
+                    <Shield size={11} /> {insc.jugadores.length} jugadores registrados
+                  </span>
+                  <span className="text-cyan-400/0 group-hover:text-cyan-400/70 transition-colors">Ver perfil →</span>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

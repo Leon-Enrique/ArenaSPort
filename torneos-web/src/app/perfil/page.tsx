@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { api } from '@/lib/api';
-import { ApiMiInscripcion, ApiMiPartida } from '@/lib/api-types';
+import { ApiError } from '@/lib/api';
+import { ApiMiEquipo, ApiMiInscripcion, ApiMiPartida } from '@/lib/api-types';
 import { Usuario } from '@/types';
 import {
   Shield, Users, Crown, LogIn, Loader2, Trophy, Clock, CheckCircle2, XCircle, Swords
@@ -43,6 +44,37 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [checkedAuth, setCheckedAuth] = useState(false);
 
+  // Equipos permanentes: la entidad que sobrevive al torneo y acumula récord.
+  const [misEquipos, setMisEquipos] = useState<ApiMiEquipo[]>([]);
+  const [creando, setCreando] = useState(false);
+  const [nuevoNombre, setNuevoNombre] = useState('');
+  const [nuevoTag, setNuevoTag] = useState('');
+  const [guardandoEquipo, setGuardandoEquipo] = useState(false);
+  const [errorEquipo, setErrorEquipo] = useState<string | null>(null);
+
+  const handleCrearEquipo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoNombre.trim()) return;
+    setGuardandoEquipo(true);
+    setErrorEquipo(null);
+    try {
+      const creado = await api.crearEquipo({
+        nombre: nuevoNombre.trim(),
+        tag: nuevoTag.trim() || undefined,
+      });
+      setMisEquipos(prev => [...prev, creado].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+      setNuevoNombre('');
+      setNuevoTag('');
+      setCreando(false);
+    } catch (err) {
+      // El caso frecuente es el 409 por nombre repetido, y el backend ya
+      // manda un mensaje claro: conviene mostrarlo tal cual.
+      setErrorEquipo(err instanceof ApiError ? err.message : 'No se pudo crear el equipo.');
+    } finally {
+      setGuardandoEquipo(false);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
@@ -54,11 +86,16 @@ export default function PerfilPage() {
     api.getMe()
       .then(u => {
         setUsuario(u);
-        return Promise.all([api.getMisInscripciones(), api.getMisPartidas()]);
+        return Promise.all([
+          api.getMisInscripciones(),
+          api.getMisPartidas(),
+          api.getMisEquipos(),
+        ]);
       })
-      .then(([ins, partidas]) => {
+      .then(([ins, partidas, equipos]) => {
         setInscripciones(ins || []);
         setMisPartidas(partidas || []);
+        setMisEquipos(equipos || []);
       })
       .catch(() => {})
       .finally(() => { setCheckedAuth(true); setLoading(false); });
@@ -146,9 +183,79 @@ export default function PerfilPage() {
           )}
         </div>
 
+        {/* EQUIPOS PERMANENTES — la entidad que acumula historial entre torneos */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
+              <Shield size={15} className="text-cyan-400" /> Equipos permanentes
+            </h2>
+            <button
+              onClick={() => { setCreando(v => !v); setErrorEquipo(null); }}
+              className="px-3.5 py-1.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all"
+            >
+              {creando ? 'Cancelar' : '+ Crear equipo'}
+            </button>
+          </div>
+
+          <p className="text-xs text-white/40 leading-relaxed">
+            Un equipo permanente se inscribe en varios torneos y va acumulando récord.
+            Si te anotás sin elegir uno, se crea un equipo suelto que arranca de cero cada vez.
+          </p>
+
+          {creando && (
+            <form onSubmit={handleCrearEquipo} className="bg-[#11111f] border border-cyan-500/25 rounded-2xl p-4 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input
+                  type="text" required value={nuevoNombre} onChange={e => setNuevoNombre(e.target.value)}
+                  placeholder="Nombre del equipo"
+                  className="sm:col-span-2 bg-[#0a0a14] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+                <input
+                  type="text" value={nuevoTag} onChange={e => setNuevoTag(e.target.value)}
+                  placeholder="Tag (opcional)" maxLength={12}
+                  className="bg-[#0a0a14] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              {errorEquipo && <p className="text-[11px] text-rose-300">{errorEquipo}</p>}
+              <button
+                type="submit" disabled={guardandoEquipo || !nuevoNombre.trim()}
+                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold disabled:opacity-50 transition-all"
+              >
+                {guardandoEquipo ? 'Creando...' : 'Crear equipo'}
+              </button>
+            </form>
+          )}
+
+          {misEquipos.length === 0 && !creando ? (
+            <div className="bg-[#11111f] border border-white/8 rounded-2xl p-6 text-center text-xs text-white/40">
+              Todavía no tenés ningún equipo permanente.
+            </div>
+          ) : (
+            misEquipos.map(eq => (
+              <div key={eq.id} className="bg-[#11111f] border border-white/8 rounded-2xl p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-600 to-indigo-700 flex items-center justify-center font-black text-white text-xs shrink-0">
+                  {eq.tag || eq.nombre.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm text-white truncate">{eq.nombre}</p>
+                  <span className="text-[11px] text-white/40">
+                    {eq.torneos_jugados} {eq.torneos_jugados === 1 ? 'torneo jugado' : 'torneos jugados'}
+                  </span>
+                </div>
+                <Link
+                  href={`/equipos/${eq.id}`}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-semibold transition-all shrink-0"
+                >
+                  Ver perfil
+                </Link>
+              </div>
+            ))
+          )}
+        </div>
+
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
-            <Users size={15} className="text-violet-400" /> Mis Equipos
+            <Users size={15} className="text-violet-400" /> Mis inscripciones
           </h2>
 
           {inscripciones.length === 0 ? (
