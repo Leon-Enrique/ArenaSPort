@@ -920,18 +920,6 @@ export const MOCK_STANDINGS_MLBB = [
 ];
 
 // ────────────────────────────────────────────
-// FREE FIRE STANDINGS
-// ────────────────────────────────────────────
-export const MOCK_FREE_FIRE_STANDINGS = [
-  { rank: 1, equipo: MOCK_EQUIPOS[0], caidas: [{ pos: 1, kills: 14, pts: 26 }, { pos: 2, kills: 8, pts: 17 }, { pos: 1, kills: 11, pts: 23 }], totalPts: 66, totalKills: 33, booyahs: 2 },
-  { rank: 2, equipo: MOCK_EQUIPOS[2], caidas: [{ pos: 3, kills: 10, pts: 18 }, { pos: 1, kills: 12, pts: 24 }, { pos: 3, kills: 7, pts: 15 }], totalPts: 57, totalKills: 29, booyahs: 1 },
-  { rank: 3, equipo: MOCK_EQUIPOS[1], caidas: [{ pos: 2, kills: 7, pts: 16 }, { pos: 4, kills: 6, pts: 13 }, { pos: 2, kills: 9, pts: 18 }], totalPts: 47, totalKills: 22, booyahs: 0 },
-  { rank: 4, equipo: MOCK_EQUIPOS[3], caidas: [{ pos: 5, kills: 5, pts: 11 }, { pos: 3, kills: 8, pts: 16 }, { pos: 4, kills: 6, pts: 13 }], totalPts: 40, totalKills: 19, booyahs: 0 },
-  { rank: 5, equipo: MOCK_EQUIPOS[4], caidas: [{ pos: 4, kills: 4, pts: 11 }, { pos: 6, kills: 5, pts: 10 }, { pos: 5, kills: 4, pts: 10 }], totalPts: 31, totalKills: 13, booyahs: 0 },
-  { rank: 6, equipo: MOCK_EQUIPOS[5], caidas: [{ pos: 6, kills: 3, pts: 8 }, { pos: 5, kills: 3, pts: 9 }, { pos: 6, kills: 2, pts: 7 }], totalPts: 24, totalKills: 8, booyahs: 0 },
-];
-
-// ────────────────────────────────────────────
 // USUARIOS DEMO (ROLES DIFERENCIADOS)
 // ────────────────────────────────────────────
 export const MOCK_ADMIN: Usuario = {

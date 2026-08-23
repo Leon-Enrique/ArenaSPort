@@ -1,5 +1,23 @@
 'use client';
 
+/**
+ * PROTOTIPO DE INTERFAZ — no funciona.
+ *
+ * Se conserva a propósito como referencia de diseño para cuando se
+ * implementen las sanciones de verdad. Hoy:
+ *
+ *   - Los datos son de `mock-data`, no de la base. Nada de lo que se ve acá
+ *     existe.
+ *   - Lo que se cargue vive en el estado de React y desaparece al recargar.
+ *   - No hay modelo `Sancion` ni endpoints en el backend: no hay nada
+ *     detrás de esta pantalla.
+ *   - La ruta no está enlazada desde ningún menú; se llega solo escribiendo
+ *     la URL.
+ *
+ * Si alguien la enlaza sin implementar el backend, un organizador va a creer
+ * que sancionó a un equipo y no va a haber pasado nada.
+ */
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
