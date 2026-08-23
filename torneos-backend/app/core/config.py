@@ -60,10 +60,29 @@ class Settings(BaseSettings):
 
     @field_validator("DATABASE_URL")
     @classmethod
-    def _anclar_sqlite(cls, value: str) -> str:
-        """`sqlite:///./torneos.db` es relativo al directorio de trabajo, así
-        que el mismo valor apunta a archivos distintos según desde dónde se
-        lance el proceso. Postgres y las rutas absolutas quedan intactas."""
+    def _normalizar_url(cls, value: str) -> str:
+        """Deja la URL en la forma que espera SQLAlchemy, y ancla SQLite.
+
+        Los proveedores gestionados (Railway, Render, Heroku) inyectan la URL
+        de Postgres en su forma canónica, `postgresql://...`, y algunos
+        todavía usan el `postgres://` viejo. Ninguna de las dos le dice a
+        SQLAlchemy qué driver usar, así que toma el por defecto —psycopg2—
+        que este proyecto NO tiene instalado: usa psycopg 3. El resultado es
+        que la app no arranca, con un error de driver que no menciona la
+        variable de entorno y manda a buscar el problema a otro lado.
+
+        Normalizarlo acá evita eso, y evita también tener que acordarse de
+        editar a mano una variable que el proveedor sobrescribe en cada
+        redeploy.
+
+        Lo de SQLite es otra cosa: `sqlite:///./torneos.db` es relativo al
+        directorio de trabajo, así que el mismo valor apunta a archivos
+        distintos según desde dónde se lance el proceso.
+        """
+        for viejo in ("postgresql+psycopg2://", "postgresql://", "postgres://"):
+            if value.startswith(viejo):
+                return "postgresql+psycopg://" + value[len(viejo):]
+
         prefijo = "sqlite:///"
         if not value.startswith(prefijo):
             return value
