@@ -4,7 +4,12 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import CurrentUser, DbSession, RequiereOrganizador
+from app.api.deps import (
+    CurrentUser,
+    DbSession,
+    RequiereOrganizador,
+    RequiereStaffDeFase,
+)
 from app.core import notificaciones
 from app.core.eventos import PUBLICADOR, topico_chat, topico_edicion
 from app.domain import sorteo
@@ -283,7 +288,7 @@ def _verificar_participa_en_partida(db: Session, usuario: Usuario, partida: Part
 
 @router.post("", response_model=PartidaRead, status_code=status.HTTP_201_CREATED)
 def crear_partida(
-    fase_id: int, datos: PartidaCreate, db: DbSession, _organizador: RequiereOrganizador
+    fase_id: int, datos: PartidaCreate, db: DbSession, _staff: RequiereStaffDeFase
 ) -> Partida:
     """Alta manual de una partida.
 
@@ -381,7 +386,7 @@ def obtener_partida(
 @router.patch("/{partida_id}/programar", response_model=PartidaRead)
 def programar_partida(
     fase_id: int, partida_id: int, datos: ProgramarPartidaIn, db: DbSession,
-    background_tasks: BackgroundTasks, _organizador: RequiereOrganizador,
+    background_tasks: BackgroundTasks, _staff: RequiereStaffDeFase,
 ) -> Partida:
     """Fija el horario de una partida — el check-in se abre solo
     `CHECKIN_MINUTOS_ANTES` antes de esa hora, sin que haga falta abrirlo
@@ -477,7 +482,7 @@ def enviar_mensaje(
 @router.post("/{partida_id}/abrir-checkin", response_model=PartidaRead)
 def abrir_checkin(
     fase_id: int, partida_id: int, datos: AbrirCheckinIn, db: DbSession,
-    background_tasks: BackgroundTasks, _organizador: RequiereOrganizador,
+    background_tasks: BackgroundTasks, _staff: RequiereStaffDeFase,
 ) -> Partida:
     """El organizador abre la ventana de check-in de una partida programada."""
     partida = _obtener_partida(db, fase_id, partida_id)
@@ -559,7 +564,7 @@ def confirmar_checkin(
 
 @router.post("/{partida_id}/resolver-checkin", response_model=PartidaRead)
 def resolver_checkin(
-    fase_id: int, partida_id: int, db: DbSession, _organizador: RequiereOrganizador
+    fase_id: int, partida_id: int, db: DbSession, _staff: RequiereStaffDeFase
 ) -> Partida:
     """Cierra una ventana de check-in vencida y aplica walkover si corresponde.
 
@@ -767,7 +772,7 @@ def impugnar_resultado(
 
 @router.post("/{partida_id}/resolver-reporte-vencido", response_model=PartidaRead)
 def resolver_reporte_vencido(
-    fase_id: int, partida_id: int, db: DbSession, _organizador: RequiereOrganizador
+    fase_id: int, partida_id: int, db: DbSession, _staff: RequiereStaffDeFase
 ) -> Partida:
     """Auto-confirmación: si venció el plazo y el rival no reaccionó (ni
     confirmó ni impugnó), el reporte se da por bueno — pero solo si tiene
@@ -810,7 +815,7 @@ def resolver_reporte_vencido(
 
 @router.post("/{partida_id}/corregir-resultado", response_model=CorreccionAplicadaOut)
 def corregir_resultado(
-    fase_id: int, partida_id: int, datos: CorregirResultadoIn, db: DbSession, usuario: RequiereOrganizador
+    fase_id: int, partida_id: int, datos: CorregirResultadoIn, db: DbSession, usuario: RequiereStaffDeFase
 ) -> CorreccionAplicadaOut:
     """Corrige el marcador de una partida YA `confirmada`, sin que nadie la
     haya impugnado — el organizador nota un error días después.

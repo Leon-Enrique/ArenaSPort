@@ -18,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base, DateTimeUTC
-from app.domain.enums import EstadoEdicion, FormatoFase, ModeloCompetencia
+from app.domain.enums import EstadoEdicion, FormatoFase, ModeloCompetencia, RolStaff
 
 
 class Juego(Base):
@@ -181,3 +181,28 @@ class Fase(Base):
     semilla_sorteo: Mapped[int | None] = mapped_column(Integer)
 
     edicion: Mapped["Edicion"] = relationship(back_populates="fases")
+
+
+class StaffDeTorneo(Base):
+    """Alguien que ayuda a correr un torneo sin ser organizador global.
+
+    `Usuario.es_organizador` es una bandera global: quien la tiene administra
+    TODOS los torneos de la plataforma. Eso hace imposible pedir una mano
+    puntual — para que alguien te ayude en una copa había que darle acceso a
+    todo, o hacerlo vos.
+    """
+
+    __tablename__ = "staff_de_torneo"
+    __table_args__ = (
+        UniqueConstraint("torneo_id", "usuario_id", name="uq_staff_torneo_usuario"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    torneo_id: Mapped[int] = mapped_column(ForeignKey("torneos.id"), index=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), index=True)
+
+    rol: Mapped[RolStaff] = mapped_column(Enum(RolStaff, native_enum=False, length=40))
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone()
+    )

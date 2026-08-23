@@ -5,7 +5,12 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from sqlalchemy import select
 
-from app.api.deps import CurrentUser, DbSession, RequiereOrganizador, UsuarioOpcional
+from app.api.deps import (
+    CurrentUser,
+    DbSession,
+    RequiereAdminDeEdicion,
+    UsuarioOpcional,
+)
 from app.core import notificaciones
 from app.domain.enums import ESTADOS_QUE_OCUPAN_CUPO, EstadoInscripcion
 from app.domain.roster import (
@@ -586,7 +591,7 @@ def obtener_inscripcion(
 def revisar_inscripcion(
     edicion_id: int, inscripcion_id: int, datos: RevisionInscripcion, db: DbSession,
     background_tasks: BackgroundTasks,
-    _organizador: RequiereOrganizador,
+    _admin: RequiereAdminDeEdicion,
 ) -> Inscripcion:
     """Aprobar o rechazar. Nunca se borra una inscripción: cambia de estado."""
     inscripcion = db.get(Inscripcion, inscripcion_id)
@@ -653,7 +658,7 @@ def _notificar_revision(
 
 @router.post("/sembrar-automatico", response_model=list[InscripcionRead])
 def sembrar_automatico(
-    edicion_id: int, db: DbSession, _organizador: RequiereOrganizador, semilla: int | None = None
+    edicion_id: int, db: DbSession, _admin: RequiereAdminDeEdicion, semilla: int | None = None
 ) -> list[Inscripcion]:
     """Asigna un número de siembra (1..N) a los equipos aprobados.
 
@@ -706,7 +711,7 @@ def sembrar_automatico(
 
 @router.patch("/{inscripcion_id}/seed", response_model=InscripcionRead)
 def fijar_seed_manual(
-    edicion_id: int, inscripcion_id: int, seed: int, db: DbSession, _organizador: RequiereOrganizador
+    edicion_id: int, inscripcion_id: int, seed: int, db: DbSession, _admin: RequiereAdminDeEdicion
 ) -> Inscripcion:
     """Ajuste manual de un seed puntual — el organizador corrige un caso,
     no re-sortea todo el torneo por eso."""
@@ -729,7 +734,7 @@ def vincular_discord(
     jugador_id: int,
     discord_id: str,
     db: DbSession,
-    _organizador: RequiereOrganizador,
+    _admin: RequiereAdminDeEdicion,
 ) -> Inscripcion:
     """El equipo se inscribió sin loguearse (es el caso normal); esto vincula
     a un jugador con su cuenta real de Discord después, para que pueda
@@ -759,7 +764,7 @@ def permitir_cambio_roster(
     inscripcion_id: int,
     datos: PermitirCambioRoster,
     db: DbSession,
-    usuario: RequiereOrganizador,
+    usuario: RequiereAdminDeEdicion,
 ) -> PermisoCambioRosterOut:
     """Habilita a un equipo a tocar su plantel con el torneo ya empezado.
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps import DbSession, RequiereOrganizador
+from app.api.deps import DbSession, RequiereAdminDeEdicion
 from app.domain import sorteo
 from app.domain.enums import EstadoFase, EstadoInscripcion, EstadoPartida, FormatoFase, LadoLlave
 from app.domain.formatos import suizo
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/ediciones/{edicion_id}/fases", tags=["fases"])
 
 
 @router.post("", response_model=FaseRead, status_code=status.HTTP_201_CREATED)
-def crear_fase(edicion_id: int, datos: FaseCreate, db: DbSession, _organizador: RequiereOrganizador) -> Fase:
+def crear_fase(edicion_id: int, datos: FaseCreate, db: DbSession, _admin: RequiereAdminDeEdicion) -> Fase:
     if not db.get(Edicion, edicion_id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
 
@@ -60,7 +60,7 @@ def _obtener_fase(db: DbSession, edicion_id: int, fase_id: int) -> Fase:
 
 
 @router.post("/{fase_id}/sortear", response_model=list[PartidaRead])
-def sortear_fase(edicion_id: int, fase_id: int, db: DbSession, _organizador: RequiereOrganizador) -> list:
+def sortear_fase(edicion_id: int, fase_id: int, db: DbSession, _admin: RequiereAdminDeEdicion) -> list:
     """Genera toda la estructura de la fase de una vez: llave, grupos, o
     ronda 1 de suizo — según el formato configurado.
 
@@ -253,7 +253,7 @@ def obtener_tabla(edicion_id: int, fase_id: int, db: DbSession) -> list[TablaGru
 
 @router.post("/{fase_id}/siguiente-ronda-suiza", response_model=list[PartidaRead])
 def generar_siguiente_ronda_suiza(
-    edicion_id: int, fase_id: int, db: DbSession, _organizador: RequiereOrganizador
+    edicion_id: int, fase_id: int, db: DbSession, _admin: RequiereAdminDeEdicion
 ) -> list[Partida]:
     """Genera la próxima ronda del suizo, emparejando por puntaje y evitando
     repetir rivales cuando es posible.
@@ -414,7 +414,7 @@ def generar_siguiente_ronda_suiza(
 
 
 @router.post("/{fase_id}/cerrar", response_model=FaseRead)
-def cerrar_fase(edicion_id: int, fase_id: int, db: DbSession, _organizador: RequiereOrganizador) -> Fase:
+def cerrar_fase(edicion_id: int, fase_id: int, db: DbSession, _admin: RequiereAdminDeEdicion) -> Fase:
     """Marca la fase como `cerrada` — requiere que TODAS sus partidas estén
     en un estado terminal (confirmada, walkover o bye). Si queda algo
     pendiente (en curso, en disputa, sin siquiera empezar), se rechaza con
@@ -542,7 +542,7 @@ def _ganadores_de_ronda_bracket(db: DbSession, fase_origen: Fase, ronda: int) ->
 @router.post("/{fase_id}/sortear-desde-fase-anterior", response_model=list[PartidaRead])
 def sortear_desde_fase_anterior(
     edicion_id: int, fase_id: int, datos: SortearDesdeFaseAnteriorIn, db: DbSession,
-    _organizador: RequiereOrganizador,
+    _admin: RequiereAdminDeEdicion,
 ) -> list[Partida]:
     """Arma la llave de esta fase con los clasificados de una fase
     anterior — dos fuentes posibles, según qué tipo de fase sea la de
@@ -616,7 +616,7 @@ def sortear_desde_fase_anterior(
 
 
 @router.post("/{fase_id}/resetear-sorteo", response_model=FaseRead)
-def resetear_sorteo(edicion_id: int, fase_id: int, db: DbSession, _organizador: RequiereOrganizador) -> Fase:
+def resetear_sorteo(edicion_id: int, fase_id: int, db: DbSession, _admin: RequiereAdminDeEdicion) -> Fase:
     """Deshace un sorteo hecho por error (ej. se sorteó con todos los
     inscritos de la edición en vez de con los clasificados de la fase
     anterior): borra sus partidas y la devuelve a `pendiente` para volver
@@ -650,7 +650,7 @@ def resetear_sorteo(edicion_id: int, fase_id: int, db: DbSession, _organizador: 
 
 
 @router.delete("/{fase_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_fase(edicion_id: int, fase_id: int, db: DbSession, _organizador: RequiereOrganizador) -> None:
+def eliminar_fase(edicion_id: int, fase_id: int, db: DbSession, _admin: RequiereAdminDeEdicion) -> None:
     """Borra una fase entera (no solo su sorteo) — para cuando se agregó
     por error o se cambió de opinión sobre el formato.
 

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from slugify import slugify
 
 from app.api.deps import DbSession, RequiereOrganizador
 from app.core import notificaciones
-from app.domain.enums import EstadoEdicion, EstadoInscripcion, EstadoPartida
+from app.domain.enums import EstadoEdicion, EstadoInscripcion, EstadoPartida, RolStaff
 from app.models import (
     CambioDeRoster,
     Edicion,
@@ -16,7 +16,9 @@ from app.models import (
     Juego,
     Partida,
     ParticipacionEnPartida,
+    StaffDeTorneo,
     Torneo,
+    Usuario,
 )
 from app.schemas.fases import FaseRead, InfoJuegoResumen, PartidaResumen, ResumenEdicionOut
 from app.schemas.inscripciones import (
@@ -456,4 +458,106 @@ def eliminar_edicion(
         synchronize_session=False
     )
     db.delete(edicion)
+    db.commit()
+
+
+class StaffIn(BaseModel):
+    usuario_id: int
+    rol: RolStaff
+
+
+class StaffOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    torneo_id: int
+    usuario_id: int
+    usuario_nombre: str = ""
+    rol: RolStaff
+
+
+@router_torneos.get("/{torneo_id}/staff", response_model=list[StaffOut])
+def listar_staff(torneo_id: int, db: DbSession, _organizador: RequiereOrganizador) -> list[StaffOut]:
+    """Quiénes ayudan a correr este torneo."""
+    if not db.get(Torneo, torneo_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "El torneo no existe.")
+
+    filas = db.query(StaffDeTorneo).filter(StaffDeTorneo.torneo_id == torneo_id).all()
+    salida = []
+    for f in filas:
+        usuario = db.get(Usuario, f.usuario_id)
+        salida.append(
+            StaffOut(
+                id=f.id, torneo_id=f.torneo_id, usuario_id=f.usuario_id,
+                usuario_nombre=usuario.discord_username if usuario else "—", rol=f.rol,
+            )
+        )
+    return salida
+
+
+@router_torneos.post("/{torneo_id}/staff", response_model=StaffOut, status_code=status.HTTP_201_CREATED)
+def agregar_staff(
+    torneo_id: int, datos: StaffIn, db: DbSession, _organizador: RequiereOrganizador
+) -> StaffOut:
+    """Le da acceso a alguien para ayudar en ESTE torneo.
+
+    Hasta ahora la única forma de que alguien te diera una mano era hacerlo
+    organizador global, o sea darle acceso a toda la plataforma. Esto acota
+    el alcance a un torneo.
+
+    Solo el organizador global reparte roles: delegar la operación de un
+    torneo no puede incluir delegar quién más entra. Si un administrador
+    pudiera sumar staff, alcanzaría con delegar una vez para perder el
+    control de lo delegado.
+    """
+    if not db.get(Torneo, torneo_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "El torneo no existe.")
+
+    usuario = db.get(Usuario, datos.usuario_id)
+    if not usuario:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese usuario no existe.")
+
+    existente = (
+        db.query(StaffDeTorneo)
+        .filter(
+            StaffDeTorneo.torneo_id == torneo_id,
+            StaffDeTorneo.usuario_id == datos.usuario_id,
+        )
+        .first()
+    )
+    if existente:
+        # Volver a agregarlo con otro rol es la forma natural de cambiarlo.
+        existente.rol = datos.rol
+        db.commit()
+        db.refresh(existente)
+        return StaffOut(
+            id=existente.id, torneo_id=torneo_id, usuario_id=datos.usuario_id,
+            usuario_nombre=usuario.discord_username, rol=existente.rol,
+        )
+
+    staff = StaffDeTorneo(torneo_id=torneo_id, usuario_id=datos.usuario_id, rol=datos.rol)
+    db.add(staff)
+    db.commit()
+    db.refresh(staff)
+    return StaffOut(
+        id=staff.id, torneo_id=torneo_id, usuario_id=datos.usuario_id,
+        usuario_nombre=usuario.discord_username, rol=staff.rol,
+    )
+
+
+@router_torneos.delete("/{torneo_id}/staff/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+def quitar_staff(
+    torneo_id: int, usuario_id: int, db: DbSession, _organizador: RequiereOrganizador
+) -> None:
+    """Le saca el acceso a este torneo. No toca su cuenta ni sus equipos."""
+    borradas = (
+        db.query(StaffDeTorneo)
+        .filter(
+            StaffDeTorneo.torneo_id == torneo_id,
+            StaffDeTorneo.usuario_id == usuario_id,
+        )
+        .delete(synchronize_session=False)
+    )
+    if not borradas:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Esa persona no es staff de este torneo.")
     db.commit()

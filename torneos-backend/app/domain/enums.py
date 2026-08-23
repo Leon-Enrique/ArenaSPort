@@ -87,3 +87,24 @@ class LadoLlave(StrEnum):
     ALTA = "alta"  # winners bracket
     BAJA = "baja"  # losers bracket
     GRAN_FINAL = "gran_final"
+
+
+class RolStaff(StrEnum):
+    """Rol de alguien que ayuda a correr UN torneo puntual.
+
+    Distinto de `Usuario.es_organizador`, que es global y da acceso a todo.
+    Acá el alcance es un torneo: se le puede dar una mano a alguien en la
+    Copa de marzo sin que quede administrando el resto de la plataforma.
+
+    ADMINISTRADOR opera el torneo completo: aprueba inscripciones, siembra,
+    sortea, programa, resuelve disputas. Lo que NO puede es borrar el torneo
+    ni tocar quién más es staff — eso queda para el organizador global, así
+    delegar nunca implica perder el control de lo delegado.
+
+    ARBITRO es el día de partido: programar, abrir check-in, resolver
+    disputas, corregir resultados. No toca inscripciones ni sorteo, que son
+    las decisiones de armado del torneo.
+    """
+
+    ADMINISTRADOR = "administrador"
+    ARBITRO = "arbitro"
