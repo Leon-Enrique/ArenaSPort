@@ -122,8 +122,19 @@ def crear_edicion(datos: EdicionCreate, db: DbSession, _organizador: RequiereOrg
     torneo = db.get(Torneo, datos.torneo_id)
     if not torneo:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "El torneo no existe.")
-    if not db.get(Juego, datos.juego_id):
+
+    juego = db.get(Juego, datos.juego_id)
+    if not juego:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "El juego no existe.")
+    if not juego.esta_activo:
+        # Que no aparezca en el selector no alcanza: el id sigue existiendo y
+        # se puede mandar a mano. Sin este chequeo, un juego pausado —los de
+        # battle royale, que el motor todavía no sabe correr— se podía usar
+        # igual y el problema aparecía recién al querer cargar un resultado.
+        raise HTTPException(
+            422,
+            f"El juego '{juego.nombre}' no está disponible en este momento.",
+        )
 
     if (
         db.query(Edicion)
