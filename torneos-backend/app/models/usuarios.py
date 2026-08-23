@@ -26,7 +26,14 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    discord_id: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    # 40 no alcanzaba. Un ID real de Discord entra de sobra (son ~18
+    # dígitos), pero las cuentas locales guardan acá un valor sintético
+    # "local:<email>" (ver auth.py), y con un email de 35 caracteres eso ya
+    # se pasa. SQLite ignora el largo de un VARCHAR, así que en desarrollo
+    # entraba igual y el problema solo iba a aparecer en Postgres — o sea
+    # recién en producción, con un usuario real que no puede registrarse.
+    # 320 = 254 del máximo de un email por RFC, más el prefijo y margen.
+    discord_id: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     discord_username: Mapped[str] = mapped_column(String(120))
     discord_avatar_url: Mapped[str | None] = mapped_column(String(500))
 

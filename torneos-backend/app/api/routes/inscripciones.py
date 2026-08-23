@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession, RequiereOrganizador, UsuarioOpcional
 from app.core import notificaciones
-from app.domain.enums import EstadoInscripcion
+from app.domain.enums import ESTADOS_QUE_OCUPAN_CUPO, EstadoInscripcion
 from app.domain.roster import (
     ConfigJuego,
     ErrorRoster,
@@ -23,6 +23,23 @@ from app.schemas.inscripciones import (
 )
 
 router = APIRouter(prefix="/ediciones/{edicion_id}/inscripciones", tags=["inscripciones"])
+
+
+def sincronizar_cupo_de_elegibilidad(inscripcion: Inscripcion) -> None:
+    """Pone al día el flag `ocupa_cupo` de los jugadores según el estado de
+    su inscripción.
+
+    `Jugador.ocupa_cupo` es un derivado de `Inscripcion.estado` (ver
+    ESTADOS_QUE_OCUPAN_CUPO), desnormalizado porque el índice único parcial
+    que hace cumplir la elegibilidad no puede consultar otra tabla.
+
+    Hay que llamarla desde CUALQUIER lugar que cambie el estado de una
+    inscripción. Si se agrega uno nuevo y se olvida, el síntoma es silencioso
+    y feo: un jugador queda bloqueado —o liberado— sin motivo visible.
+    """
+    ocupa = inscripcion.estado in ESTADOS_QUE_OCUPAN_CUPO
+    for jugador in inscripcion.jugadores:
+        jugador.ocupa_cupo = ocupa
 
 
 def _obtener_edicion(db: DbSession, edicion_id: int) -> Edicion:
@@ -69,7 +86,12 @@ def _normalizar_y_validar_roster(
 
     claves = [j.clave_identidad for j in resultado.jugadores]
     query = select(Jugador).where(
-        Jugador.edicion_id == edicion_id, Jugador.clave_identidad.in_(claves)
+        Jugador.edicion_id == edicion_id,
+        Jugador.clave_identidad.in_(claves),
+        # Solo cuentan los que siguen ocupando cupo. Sin este filtro, rechazar
+        # un equipo dejaba a sus cinco jugadores sin poder entrar en ningún
+        # otro para el resto de la edición — atados a una inscripción muerta.
+        Jugador.ocupa_cupo.is_(True),
     )
     if excluir_inscripcion_id is not None:
         query = query.where(Jugador.inscripcion_id != excluir_inscripcion_id)
@@ -413,6 +435,11 @@ def editar_inscripcion(
         inscripcion.estado = EstadoInscripcion.PENDIENTE
         inscripcion.revisada_at = None
 
+    # El roster se reemplazó entero unas líneas arriba: los jugadores nuevos
+    # nacen con el default y hay que dejarlos acordes al estado real.
+    db.flush()
+    sincronizar_cupo_de_elegibilidad(inscripcion)
+
     db.commit()
     db.refresh(inscripcion)
 
@@ -492,6 +519,9 @@ def revisar_inscripcion(
     inscripcion.estado = datos.estado
     inscripcion.motivo_rechazo = datos.motivo_rechazo
     inscripcion.revisada_at = datetime.now().astimezone()
+    # Rechazar o retirar libera a sus jugadores para que puedan entrar en
+    # otro equipo; descalificar los mantiene bloqueados a propósito.
+    sincronizar_cupo_de_elegibilidad(inscripcion)
 
     edicion = _obtener_edicion(db, edicion_id)
     _notificar_revision(db, background_tasks, edicion, inscripcion, datos)

@@ -11,10 +11,12 @@ from sqlalchemy import (
     Boolean,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -110,8 +112,24 @@ class Jugador(Base):
 
     __tablename__ = "jugadores"
     __table_args__ = (
-        UniqueConstraint(
-            "edicion_id", "clave_identidad", name="uq_jugador_elegibilidad"
+        # Único PARCIAL: la regla es "un jugador en un solo equipo por
+        # edición", pero solo cuenta mientras su inscripción esté viva.
+        #
+        # Antes era un UNIQUE común y eso dejaba un agujero: al rechazar un
+        # equipo, sus cinco jugadores seguían ocupando cupo y no podían
+        # entrar en ningún otro, para siempre. El chequeo de la aplicación
+        # solo no alcanza — sin restricción en la base, dos inscripciones
+        # simultáneas del mismo jugador pasan las dos.
+        #
+        # La condición va sobre `ocupa_cupo` y no sobre el estado de la
+        # inscripción porque un índice no puede mirar otra tabla.
+        Index(
+            "uq_jugador_elegibilidad",
+            "edicion_id",
+            "clave_identidad",
+            unique=True,
+            sqlite_where=text("ocupa_cupo = 1"),
+            postgresql_where=text("ocupa_cupo"),
         ),
     )
 
@@ -131,12 +149,28 @@ class Jugador(Base):
     es_suplente: Mapped[bool] = mapped_column(Boolean, default=False)
     es_capitan: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Si este jugador bloquea el cupo de elegibilidad de la edición.
+    #
+    # Es un derivado del estado de la inscripción (ver
+    # ESTADOS_QUE_OCUPAN_CUPO): existe desnormalizado acá solo porque el
+    # índice único parcial de arriba no puede consultar otra tabla. La
+    # sincronización vive en `sincronizar_cupo_de_elegibilidad`
+    # (app/api/routes/inscripciones.py) y se llama desde los únicos tres
+    # lugares que cambian el estado de una inscripción.
+    ocupa_cupo: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="1", nullable=False
+    )
+
     # Vincula a este jugador con una cuenta de Discord real. Nulo mientras
     # el equipo se inscribe sin que nadie haya iniciado sesión todavía — se
     # completa cuando el capitán se loguea por primera vez y confirma que es
     # él. Sin esto, reportar/confirmar resultados no tiene con qué verificar
     # que quien llama es realmente el capitán de este equipo.
-    discord_id: Mapped[str | None] = mapped_column(String(40), index=True)
+    # Mismo largo que `Usuario.discord_id`: acá se guarda exactamente el
+    # mismo valor, incluido el sintético "local:<email>" de las cuentas
+    # locales. Si esta columna fuera más corta, vincular a un jugador con
+    # una cuenta local de email largo fallaría solo en Postgres.
+    discord_id: Mapped[str | None] = mapped_column(String(320), index=True)
 
     inscripcion: Mapped["Inscripcion"] = relationship(back_populates="jugadores")
 

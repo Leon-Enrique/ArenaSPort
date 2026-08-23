@@ -43,6 +43,25 @@ class EstadoInscripcion(StrEnum):
     DESCALIFICADA = "descalificada"
 
 
+# Estados en los que los jugadores de una inscripción siguen "ocupando" su
+# cupo de elegibilidad, o sea que no pueden aparecer en otro equipo de la
+# misma edición.
+#
+# RECHAZADA y RETIRADA quedan afuera: ese equipo no está compitiendo, así que
+# retener a su gente solo los deja sin poder jugar con nadie. Antes no se
+# distinguía y un rechazo dejaba a cinco jugadores bloqueados para toda la
+# edición.
+#
+# DESCALIFICADA sí bloquea, y es a propósito: si los jugadores de un equipo
+# descalificado pudieran reinscribirse con otro nombre, la sanción no
+# significaría nada.
+ESTADOS_QUE_OCUPAN_CUPO = frozenset({
+    EstadoInscripcion.PENDIENTE,
+    EstadoInscripcion.APROBADA,
+    EstadoInscripcion.DESCALIFICADA,
+})
+
+
 class EstadoFase(StrEnum):
     PENDIENTE = "pendiente"
     SORTEADA = "sorteada"
