@@ -56,6 +56,35 @@ def sincronizar_cupo_de_elegibilidad(inscripcion: Inscripcion) -> None:
         jugador.ocupa_cupo = ocupa
 
 
+def vincular_al_capitan(resultado, usuario) -> None:
+    """Deja la cuenta de quien inscribe pegada a la fila del capitán, y a
+    ninguna otra.
+
+    La regla es "el que registra el equipo es su capitán y su dueño", igual
+    que en Battlefy: quien crea el equipo queda de capitán y desde ahí puede
+    pasarle el rol a otro miembro si hace falta.
+
+    Antes esto lo decidía el cliente, que podía mandar un `discord_id` para
+    CUALQUIER jugador del roster. Dos problemas:
+
+      - El frontend le pegaba la cuenta de quien estaba logueado a la fila
+        que estuviera marcada como capitán, fuera quien fuera esa persona.
+        Si marcabas capitán a otro jugador, su fila quedaba con TU identidad:
+        vos reportabas en su nombre y él no podía hacer nada.
+      - Peor en general: cualquiera podía reclamar la cuenta de otro
+        escribiéndola en el formulario, y quedar habilitado a reportar
+        resultados por un equipo ajeno.
+
+    Ahora la cuenta no la elige el cliente: sale de la sesión. Sin sesión no
+    se vincula a nadie, y vincular a los demás jugadores sigue siendo tarea
+    del organizador (`vincular-discord`), que es el camino auditado.
+    """
+    for jugador in resultado.jugadores:
+        jugador.discord_id = (
+            usuario.discord_id if (usuario is not None and jugador.es_capitan) else None
+        )
+
+
 def _obtener_edicion(db: DbSession, edicion_id: int) -> Edicion:
     edicion = db.get(Edicion, edicion_id)
     if not edicion:
@@ -281,6 +310,7 @@ def inscribir_equipo(
     resultado = _normalizar_y_validar_roster(
         db, edicion_id, edicion.juego, datos.jugadores, datos.capitan_declarado
     )
+    vincular_al_capitan(resultado, usuario)
 
     nombre_normalizado = datos.nombre_equipo.strip()
     duplicado = (
@@ -409,6 +439,9 @@ def editar_inscripcion(
         datos.capitan_declarado,
         excluir_inscripcion_id=inscripcion_id,
     )
+    # Al reemplazar el roster vale la misma regla: la cuenta sale de la
+    # sesión de quien edita, no de lo que mande el cliente.
+    vincular_al_capitan(resultado, usuario)
 
     nombre_normalizado = datos.nombre_equipo.strip()
     duplicado = (
@@ -776,3 +809,53 @@ def historial_de_cambios(
         .order_by(CambioDeRoster.created_at)
         .all()
     )
+
+
+@router.post("/{inscripcion_id}/transferir-capitania", response_model=InscripcionRead)
+def transferir_capitania(
+    edicion_id: int,
+    inscripcion_id: int,
+    jugador_id: int,
+    db: DbSession,
+    usuario: CurrentUser,
+) -> Inscripcion:
+    """Le pasa la capitanía a otro jugador del mismo equipo.
+
+    Es el equivalente al ícono de estrella de Battlefy: el capitán entrega el
+    rol a otro miembro. Sin esto el modelo queda rígido — si el capitán deja
+    el equipo o simplemente no puede seguir, no habría forma de que otro
+    reporte resultados, y despues del sorteo editar el roster está bloqueado.
+
+    Lo puede hacer el capitán actual (entrega su propio rol) o el organizador
+    (destraba el caso en que el capitán desapareció). Un jugador cualquiera
+    no puede autoproclamarse.
+
+    El jugador que recibe la capitanía queda SIN cuenta vinculada: el rol
+    cambia de fila, pero la identidad de la persona no se puede adivinar. Que
+    él vincule la suya es un paso aparte, del organizador
+    (`vincular-discord`), que es el camino auditado.
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    _verificar_capitan_de_inscripcion(db, usuario, inscripcion)
+
+    nuevo = next((j for j in inscripcion.jugadores if j.id == jugador_id), None)
+    if nuevo is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, "Ese jugador no es de este equipo."
+        )
+    if nuevo.es_capitan:
+        raise HTTPException(422, "Ese jugador ya es el capitán.")
+
+    for jugador in inscripcion.jugadores:
+        jugador.es_capitan = jugador.id == jugador_id
+        if jugador.id == jugador_id:
+            # El rol se muda; la cuenta no. Nadie puede afirmar de quién es
+            # la cuenta del nuevo capitán sin que él lo confirme.
+            jugador.discord_id = None
+
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion

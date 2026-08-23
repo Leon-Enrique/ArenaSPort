@@ -178,11 +178,14 @@ export default function InscribirseTorneoPage() {
         contacto_whatsapp: whatsapp.trim() || undefined,
         contacto_discord: discordTag.trim() || undefined,
         capitan_declarado: contactoNombre.trim() || undefined,
+        // Sin `discord_id`: el backend vincula la cuenta de quien inscribe a
+        // la fila del capitán y a ninguna otra. Antes se mandaba desde acá y
+        // le pegaba TU cuenta a quien estuviera marcado capitán, fuera quien
+        // fuera — vos reportabas en su nombre y él no podía hacer nada.
         jugadores: jugadores.map(j => ({
           identidad: j.identidad,
           es_suplente: j.esSuplente,
           es_capitan: j.esCapitan,
-          discord_id: (j.esCapitan && usuario) ? usuario.discordId : undefined,
         })),
       });
       setResultado(data);
@@ -381,8 +384,13 @@ export default function InscribirseTorneoPage() {
                         <span className="font-bold text-white flex items-center gap-1.5">
                           {jugador.esSuplente ? 'Suplente' : 'Titular'} #{idx + 1}
                           {jugador.esCapitan && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold text-[9px] uppercase flex items-center gap-1">
-                              <Crown size={9} /> Capitán
+                            <span
+                              title={usuario
+                                ? 'Esta fila queda asociada a tu cuenta: vas a ser vos quien reporte los resultados de este equipo.'
+                                : 'Sin iniciar sesión, nadie queda habilitado para reportar resultados.'}
+                              className="px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-bold text-[9px] uppercase flex items-center gap-1"
+                            >
+                              <Crown size={9} /> Capitán{usuario ? ' (vos)' : ''}
                             </span>
                           )}
                         </span>

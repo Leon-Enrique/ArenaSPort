@@ -32,13 +32,24 @@ class Equipo(Base):
     Battlefy (Team vs Tournament Roster) y Toornament: el equipo se conserva,
     el plantel se arma de nuevo en cada edición.
 
-    `propietario_usuario_id` es quién lo administra. Nulo a propósito en dos
-    casos que siguen existiendo: los equipos creados por una inscripción
-    anónima (la plataforma deja anotarse sin cuenta, y esa es una ventaja
-    para torneos de base que no queremos perder) y los 53 equipos que ya
+    `propietario_usuario_id` es quién lo administra: inscribirlo en torneos
+    nuevos, renombrarlo, verlo en "mis equipos".
+
+    Quien registra el equipo queda de dueño Y de capitán de esa inscripción,
+    como en Battlefy. No son lo mismo —el dueño administra el equipo entre
+    torneos, el capitán opera dentro de uno— pero arrancan siendo la misma
+    persona a propósito. Antes no había nada que los conectara y se podía
+    terminar con un equipo cuyo dueño no puede reportar resultados, o con un
+    capitán que no puede reinscribirlo. Ver `vincular_al_capitan` en
+    app/api/routes/inscripciones.py, y `transferir-capitania` para pasarle el
+    rol a otro jugador.
+
+    Nulo a propósito en dos casos que siguen existiendo: los equipos creados
+    por una inscripción anónima (la plataforma deja anotarse sin cuenta, y esa
+    es una ventaja para torneos de base que no queremos perder) y los que ya
     estaban antes de que esto existiera. Sin dueño, el equipo funciona igual
-    dentro de su torneo — lo único que no puede es reutilizarse en el
-    siguiente, porque nadie puede demostrar que le pertenece.
+    dentro de su torneo — lo que no puede es reutilizarse en el siguiente,
+    porque nadie puede demostrar que le pertenece.
     """
 
     __tablename__ = "equipos"

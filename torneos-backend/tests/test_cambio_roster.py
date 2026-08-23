@@ -84,13 +84,11 @@ def auth(u: Usuario) -> dict[str, str]:
     return {"Authorization": f"Bearer {crear_access_token(u.id, u.discord_id, u.es_organizador)}"}
 
 
-def roster(*nicks, discord_capitan=None):
+def roster(*nicks):
+    """El primero es el capitán. Ya no se manda `discord_id`: la cuenta la
+    toma el backend de la sesión de quien inscribe."""
     return [
-        {
-            "identidad": {"nick": n, "id_juego": f"id-{n}"},
-            "es_capitan": i == 0,
-            **({"discord_id": discord_capitan} if i == 0 and discord_capitan else {}),
-        }
+        {"identidad": {"nick": n, "id_juego": f"id-{n}"}, "es_capitan": i == 0}
         for i, n in enumerate(nicks)
     ]
 
@@ -98,12 +96,12 @@ def roster(*nicks, discord_capitan=None):
 def inscribir_y_sortear(cliente, db, escenario, nicks=("ana", "beto")):
     """Inscribe, aprueba y crea una partida: deja el plantel congelado."""
     ed = escenario["edicion"]
+    # Inscribe el propio capitán, logueado: así queda dueño del equipo Y
+    # capitán de la inscripción, que es la regla nueva.
     creada = cliente.post(
         f"/api/ediciones/{ed.id}/inscripciones",
-        json={
-            "nombre_equipo": "Dragons",
-            "jugadores": roster(*nicks, discord_capitan=escenario["capitan"].discord_id),
-        },
+        json={"nombre_equipo": "Dragons", "jugadores": roster(*nicks)},
+        headers=auth(escenario["capitan"]),
     )
     assert creada.status_code == 201, creada.text
     insc_id = creada.json()["inscripcion"]["id"]
@@ -129,10 +127,7 @@ def inscribir_y_sortear(cliente, db, escenario, nicks=("ana", "beto")):
 def editar(cliente, escenario, insc_id, nicks, quien):
     return cliente.patch(
         f"/api/ediciones/{escenario['edicion'].id}/inscripciones/{insc_id}",
-        json={
-            "nombre_equipo": "Dragons",
-            "jugadores": roster(*nicks, discord_capitan=escenario["capitan"].discord_id),
-        },
+        json={"nombre_equipo": "Dragons", "jugadores": roster(*nicks)},
         headers=auth(quien),
     )
 
@@ -270,10 +265,8 @@ class TestAntesDelSorteo:
         ed = escenario["edicion"]
         creada = cliente.post(
             f"/api/ediciones/{ed.id}/inscripciones",
-            json={
-                "nombre_equipo": "Dragons",
-                "jugadores": roster("ana", "beto", discord_capitan=escenario["capitan"].discord_id),
-            },
+            json={"nombre_equipo": "Dragons", "jugadores": roster("ana", "beto")},
+            headers=auth(escenario["capitan"]),
         )
         insc_id = creada.json()["inscripcion"]["id"]
 
