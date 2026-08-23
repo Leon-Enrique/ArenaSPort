@@ -673,13 +673,29 @@ def sembrar_automatico(
     if len(aprobadas) < 2:
         raise HTTPException(422, "Hacen falta al menos 2 equipos aprobados para sembrar.")
 
+    # Si hay puntos de siembra cargados, se ordena por eso: el de más puntos
+    # queda seed 1. Sembrar al azar con equipos de nivel muy dispar hace que
+    # los dos mejores puedan cruzarse en primera ronda, que es justo lo que
+    # la siembra existe para evitar.
+    #
+    # El azar se conserva DENTRO de cada valor de puntos: dos equipos
+    # empatados no se ordenan por id, que sería sembrar por antigüedad de
+    # inscripción sin decirlo. Sigue siendo reproducible con la semilla.
     semilla_usada = semilla if semilla is not None else int.from_bytes(os.urandom(4), "big")
     rng = random.Random(semilla_usada)
-    orden = list(range(len(aprobadas)))
-    rng.shuffle(orden)
 
-    for numero_seed, idx in enumerate(orden, start=1):
-        aprobadas[idx].seed = numero_seed
+    if any(i.puntos_siembra is not None for i in aprobadas):
+        mezcladas = list(aprobadas)
+        rng.shuffle(mezcladas)
+        for numero_seed, inscripcion in enumerate(
+            sorted(mezcladas, key=lambda i: -(i.puntos_siembra or 0)), start=1
+        ):
+            inscripcion.seed = numero_seed
+    else:
+        orden = list(range(len(aprobadas)))
+        rng.shuffle(orden)
+        for numero_seed, idx in enumerate(orden, start=1):
+            aprobadas[idx].seed = numero_seed
 
     db.commit()
     for i in aprobadas:

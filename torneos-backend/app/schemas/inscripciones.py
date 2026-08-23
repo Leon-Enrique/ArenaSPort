@@ -47,6 +47,7 @@ class EdicionRead(BaseModel):
     requiere_equipo_permanente: bool
     checkin_abre_at: datetime | None = None
     checkin_cierra_at: datetime | None = None
+    solo_organizador_reporta: bool = False
     equipos_aprobados: int = 0
 
 
@@ -63,6 +64,7 @@ class EdicionUpdate(BaseModel):
     discord_webhook_url: str | None = Field(default=None, max_length=500)
     requiere_aprobacion: bool | None = None
     requiere_equipo_permanente: bool | None = None
+    solo_organizador_reporta: bool | None = None
 
     @field_validator("fecha_inicio")
     @classmethod
@@ -183,6 +185,7 @@ class InscripcionRead(BaseModel):
     edicion_id: int
     estado: EstadoInscripcion
     seed: int | None
+    puntos_siembra: int | None = None
     checkin_at: datetime | None = None
     created_at: datetime
     equipo: EquipoRead

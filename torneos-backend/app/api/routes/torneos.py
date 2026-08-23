@@ -7,7 +7,17 @@ from slugify import slugify
 from app.api.deps import DbSession, RequiereOrganizador
 from app.core import notificaciones
 from app.domain.enums import EstadoEdicion, EstadoInscripcion, EstadoPartida
-from app.models import Edicion, Fase, Inscripcion, Jugador, Juego, Partida, ParticipacionEnPartida, Torneo
+from app.models import (
+    CambioDeRoster,
+    Edicion,
+    Fase,
+    Inscripcion,
+    Jugador,
+    Juego,
+    Partida,
+    ParticipacionEnPartida,
+    Torneo,
+)
 from app.schemas.fases import FaseRead, InfoJuegoResumen, PartidaResumen, ResumenEdicionOut
 from app.schemas.inscripciones import (
     EdicionCreate,
@@ -377,3 +387,73 @@ def obtener_resumen(edicion_id: int, db: DbSession) -> ResumenEdicionOut:
             _partida_a_resumen(p, fase_por_id[p.fase_id].nombre) for p in proximas[:6]
         ],
     )
+
+
+@router_ediciones.delete("/{edicion_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_edicion(
+    edicion_id: int, db: DbSession, _organizador: RequiereOrganizador
+) -> None:
+    """Borra una edición: sus fases, partidas, inscripciones y jugadores.
+
+    Antes solo se podía borrar el torneo ENTERO, lo que no servía para el
+    caso normal: una edición creada por error dentro de un torneo que sí
+    querés conservar. Había que tocar la base a mano.
+
+    Mismo criterio que borrar un torneo: solo si NINGUNA partida tuvo
+    actividad real (nada más que `programada` o `bye`). Una edición con
+    check-ins, reportes o resultados es historia y no se tira desde un
+    endpoint — eso lo revisa un organizador a mano.
+
+    Los `Equipo` NO se borran: son entidades permanentes que pueden estar en
+    otros torneos y tienen su propio historial.
+    """
+    edicion = db.get(Edicion, edicion_id)
+    if not edicion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
+
+    fase_ids = [f.id for f in db.query(Fase.id).filter(Fase.edicion_id == edicion_id)]
+
+    if fase_ids:
+        tocadas = (
+            db.query(Partida)
+            .filter(
+                Partida.fase_id.in_(fase_ids),
+                Partida.estado.notin_([EstadoPartida.PROGRAMADA, EstadoPartida.BYE]),
+            )
+            .count()
+        )
+        if tocadas:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"Esta edición tiene {tocadas} partida(s) con actividad real "
+                "(check-in, reporte o resultado) — no se puede borrar desde acá.",
+            )
+
+        partida_ids = [
+            p.id for p in db.query(Partida.id).filter(Partida.fase_id.in_(fase_ids))
+        ]
+        if partida_ids:
+            db.query(ParticipacionEnPartida).filter(
+                ParticipacionEnPartida.partida_id.in_(partida_ids)
+            ).delete(synchronize_session=False)
+            db.query(Partida).filter(Partida.id.in_(partida_ids)).delete(
+                synchronize_session=False
+            )
+        db.query(Fase).filter(Fase.id.in_(fase_ids)).delete(synchronize_session=False)
+
+    inscripcion_ids = [
+        i.id for i in db.query(Inscripcion.id).filter(Inscripcion.edicion_id == edicion_id)
+    ]
+    if inscripcion_ids:
+        db.query(CambioDeRoster).filter(
+            CambioDeRoster.inscripcion_id.in_(inscripcion_ids)
+        ).delete(synchronize_session=False)
+
+    db.query(Jugador).filter(Jugador.edicion_id == edicion_id).delete(
+        synchronize_session=False
+    )
+    db.query(Inscripcion).filter(Inscripcion.edicion_id == edicion_id).delete(
+        synchronize_session=False
+    )
+    db.delete(edicion)
+    db.commit()

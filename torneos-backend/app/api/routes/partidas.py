@@ -643,8 +643,15 @@ def reportar_resultado(
 ) -> ReporteResultado:
     """Un capitán reporta cómo terminó la partida. Queda pendiente hasta que
     el rival confirme o impugne — nunca se aplica de una."""
-    _verificar_capitan_del_equipo(db, usuario, datos.equipo_id)
     partida = _obtener_partida(db, fase_id, partida_id)
+
+    fase = _obtener_fase(db, fase_id)
+    if fase.edicion.solo_organizador_reporta and not usuario.es_organizador:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "En este torneo los resultados los carga el organizador.",
+        )
+    _verificar_capitan_del_equipo(db, usuario, datos.equipo_id)
 
     if partida.estado != EstadoPartida.EN_CURSO:
         raise HTTPException(

@@ -93,6 +93,15 @@ class Inscripcion(Base):
     motivo_rechazo: Mapped[str | None] = mapped_column(Text)
     seed: Mapped[int | None] = mapped_column(Integer)  # siembra para el sorteo
 
+    # Puntos del equipo para ordenar la siembra: ranking previo, resultados
+    # de temporadas pasadas, lo que el organizador decida. Battlefy los llama
+    # "participant points" y sirven para lo mismo.
+    #
+    # Sin esto la siembra era o aleatoria o número por número a mano. Con 8
+    # equipos da igual; con 32 de nivel muy dispar, sembrar al azar hace que
+    # los dos mejores puedan cruzarse en primera ronda.
+    puntos_siembra: Mapped[int | None] = mapped_column(Integer)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTimeUTC, default=lambda: datetime.now().astimezone()
     )

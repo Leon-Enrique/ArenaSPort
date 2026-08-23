@@ -105,6 +105,17 @@ class Edicion(Base):
     checkin_abre_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
     checkin_cierra_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
 
+    # Si está en True, el resultado de una partida solo lo carga el
+    # organizador. En False —el default— lo reporta un capitán y el rival
+    # confirma, que reparte el trabajo y deja rastro de los dos lados.
+    #
+    # Battlefy ofrece la misma opción. Sirve para torneos presenciales o con
+    # árbitro en cada mesa, donde hacer que los equipos reporten solo agrega
+    # pasos.
+    solo_organizador_reporta: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0"
+    )
+
     # Si está en True, para inscribirse hay que elegir un equipo permanente
     # ya existente (y por lo tanto tener cuenta). En False —el default— se
     # puede seguir anotando un equipo suelto sin loguearse.
