@@ -29,7 +29,13 @@ def sortear_fase(db: Session, fase: Fase, equipos_ordenados: list[int]) -> list[
     `equipos_ordenados`: ids de equipo en el orden de siembra correspondiente.
     """
     if fase.formato == FormatoFase.ELIMINACION_SIMPLE:
-        return _persistir_llave(db, fase, eliminacion_simple.generar(equipos_ordenados))
+        # `tercer_puesto` en la config de la fase agrega el cruce entre los
+        # perdedores de semifinales. La eliminación doble no lo necesita: ahí
+        # el tercer puesto sale de la llave baja.
+        con_tercero = bool((fase.config or {}).get("tercer_puesto"))
+        return _persistir_llave(
+            db, fase, eliminacion_simple.generar(equipos_ordenados, con_tercero)
+        )
 
     if fase.formato == FormatoFase.ELIMINACION_DOBLE:
         return _persistir_llave(db, fase, eliminacion_doble.generar(equipos_ordenados))

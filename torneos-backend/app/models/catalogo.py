@@ -92,6 +92,19 @@ class Edicion(Base):
     reglamento_url: Mapped[str | None] = mapped_column(String(500))
     version_reglamento: Mapped[str | None] = mapped_column(String(40))
 
+    # Check-in DEL TORNEO: la confirmación de asistencia que se pide antes de
+    # sortear, distinta del check-in de cada partida (que vive en `Partida`).
+    #
+    # Sirve para depurar equipos fantasma: entre que un equipo se inscribe y
+    # que arranca el torneo pasan días, y siempre hay algunos que no aparecen.
+    # Sortear con ellos deja llaves llenas de walkovers desde la primera
+    # ronda, que es la forma más rápida de arruinar un cuadro.
+    #
+    # Ambos nulos = este torneo no pide check-in y el sorteo toma a todos los
+    # aprobados, como siempre.
+    checkin_abre_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
+    checkin_cierra_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
+
     # Si está en True, para inscribirse hay que elegir un equipo permanente
     # ya existente (y por lo tanto tener cuenta). En False —el default— se
     # puede seguir anotando un equipo suelto sin loguearse.

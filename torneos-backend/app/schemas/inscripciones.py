@@ -45,6 +45,8 @@ class EdicionRead(BaseModel):
     discord_webhook_url: str | None
     requiere_aprobacion: bool
     requiere_equipo_permanente: bool
+    checkin_abre_at: datetime | None = None
+    checkin_cierra_at: datetime | None = None
     equipos_aprobados: int = 0
 
 
@@ -181,6 +183,7 @@ class InscripcionRead(BaseModel):
     edicion_id: int
     estado: EstadoInscripcion
     seed: int | None
+    checkin_at: datetime | None = None
     created_at: datetime
     equipo: EquipoRead
     jugadores: list[JugadorRead]

@@ -98,6 +98,11 @@ class Inscripcion(Base):
     )
     revisada_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
 
+    # Cuándo confirmó asistencia al torneo (ver `Edicion.checkin_abre_at`).
+    # Nulo mientras no confirmó: si la edición pide check-in, este equipo
+    # queda afuera del sorteo.
+    checkin_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
+
     # Ventana en la que el organizador autoriza a este equipo a tocar su
     # plantel aunque el torneo ya haya arrancado.
     #

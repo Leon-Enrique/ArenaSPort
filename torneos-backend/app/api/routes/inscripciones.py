@@ -859,3 +859,53 @@ def transferir_capitania(
     db.commit()
     db.refresh(inscripcion)
     return inscripcion
+
+
+@router.post("/{inscripcion_id}/checkin", response_model=InscripcionRead)
+def checkin_de_torneo(
+    edicion_id: int, inscripcion_id: int, db: DbSession, usuario: CurrentUser
+) -> Inscripcion:
+    """El equipo confirma que va a estar en el torneo.
+
+    Es el check-in DEL TORNEO, distinto del de cada partida: se hace una vez,
+    antes del sorteo. Sirve para depurar equipos fantasma — entre inscribirse
+    y arrancar pasan días y siempre hay algunos que no aparecen. Sortear con
+    ellos deja el cuadro lleno de walkovers desde la primera ronda.
+
+    Lo hace el capitán (o el organizador en su nombre, para el equipo que
+    avisó por otro lado).
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    _verificar_capitan_de_inscripcion(db, usuario, inscripcion)
+
+    edicion = _obtener_edicion(db, edicion_id)
+    if edicion.checkin_abre_at is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Este torneo no pide check-in."
+        )
+
+    ahora = _ahora()
+    if ahora < edicion.checkin_abre_at:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"El check-in abre el {edicion.checkin_abre_at:%d/%m a las %H:%M}.",
+        )
+    if edicion.checkin_cierra_at and ahora > edicion.checkin_cierra_at:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "El check-in ya cerró. Hablá con el organizador.",
+        )
+
+    if inscripcion.estado != EstadoInscripcion.APROBADA:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Solo puede hacer check-in un equipo aprobado (está '{inscripcion.estado}').",
+        )
+
+    inscripcion.checkin_at = ahora
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion

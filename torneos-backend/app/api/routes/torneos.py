@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from slugify import slugify
@@ -252,6 +254,38 @@ def probar_webhook(
         raise HTTPException(422, str(e)) from e
 
     return ResultadoPruebaWebhook(mensaje="Mensaje enviado. Revisá el canal de Discord.")
+
+
+@router_ediciones.post("/{edicion_id}/abrir-checkin", response_model=EdicionRead)
+def abrir_checkin_de_torneo(
+    edicion_id: int,
+    db: DbSession,
+    _organizador: RequiereOrganizador,
+    horas: int = 24,
+) -> Edicion:
+    """Abre la ventana de check-in del torneo.
+
+    Distinto del check-in de cada partida: este se hace una vez, antes del
+    sorteo, y sirve para saber quién va a estar de verdad. Los equipos que no
+    confirmen quedan afuera del sorteo — ver `sortear_fase`.
+
+    Es lo que evita el problema más común de un torneo abierto: la mitad de
+    los inscritos no aparece, y el cuadro queda lleno de walkovers desde la
+    primera ronda.
+    """
+    edicion = db.get(Edicion, edicion_id)
+    if not edicion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La edición no existe.")
+    if horas < 1 or horas > 336:
+        raise HTTPException(422, "La ventana tiene que estar entre 1 hora y 14 días.")
+
+    ahora = datetime.now().astimezone()
+    edicion.checkin_abre_at = ahora
+    edicion.checkin_cierra_at = ahora + timedelta(hours=horas)
+    db.commit()
+    db.refresh(edicion)
+    edicion.equipos_aprobados = _contar_equipos_aprobados(db, edicion_id)
+    return edicion
 
 
 @router_ediciones.post("/{edicion_id}/estado", response_model=EdicionRead)

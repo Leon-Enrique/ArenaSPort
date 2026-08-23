@@ -32,7 +32,9 @@ def siguiente_potencia_de_dos(n: int) -> int:
     return tamano
 
 
-def generar(equipos_seed: list[int]) -> ResultadoGeneracion:
+def generar(
+    equipos_seed: list[int], con_tercer_puesto: bool = False
+) -> ResultadoGeneracion:
     """equipos_seed: ids de equipo en orden de siembra (mejor a peor).
 
     Devuelve la llave completa. Los cruces de ronda 1 que enfrentan a un
@@ -102,4 +104,29 @@ def generar(equipos_seed: list[int]) -> ResultadoGeneracion:
         ronda += 1
 
     total_rondas = ronda - 1
+
+    # Partido por el tercer puesto: lo juegan los PERDEDORES de las dos
+    # semifinales. Es la única partida de una llave simple que se alimenta de
+    # perdedores, y por eso necesita `PERDEDOR_DE` — el mismo mecanismo que
+    # usa la llave baja de eliminación doble.
+    #
+    # Va en la misma ronda que la final a propósito: se juega el mismo día y
+    # ordenarlo después la dejaría "más lejos" que la final en cualquier
+    # vista que ordene por ronda.
+    #
+    # Con menos de 4 equipos no hay semifinales de las que sacar perdedores,
+    # así que simplemente no se crea.
+    if con_tercer_puesto and total_rondas >= 2:
+        semifinales = [c for c in cruces if c.ronda == total_rondas - 1]
+        if len(semifinales) == 2:
+            cruces.append(
+                Cruce(
+                    indice=indice,
+                    lado="unica",
+                    ronda=total_rondas,
+                    fuente_a=Fuente(TipoFuente.PERDEDOR_DE, semifinales[0].indice),
+                    fuente_b=Fuente(TipoFuente.PERDEDOR_DE, semifinales[1].indice),
+                )
+            )
+
     return ResultadoGeneracion(cruces=cruces, total_rondas=total_rondas)

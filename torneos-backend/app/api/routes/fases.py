@@ -86,6 +86,21 @@ def sortear_fase(edicion_id: int, fase_id: int, db: DbSession, _organizador: Req
         )
         .all()
     )
+
+    # Si el torneo pidió check-in, solo entran al sorteo los que confirmaron.
+    # Es el punto de tener check-in: sortear con equipos que no van a
+    # aparecer deja el cuadro lleno de walkovers desde la primera ronda.
+    edicion = db.get(Edicion, edicion_id)
+    if edicion is not None and edicion.checkin_abre_at is not None:
+        confirmadas = [i for i in aprobadas if i.checkin_at is not None]
+        if len(confirmadas) < 2:
+            raise HTTPException(
+                422,
+                f"Solo {len(confirmadas)} de {len(aprobadas)} equipos hicieron "
+                "check-in. Hacen falta al menos 2 para sortear.",
+            )
+        aprobadas = confirmadas
+
     if len(aprobadas) < 2:
         raise HTTPException(422, "Hacen falta al menos 2 equipos aprobados.")
 
