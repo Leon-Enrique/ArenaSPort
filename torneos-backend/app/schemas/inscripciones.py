@@ -196,3 +196,44 @@ class InscripcionCreada(BaseModel):
 class RevisionInscripcion(BaseModel):
     estado: EstadoInscripcion
     motivo_rechazo: str | None = None
+
+
+class PermitirCambioRoster(BaseModel):
+    """El organizador habilita a un equipo a tocar su plantel con el torneo
+    ya empezado."""
+
+    motivo: str = Field(
+        min_length=3,
+        description=(
+            "Por qué se autoriza. Queda registrado junto al cambio: es lo que "
+            "permite defender la decisión si alguien la cuestiona después."
+        ),
+    )
+    horas: int = Field(
+        default=24,
+        ge=1,
+        le=168,
+        description=(
+            "Cuánto dura el permiso. Acotado a propósito: un permiso abierto "
+            "para siempre es lo mismo que no tener el bloqueo."
+        ),
+    )
+
+
+class PermisoCambioRosterOut(BaseModel):
+    inscripcion_id: int
+    cambio_roster_hasta: datetime
+    motivo: str
+
+
+class CambioDeRosterRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    inscripcion_id: int
+    entraron: str | None
+    salieron: str | None
+    motivo_autorizacion: str | None
+    autorizado_por_usuario_id: int | None
+    aplicado_por_usuario_id: int | None
+    created_at: datetime

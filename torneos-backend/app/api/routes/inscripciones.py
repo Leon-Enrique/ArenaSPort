@@ -1,6 +1,6 @@
 import os
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from sqlalchemy import select
@@ -14,15 +14,29 @@ from app.domain.roster import (
     JugadorEntrada,
     normalizar_roster,
 )
-from app.models import Edicion, Equipo, Inscripcion, Jugador, ParticipacionEnPartida
+from app.models import (
+    CambioDeRoster,
+    Edicion,
+    Equipo,
+    Inscripcion,
+    Jugador,
+    ParticipacionEnPartida,
+)
 from app.schemas.inscripciones import (
+    CambioDeRosterRead,
     InscripcionCreada,
     InscripcionCreate,
     InscripcionRead,
+    PermisoCambioRosterOut,
+    PermitirCambioRoster,
     RevisionInscripcion,
 )
 
 router = APIRouter(prefix="/ediciones/{edicion_id}/inscripciones", tags=["inscripciones"])
+
+
+def _ahora() -> datetime:
+    return datetime.now().astimezone()
 
 
 def sincronizar_cupo_de_elegibilidad(inscripcion: Inscripcion) -> None:
@@ -364,13 +378,27 @@ def editar_inscripcion(
         .filter(ParticipacionEnPartida.equipo_id == inscripcion.equipo_id)
         .first()
     )
-    if ya_en_fase:
+    # Con el torneo ya sorteado el roster queda congelado, salvo que el
+    # organizador haya abierto una ventana para este equipo. Es el caso real
+    # de "se le rompió el celular al titular en cuartos": antes no había forma
+    # de resolverlo ni siquiera siendo organizador.
+    permiso_abierto = (
+        inscripcion.cambio_roster_hasta is not None
+        and _ahora() <= inscripcion.cambio_roster_hasta
+    )
+    if ya_en_fase and not permiso_abierto:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            "Este equipo ya fue colocado en una fase del torneo (tiene partidas "
-            "generadas) — a partir de acá, cualquier cambio lo tiene que hacer "
-            "el organizador directamente.",
+            "Este equipo ya fue colocado en una fase del torneo, así que su "
+            "plantel está congelado. Si hace falta un cambio, el organizador "
+            "puede habilitarlo con "
+            f"POST /ediciones/{edicion_id}/inscripciones/{inscripcion_id}"
+            "/permitir-cambio-roster.",
         )
+
+    # Los nicks de antes, para poder registrar qué cambió: unas líneas más
+    # abajo el roster se reemplaza entero y estos jugadores se borran.
+    nicks_previos = {j.nick for j in inscripcion.jugadores} if ya_en_fase else set()
 
     edicion = _obtener_edicion(db, edicion_id)
     resultado = _normalizar_y_validar_roster(
@@ -439,6 +467,28 @@ def editar_inscripcion(
     # nacen con el default y hay que dejarlos acordes al estado real.
     db.flush()
     sincronizar_cupo_de_elegibilidad(inscripcion)
+
+    if ya_en_fase:
+        # Cambio con el torneo en marcha: queda registrado. El permiso se
+        # consume acá — vale para UN cambio, no para toda la ventana, para
+        # que autorizar un reemplazo no habilite rehacer el plantel entero.
+        #
+        # Los nicks salen del roster normalizado y no de `inscripcion.jugadores`:
+        # el roster se reemplazó borrando y volviendo a crear filas, y la
+        # relación del ORM todavía no refleja eso.
+        nicks_nuevos = {
+            j.identidad.get("nick", "?") for j in resultado.jugadores
+        }
+        db.add(
+            CambioDeRoster(
+                inscripcion_id=inscripcion.id,
+                entraron=", ".join(sorted(nicks_nuevos - nicks_previos)) or None,
+                salieron=", ".join(sorted(nicks_previos - nicks_nuevos)) or None,
+                motivo_autorizacion=inscripcion.cambio_roster_motivo,
+                aplicado_por_usuario_id=usuario.id,
+            )
+        )
+        inscripcion.cambio_roster_hasta = None
 
     db.commit()
     db.refresh(inscripcion)
@@ -649,3 +699,80 @@ def vincular_discord(
     db.commit()
     db.refresh(inscripcion)
     return inscripcion
+
+
+@router.post(
+    "/{inscripcion_id}/permitir-cambio-roster",
+    response_model=PermisoCambioRosterOut,
+)
+def permitir_cambio_roster(
+    edicion_id: int,
+    inscripcion_id: int,
+    datos: PermitirCambioRoster,
+    db: DbSession,
+    usuario: RequiereOrganizador,
+) -> PermisoCambioRosterOut:
+    """Habilita a un equipo a tocar su plantel con el torneo ya empezado.
+
+    Existe por un caso concreto y muy común: a un titular se le rompe el
+    celular en cuartos y el equipo necesita meter a alguien. Antes eso no
+    tenía salida — el roster se congelaba al sortear y el bloqueo no tenía
+    excepción ni siquiera para el organizador; el mensaje de error mandaba a
+    hacerlo "directamente" y no existía ningún endpoint para eso.
+
+    Tres límites, para que la puerta no quede abierta:
+
+    - **Dura poco.** Como mucho una semana, 24 horas por defecto.
+    - **Vale para un solo cambio.** Se consume al usarlo, así que autorizar
+      un reemplazo no habilita rehacer el plantel entero.
+    - **Deja rastro.** Cada cambio guarda quién entró, quién salió, cuándo y
+      con qué motivo se autorizó. Cambiar un roster en cuartos es justo lo
+      que se discute después, y sin registro es tu palabra contra la de
+      ellos.
+
+    La elegibilidad se sigue aplicando: el jugador que entra no puede estar
+    en otro equipo de esta edición.
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    if inscripcion.estado not in (EstadoInscripcion.PENDIENTE, EstadoInscripcion.APROBADA):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Esta inscripción está '{inscripcion.estado}': no tiene sentido "
+            "habilitarle un cambio de plantel.",
+        )
+
+    inscripcion.cambio_roster_hasta = _ahora() + timedelta(hours=datos.horas)
+    inscripcion.cambio_roster_motivo = datos.motivo.strip()
+    db.commit()
+    db.refresh(inscripcion)
+
+    return PermisoCambioRosterOut(
+        inscripcion_id=inscripcion.id,
+        cambio_roster_hasta=inscripcion.cambio_roster_hasta,
+        motivo=inscripcion.cambio_roster_motivo,
+    )
+
+
+@router.get("/{inscripcion_id}/cambios-de-roster", response_model=list[CambioDeRosterRead])
+def historial_de_cambios(
+    edicion_id: int, inscripcion_id: int, db: DbSession
+) -> list[CambioDeRoster]:
+    """Los cambios de plantel hechos con el torneo ya empezado, en orden.
+
+    Público a propósito: la transparencia es el punto. Si un equipo cambió
+    su roster antes de la final, cualquiera tiene que poder verlo — es lo que
+    convierte una sospecha en un dato verificable.
+    """
+    inscripcion = db.get(Inscripcion, inscripcion_id)
+    if not inscripcion or inscripcion.edicion_id != edicion_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "La inscripción no existe.")
+
+    return (
+        db.query(CambioDeRoster)
+        .filter(CambioDeRoster.inscripcion_id == inscripcion_id)
+        .order_by(CambioDeRoster.created_at)
+        .all()
+    )

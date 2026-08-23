@@ -87,6 +87,19 @@ class Inscripcion(Base):
     )
     revisada_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
 
+    # Ventana en la que el organizador autoriza a este equipo a tocar su
+    # plantel aunque el torneo ya haya arrancado.
+    #
+    # Por defecto, apenas se sortea la fase el roster queda congelado: es lo
+    # correcto, porque cambiarlo a mitad de torneo es la vía para meter un
+    # jugador de refuerzo antes de la final. Pero el caso legítimo existe y
+    # es común —a alguien se le rompe el celular en cuartos— y antes no había
+    # forma de resolverlo: el bloqueo no tenía excepción ni siquiera para el
+    # organizador, y el mensaje de error mandaba a hacer "directamente" algo
+    # que ningún endpoint permitía.
+    cambio_roster_hasta: Mapped[datetime | None] = mapped_column(DateTimeUTC)
+    cambio_roster_motivo: Mapped[str | None] = mapped_column(Text)
+
     equipo: Mapped["Equipo"] = relationship(back_populates="inscripciones")
     jugadores: Mapped[list["Jugador"]] = relationship(
         back_populates="inscripcion",
@@ -101,6 +114,47 @@ class Inscripcion(Base):
     @property
     def suplentes(self) -> list["Jugador"]:
         return [j for j in self.jugadores if j.es_suplente]
+
+
+class CambioDeRoster(Base):
+    """Rastro de un cambio de plantel hecho con el torneo ya empezado.
+
+    No es burocracia: modificar un roster en cuartos es exactamente lo que
+    después se discute —"metieron un jugador de afuera para la final"— y sin
+    registro queda la palabra de uno contra la del otro. Guarda quién entró,
+    quién salió, cuándo, con qué motivo y quién lo autorizó.
+
+    Mismo espíritu que `ReporteResultado`: append-only, cada cambio es su
+    propia fila y nunca se pisa una anterior.
+
+    Solo se registran los cambios hechos DESPUÉS del sorteo. Editar el roster
+    mientras la inscripción está pendiente es parte normal de anotarse y no
+    necesita rastro.
+    """
+
+    __tablename__ = "cambios_de_roster"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    inscripcion_id: Mapped[int] = mapped_column(
+        ForeignKey("inscripciones.id"), index=True
+    )
+
+    # Nicks, no ids: los `Jugador` que salen se borran al reemplazar el
+    # roster, así que guardar su id dejaría una referencia a la nada.
+    entraron: Mapped[str | None] = mapped_column(Text)
+    salieron: Mapped[str | None] = mapped_column(Text)
+
+    motivo_autorizacion: Mapped[str | None] = mapped_column(Text)
+    autorizado_por_usuario_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id")
+    )
+    aplicado_por_usuario_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id")
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone(), index=True
+    )
 
 
 class Jugador(Base):

@@ -19,10 +19,11 @@ Create Date: 2026-08-21
 """
 from typing import Sequence, Union
 
-from alembic import context, op
+from alembic import op
 import sqlalchemy as sa
 
 import app.db.database  # necesario para el tipo DateTimeUTC usado abajo
+from app.db.migraciones import tabla_existe
 
 
 # revision identifiers, used by Alembic.
@@ -34,23 +35,9 @@ depends_on: Union[str, Sequence[str], None] = None
 TABLA = 'mensajes_partida'
 
 
-def _ya_existe() -> bool:
-    """Si la tabla ya está en la base.
-
-    En modo offline (`alembic upgrade --sql`, que genera el script sin
-    conectarse) no hay base que inspeccionar: la conexión es simulada y
-    `sa.inspect` levanta. Ahí se asume que NO existe, que es lo correcto —
-    un script SQL se genera para aplicar sobre una base limpia, no sobre la
-    de desarrollo que ya tenía la tabla por `create_all`.
-    """
-    if context.is_offline_mode():
-        return False
-    return TABLA in set(sa.inspect(op.get_bind()).get_table_names())
-
-
 def upgrade() -> None:
     """Upgrade schema."""
-    if _ya_existe():
+    if tabla_existe(TABLA):
         # Ya la creó create_all en una base de desarrollo. No hay nada que
         # hacer y volver a crearla sería un error — la revisión solo queda
         # registrada para que esta base quede alineada con las demás.
@@ -74,7 +61,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    if not _ya_existe():
+    if not tabla_existe(TABLA):
         return
     op.drop_index('ix_mensajes_partida_created_at', table_name=TABLA)
     op.drop_index('ix_mensajes_partida_partida_id', table_name=TABLA)

@@ -1,6 +1,6 @@
 from app.models.catalogo import Edicion, Fase, Juego, Torneo
 from app.models.notificaciones import Notificacion
-from app.models.participantes import Equipo, Inscripcion, Jugador
+from app.models.participantes import CambioDeRoster, Equipo, Inscripcion, Jugador
 from app.models.partidas import Disputa, MensajePartida, Partida, ParticipacionEnPartida, ReporteResultado
 from app.models.usuarios import Usuario
 
@@ -12,6 +12,7 @@ __all__ = [
     "Equipo",
     "Inscripcion",
     "Jugador",
+    "CambioDeRoster",
     "Partida",
     "ParticipacionEnPartida",
     "Disputa",
