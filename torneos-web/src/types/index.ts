@@ -1,5 +1,5 @@
 export type ModeloCompetencia = 'enfrentamiento_directo' | 'multi_equipo';
-export type FormatoFase = 'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo' | 'liga_acumulativa';
+export type FormatoFase = 'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo';
 // String en vez de union estricta: el admin (Fase B, todavía en mock data)
 // usa algunos estados de mentira ('roster_lock', 'en_juego') que no son los
 // reales del backend ('inscripciones_cerradas', 'check_in', 'bye', etc).
@@ -50,7 +50,6 @@ export interface Edicion {
   equiposInscritosCount: number;
   maxEquipos: number;
   fechaInicio: string;
-  fechaRosterLock: string;
   reglamentoUrl?: string;
   descripcion: string;
   sistemasPuntaje?: Record<string, any>;

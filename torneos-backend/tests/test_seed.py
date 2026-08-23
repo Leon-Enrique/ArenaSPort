@@ -135,3 +135,44 @@ class TestCatalogoPublico:
             headers=headers,
         )
         assert r.status_code == 422, r.text
+
+
+class TestFormatosOfrecidos:
+    """Todo formato elegible tiene que poder sortearse.
+
+    `liga_acumulativa` estuvo en el enum mucho tiempo: se podia elegir al
+    crear una fase y `sortear_fase` respondia "Formato no soportado todavia".
+    El test existe para que agregar un formato al enum sin su generador
+    falle aca y no en la cara de un organizador a mitad de torneo.
+    """
+
+    def test_todo_formato_del_enum_tiene_generador(self):
+        from app.domain.enums import FormatoFase, ModeloCompetencia
+        from app.domain.formatos.base import ErrorFormato
+
+        class FaseFalsa:
+            id = 1
+            config: dict = {}
+            modelo_competencia = ModeloCompetencia.ENFRENTAMIENTO_DIRECTO
+
+        for formato in FormatoFase:
+            fase = FaseFalsa()
+            fase.formato = formato
+            try:
+                from app.domain import sorteo
+
+                sorteo.sortear_fase(None, fase, [])
+            except ErrorFormato as e:
+                assert "no soportado" not in str(e).lower(), (
+                    f"'{formato}' es elegible pero el motor no sabe generarlo. "
+                    "O se implementa, o sale del enum."
+                )
+            except Exception:
+                # Cualquier otro error viene de la sesion/los equipos falsos:
+                # lo unico que importa aca es no haber caido en "no soportado".
+                pass
+
+    def test_liga_acumulativa_ya_no_es_elegible(self):
+        from app.domain.enums import FormatoFase
+
+        assert not hasattr(FormatoFase, "LIGA_ACUMULATIVA")

@@ -39,7 +39,6 @@ class EdicionRead(BaseModel):
     max_equipos: int | None
     inscripcion_abre: datetime | None
     inscripcion_cierra: datetime | None
-    roster_lock: datetime | None
     fecha_inicio: datetime | None
     bolsa_premios: str | None
     reglamento_url: str | None

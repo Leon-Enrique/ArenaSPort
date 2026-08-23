@@ -85,7 +85,6 @@ class Edicion(Base):
     max_equipos: Mapped[int | None] = mapped_column(Integer)
     inscripcion_abre: Mapped[datetime | None] = mapped_column(DateTimeUTC)
     inscripcion_cierra: Mapped[datetime | None] = mapped_column(DateTimeUTC)
-    roster_lock: Mapped[datetime | None] = mapped_column(DateTimeUTC)
     fecha_inicio: Mapped[datetime | None] = mapped_column(DateTimeUTC)
 
     bolsa_premios: Mapped[str | None] = mapped_column(String(120))

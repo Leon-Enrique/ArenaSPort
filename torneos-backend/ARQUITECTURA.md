@@ -112,8 +112,10 @@ app/
 │   │   ├── round_robin.py
 │   │   ├── eliminacion_simple.py
 │   │   ├── eliminacion_doble.py
-│   │   ├── suizo.py
-│   │   └── liga_acumulativa.py
+│   │   └── suizo.py
+│   │       # liga_acumulativa.py (battle royale) NO existe: se planificó,
+│   │       # nunca se escribió, y el formato salió del enum. Vuelve cuando
+│   │       # haya motor multi-equipo.
 │   └── puntaje/
 │       ├── base.py            #   interfaz SistemaDePuntaje
 │       ├── victoria_derrota.py
@@ -211,7 +213,9 @@ torneos
 ediciones
   id, torneo_id, juego_id, numero, nombre, estado,
   sistema_puntaje (JSONB), criterios_desempate (JSONB),
-  fecha_roster_lock, zona_horaria, version_reglamento
+  zona_horaria, version_reglamento
+  # fecha_roster_lock estuvo como `roster_lock` y se eliminó: existió desde
+  # el esquema inicial sin que ningún código la leyera nunca.
 
 fases
   id, edicion_id, orden, nombre, modelo_competencia, formato,

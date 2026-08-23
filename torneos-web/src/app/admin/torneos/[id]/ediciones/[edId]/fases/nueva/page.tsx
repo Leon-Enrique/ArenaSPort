@@ -3,10 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import {
-  ArrowLeft, Swords, Check,
-  Layers, Flame, AlertCircle, Loader2, Plus, X
-} from 'lucide-react';
+import { ArrowLeft, Check, Layers, AlertCircle, Loader2, Plus, X } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { ApiEdicion, ApiTorneo } from '@/lib/api-types';
 
@@ -28,8 +25,11 @@ export default function NuevaFasePage() {
   }, [torneoId, edId]);
 
   const [nombre, setNombre] = useState('');
-  const [modeloCompetencia, setModeloCompetencia] = useState<'enfrentamiento_directo' | 'multi_equipo'>('enfrentamiento_directo');
-  const [formato, setFormato] = useState<'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo' | 'liga_acumulativa'>('eliminacion_doble');
+  // Multi-equipo (battle royale) salio del producto junto con Free Fire y
+  // CODM BR: el motor no genera caidas ni calcula su tabla. Queda fijo en
+  // enfrentamiento directo hasta que ese motor exista.
+  const modeloCompetencia = 'enfrentamiento_directo' as const;
+  const [formato, setFormato] = useState<'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo'>('eliminacion_doble');
   const [boDefault, setBoDefault] = useState<1 | 3 | 5>(3);
   const [tramosBo, setTramosBo] = useState<{ ronda: number; bo: 1 | 3 | 5 }[]>([]);
   const [cuposAvance, setCuposAvance] = useState(4);
@@ -37,7 +37,6 @@ export default function NuevaFasePage() {
   const [usarCorteSuizo, setUsarCorteSuizo] = useState(true);
   const [metaVictorias, setMetaVictorias] = useState(3);
   const [metaDerrotas, setMetaDerrotas] = useState(3);
-  const [caidasPorJornada, setCaidasPorJornada] = useState(5);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -46,10 +45,6 @@ export default function NuevaFasePage() {
     { id: 'eliminacion_simple', nombre: 'Eliminación Simple', desc: 'Cuadro tradicional donde una derrota elimina al equipo.' },
     { id: 'round_robin', nombre: 'Fase de Grupos (Round Robin)', desc: 'Todos contra todos por puntos en cada grupo.' },
     { id: 'suizo', nombre: 'Sistema Suizo', desc: 'Enfrentamientos entre equipos con el mismo récord de victorias/derrotas.' },
-  ];
-
-  const formatosMulti = [
-    { id: 'liga_acumulativa', nombre: 'Liga Acumulativa (Battle Royale)', desc: 'Varios equipos en simultáneo en el mismo lobby (Free Fire / CODM BR).' },
   ];
 
   const addTramoBo = () => {
@@ -78,7 +73,6 @@ export default function NuevaFasePage() {
       config.meta_victorias = metaVictorias;
       config.meta_derrotas = metaDerrotas;
     }
-    if (modeloCompetencia === 'multi_equipo') config.caidas_por_jornada = caidasPorJornada;
     try {
       await api.createFase(edId, { orden, nombre: nombre.trim(), modelo_competencia: modeloCompetencia, formato, config });
       router.push(`/admin/torneos/${torneoId}/ediciones/${edId}/fases`);
@@ -144,58 +138,13 @@ export default function NuevaFasePage() {
         </div>
 
         {/* Modelo Competitivo */}
-        <div>
-          <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
-            Modelo de Competencia
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setModeloCompetencia('enfrentamiento_directo');
-                setFormato('eliminacion_doble');
-              }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
-                modeloCompetencia === 'enfrentamiento_directo'
-                  ? 'border-violet-500 bg-violet-500/10'
-                  : 'border-white/10 bg-white/5 hover:border-white/20'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Swords size={16} className="text-violet-400" />
-                <p className="text-sm font-bold text-white">Enfrentamiento Directo (1v1)</p>
-              </div>
-              <p className="text-xs text-white/40">2 equipos por partida. Ej: Mobile Legends, CODM MP, League of Legends.</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setModeloCompetencia('multi_equipo');
-                setFormato('liga_acumulativa');
-              }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
-                modeloCompetencia === 'multi_equipo'
-                  ? 'border-violet-500 bg-violet-500/10'
-                  : 'border-white/10 bg-white/5 hover:border-white/20'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Flame size={16} className="text-amber-400" />
-                <p className="text-sm font-bold text-white">Multi-Equipo / Battle Royale</p>
-              </div>
-              <p className="text-xs text-white/40">12 a 25 equipos por lobby. Ej: Free Fire, PUBG, CODM BR.</p>
-            </button>
-          </div>
-        </div>
-
         {/* Formatos disponibles */}
         <div>
           <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
             Formato de Fase
           </label>
           <div className="space-y-2.5">
-            {(modeloCompetencia === 'enfrentamiento_directo' ? formatosDirectos : formatosMulti).map((f) => (
+            {formatosDirectos.map((f) => (
               <label
                 key={f.id}
                 className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
@@ -381,35 +330,6 @@ export default function NuevaFasePage() {
             </div>
           )}
 
-          {modeloCompetencia === 'multi_equipo' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                  Caídas / Mapas por Jornada
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={caidasPorJornada}
-                  onChange={e => setCaidasPorJornada(parseInt(e.target.value) || 5)}
-                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-violet-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                  Equipos que avanzan a Gran Final
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={cuposAvance}
-                  onChange={e => setCuposAvance(parseInt(e.target.value) || 12)}
-                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-violet-500"
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {error && (

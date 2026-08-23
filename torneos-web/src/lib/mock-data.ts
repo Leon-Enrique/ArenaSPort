@@ -227,7 +227,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 8,
     maxEquipos: 8,
     fechaInicio: '2026-08-20',
-    fechaRosterLock: '2026-08-18',
     descripcion: 'El torneo oficial de Mobile Legends Bang Bang para LATAM con eliminación directa.',
     sistemasPuntaje: { victoria: 1, derrota: 0 }
   },
@@ -245,7 +244,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 32,
     maxEquipos: 32,
     fechaInicio: '2026-07-10',
-    fechaRosterLock: '2026-07-08',
     descripcion: 'Torneo continental completado con 32 escuadras en 5 rondas de bracket directo.',
     sistemasPuntaje: { victoria: 1, derrota: 0 }
   },
@@ -263,7 +261,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 64,
     maxEquipos: 64,
     fechaInicio: '2026-08-01',
-    fechaRosterLock: '2026-07-28',
     descripcion: 'Mega Torneo Finalizado: Fase 1 (16 Grupos de 4) ➔ Fase 2 (Octavos 16 a 8 BO3) ➔ Fase 3 (Gran Final Top 8 Doble Eliminación).',
     sistemasPuntaje: { victoria: 3, derrota: 0 }
   },
@@ -281,7 +278,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 64,
     maxEquipos: 64,
     fechaInicio: '2026-06-01',
-    fechaRosterLock: '2026-05-28',
     descripcion: 'Mega campeonato de 64 equipos con 6 rondas de eliminatoria directa completadas.',
     sistemasPuntaje: { victoria: 1, derrota: 0 }
   },
@@ -299,7 +295,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 8,
     maxEquipos: 8,
     fechaInicio: '2026-04-10',
-    fechaRosterLock: '2026-04-08',
     descripcion: 'Primera edición del torneo oficial de MLBB.',
     sistemasPuntaje: { victoria: 1, derrota: 0 }
   },
@@ -317,7 +312,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 12,
     maxEquipos: 24,
     fechaInicio: '2026-08-25',
-    fechaRosterLock: '2026-08-23',
     descripcion: 'Gran Liga Battle Royale de 5 caídas por jornada.',
     sistemasPuntaje: {
       posiciones: { 1: 12, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1, 11: 0, 12: 0 },
@@ -338,7 +332,6 @@ export const MOCK_EDICIONES: Edicion[] = [
     equiposInscritosCount: 6,
     maxEquipos: 16,
     fechaInicio: '2026-09-01',
-    fechaRosterLock: '2026-08-30',
     descripcion: 'Torneo 5v5 Buscar y Destruir + Dominio.'
   }
 ];
@@ -872,7 +865,7 @@ export const MOCK_FASES_POR_EDICION: Record<string, Fase[]> = {
       orden: 1,
       nombre: 'Jornada 1 - League Acumulativa',
       modeloCompetencia: 'multi_equipo',
-      formato: 'liga_acumulativa',
+      formato: 'round_robin',
       estado: 'en_curso',
       cuposAvance: 8,
       partidas: []

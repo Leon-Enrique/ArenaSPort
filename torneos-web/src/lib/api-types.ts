@@ -42,7 +42,6 @@ export interface ApiEdicion {
   max_equipos: number | null;
   inscripcion_abre: string | null;
   inscripcion_cierra: string | null;
-  roster_lock: string | null;
   fecha_inicio: string | null;
   bolsa_premios: string | null;
   reglamento_url: string | null;
@@ -74,7 +73,7 @@ export interface ApiFase {
   orden: number;
   nombre: string;
   modelo_competencia: 'enfrentamiento_directo' | 'multi_equipo';
-  formato: 'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo' | 'liga_acumulativa';
+  formato: 'eliminacion_simple' | 'eliminacion_doble' | 'round_robin' | 'suizo';
   estado: string;
   config: Record<string, any>;
 }

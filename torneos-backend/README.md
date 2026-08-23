@@ -415,7 +415,8 @@ hicieron falta.
 
 Cerrar una fase, de paso, resolvió otro campo fantasma: `EstadoFase.CERRADA` y
 `EN_CURSO` existían en el enum desde el principio, pero nunca los seteaba nada —
-otro caso como el `roster_lock`.
+igual que pasaba con `roster_lock`, que era la otra promesa vacía del esquema y
+que terminó eliminado por eso mismo.
 
 Probado en dos escenarios reales:
 

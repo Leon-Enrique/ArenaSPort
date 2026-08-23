@@ -510,7 +510,6 @@ function mapEdicionBasica(e: ApiEdicion, torneo: ApiTorneo): Edicion {
     equiposInscritosCount: e.equipos_aprobados,
     maxEquipos: e.max_equipos ?? 0,
     fechaInicio: e.fecha_inicio || '',
-    fechaRosterLock: e.roster_lock || '',
     reglamentoUrl: e.reglamento_url || undefined,
     descripcion: '',
   };
@@ -534,7 +533,6 @@ export function mapResumenAEdicion(r: ApiResumenEdicion, torneo?: ApiTorneo): Ed
     equiposInscritosCount: r.equipos_aprobados,
     maxEquipos: e.max_equipos ?? 0,
     fechaInicio: e.fecha_inicio || '',
-    fechaRosterLock: e.roster_lock || '',
     reglamentoUrl: e.reglamento_url || undefined,
     descripcion: '',
   };

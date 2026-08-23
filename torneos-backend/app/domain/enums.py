@@ -9,11 +9,21 @@ class ModeloCompetencia(StrEnum):
 
 
 class FormatoFase(StrEnum):
+    """Formatos que el motor sabe generar de punta a punta.
+
+    Estuvo un tiempo `LIGA_ACUMULATIVA` acá: se podía elegir al crear una
+    fase y `sortear_fase` respondía "Formato no soportado todavía". Era el
+    formato de battle royale (varias escuadras en el mismo lobby), y salió
+    junto con Free Fire y CODM BR del catálogo — el motor no genera caídas
+    multi-equipo ni calcula su tabla. Se agrega de nuevo cuando exista eso,
+    no antes: un formato elegible que falla al sortear es peor que uno que
+    no aparece.
+    """
+
     ROUND_ROBIN = "round_robin"
     ELIMINACION_SIMPLE = "eliminacion_simple"
     ELIMINACION_DOBLE = "eliminacion_doble"
     SUIZO = "suizo"
-    LIGA_ACUMULATIVA = "liga_acumulativa"
 
 
 class EstadoEdicion(StrEnum):

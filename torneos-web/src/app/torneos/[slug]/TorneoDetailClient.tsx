@@ -31,7 +31,6 @@ const FORMATO_LABEL: Record<string, string> = {
   eliminacion_doble: 'Doble Eliminación',
   round_robin: 'Fase de Grupos (Round Robin)',
   suizo: 'Sistema Suizo',
-  liga_acumulativa: 'Liga Acumulativa',
 };
 
 export default function TorneoDetailClient({ resumenInicial }: { resumenInicial: ApiResumenEdicion }) {

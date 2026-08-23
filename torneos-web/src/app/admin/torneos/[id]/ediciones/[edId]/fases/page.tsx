@@ -15,7 +15,6 @@ const FORMATO_LABELS: Record<string, string> = {
   eliminacion_simple: 'Eliminación Simple (Brackets)',
   eliminacion_doble: 'Eliminación Doble (Upper / Lower)',
   suizo: 'Sistema Suizo',
-  liga_acumulativa: 'Liga Acumulativa',
 };
 
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
