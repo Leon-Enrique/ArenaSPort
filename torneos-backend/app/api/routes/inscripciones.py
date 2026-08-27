@@ -23,9 +23,12 @@ from app.models import (
     CambioDeRoster,
     Edicion,
     Equipo,
+    IdentidadDeJuego,
     Inscripcion,
     Jugador,
+    MiembroEquipo,
     ParticipacionEnPartida,
+    Usuario,
 )
 from app.schemas.inscripciones import (
     CambioDeRosterRead,
@@ -176,6 +179,120 @@ def _verificar_capitan_de_inscripcion(db: DbSession, usuario, inscripcion: Inscr
         )
 
 
+def _roster_desde_equipo_permanente(
+    db: DbSession, tareas: BackgroundTasks, equipo: Equipo, edicion
+) -> list[JugadorEntrada]:
+    """Arma el roster de la inscripción con la gente del equipo permanente.
+
+    Es el pago de todo el rediseño: el capitán inscribe y el plantel ya
+    está, con la identidad de juego que cargó cada uno en su cuenta. Antes
+    había que retipear a los cinco en cada torneo, y los tipeaba él.
+
+    Si falta gente, la inscripción NO entra. Un equipo incompleto no puede
+    jugar, y dejarlo anotarse "a completar después" convierte el problema
+    en algo que aparece el día del sorteo, cuando ya no hay margen.
+
+    Lo que sí se hace es que el rechazo sea accionable: a los que no
+    cargaron su identidad se les avisa en el momento, porque son los
+    únicos que pueden destrabarlo —el capitán no puede cargar el ID por
+    ellos— y si no, se entera solo él y tiene que salir a perseguirlos.
+    """
+    miembros = (
+        db.query(MiembroEquipo)
+        .filter(
+            MiembroEquipo.equipo_id == equipo.id,
+            MiembroEquipo.juego_id == edicion.juego_id,
+            MiembroEquipo.esta_activo,
+        )
+        .order_by(MiembroEquipo.created_at)
+        .all()
+    )
+    if not miembros:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Tu equipo no tiene jugadores todavía. Sumalos desde el equipo y "
+            "volvé a intentar.",
+        )
+
+    ids = [m.usuario_id for m in miembros]
+    usuarios = {u.id: u for u in db.query(Usuario).filter(Usuario.id.in_(ids)).all()}
+    identidades = {
+        i.usuario_id: i
+        for i in db.query(IdentidadDeJuego)
+        .filter(
+            IdentidadDeJuego.usuario_id.in_(ids),
+            IdentidadDeJuego.juego_id == edicion.juego_id,
+        )
+        .all()
+    }
+
+    entradas: list[JugadorEntrada] = []
+    faltan: list[Usuario] = []
+    for miembro in miembros:
+        persona = usuarios.get(miembro.usuario_id)
+        identidad = identidades.get(miembro.usuario_id)
+        if identidad is None:
+            if persona is not None:
+                faltan.append(persona)
+            continue
+        entradas.append(
+            JugadorEntrada(
+                identidad=identidad.identidad,
+                # El dueño del equipo es el capitán de la inscripción. Si no
+                # está en el roster, `normalizar_roster` marca al primero.
+                es_capitan=miembro.usuario_id == equipo.propietario_usuario_id,
+                # Server-side, de la cuenta del miembro: acá no hay un
+                # cliente pudiendo reclamar la identidad de otro, que era el
+                # problema que resuelve `vincular_al_capitan`. Y de paso
+                # queda TODO el plantel habilitado a reportar, no solo el
+                # capitán.
+                discord_id=persona.discord_id if persona else None,
+            )
+        )
+
+    if len(entradas) < edicion.juego.titulares_requeridos:
+        if faltan:
+            # Descartar primero lo que la inscripción fallida haya dejado a
+            # medias en la sesión: `_resolver_equipo` pudo haber renombrado
+            # el equipo, y un commit acá se lo llevaría puesto aunque la
+            # inscripción no entre. Después del rollback lo único pendiente
+            # son estos avisos.
+            db.rollback()
+            notificaciones.notificar(
+                db,
+                tareas,
+                tipo="falta_tu_identidad",
+                usuarios=faltan,
+                titulo="Falta tu ID de juego",
+                cuerpo=(
+                    f"Tu equipo {equipo.nombre} quiso inscribirse en "
+                    f"{edicion.nombre} y no pudo porque todavía no cargaste "
+                    "tu identidad de juego. Cargala desde tu perfil."
+                ),
+                url="/perfil",
+                edicion=edicion,
+            )
+            # El resto de las notificaciones de este módulo viajan con el
+            # cambio que las dispara; esta se commitea sola porque ese
+            # cambio no va a existir. El aviso igual es sobre algo que
+            # pasó: tu capitán intentó anotar al equipo y no pudo por vos.
+            db.commit()
+
+        nombres = ", ".join(u.discord_username for u in faltan)
+        detalle = (
+            f" Les falta cargar su identidad de juego a: {nombres} (ya les avisamos)."
+            if faltan
+            else ""
+        )
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Tu equipo tiene {len(entradas)} jugadores con identidad cargada "
+            f"y se necesitan {edicion.juego.titulares_requeridos}.{detalle}",
+        )
+
+    return entradas
+
+
 def _equipo_del_usuario(db: DbSession, equipo_id: int, usuario) -> Equipo:
     """Trae un equipo comprobando que quien pregunta tenga derecho a él.
 
@@ -279,7 +396,11 @@ def _resolver_equipo(
 
 @router.post("", response_model=InscripcionCreada, status_code=status.HTTP_201_CREATED)
 def inscribir_equipo(
-    edicion_id: int, datos: InscripcionCreate, db: DbSession, usuario: UsuarioOpcional
+    edicion_id: int,
+    datos: InscripcionCreate,
+    db: DbSession,
+    usuario: UsuarioOpcional,
+    tareas: BackgroundTasks,
 ) -> InscripcionCreada:
     """Registro de un equipo en un torneo.
 
@@ -324,11 +445,6 @@ def inscribir_equipo(
                 f"Ya se llenaron los {edicion.max_equipos} cupos.",
             )
 
-    resultado = _normalizar_y_validar_roster(
-        db, edicion_id, edicion.juego, datos.jugadores, datos.capitan_declarado
-    )
-    vincular_al_capitan(resultado, usuario)
-
     nombre_normalizado = datos.nombre_equipo.strip()
     duplicado = (
         db.query(Inscripcion)
@@ -347,6 +463,30 @@ def inscribir_equipo(
         )
 
     equipo, avisos_equipo = _resolver_equipo(db, edicion, datos, usuario, nombre_normalizado)
+
+    # El roster puede venir de dos lados. Si el capitán mandó jugadores, es
+    # el formulario de siempre. Si no mandó ninguno, se arma solo desde el
+    # equipo permanente — que es el sentido de tener uno: no volver a
+    # tipear a la misma gente en cada torneo.
+    #
+    # Resolver el equipo TIENE que pasar antes, porque ahí adentro está el
+    # chequeo de que sea tuyo. Al revés, mandar el `equipo_id` de otro con
+    # la lista vacía devolvería su roster completo en la respuesta.
+    desde_equipo = not datos.jugadores
+    if desde_equipo:
+        entradas = _roster_desde_equipo_permanente(db, tareas, equipo, edicion)
+    else:
+        entradas = datos.jugadores
+
+    resultado = _normalizar_y_validar_roster(
+        db, edicion_id, edicion.juego, entradas, datos.capitan_declarado
+    )
+    if not desde_equipo:
+        # Solo el camino del formulario necesita esto: ahí el `discord_id`
+        # lo mandaba el cliente y había que ignorarlo. Cuando el roster
+        # sale del equipo, cada identidad ya viene de la cuenta de su
+        # dueño, y llamar a esto las borraría todas menos la del capitán.
+        vincular_al_capitan(resultado, usuario)
 
     # Torneo abierto: el equipo queda adentro sin revisión manual. Ojo con el
     # orden — todo lo que valida esta función (cupos, plazo, roster,

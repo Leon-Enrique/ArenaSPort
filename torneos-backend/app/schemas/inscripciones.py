@@ -155,7 +155,15 @@ class InscripcionCreate(BaseModel):
         default=None,
         description="Nombre que el equipo indica como capitán. Puede ser nombre real.",
     )
-    jugadores: list[JugadorEntradaIn] = Field(min_length=1)
+    jugadores: list[JugadorEntradaIn] = Field(
+        default_factory=list,
+        description=(
+            "Roster tipeado a mano. Se puede omitir al inscribir un equipo "
+            "permanente (`equipo_id`): ahí el roster sale de sus miembros, "
+            "con la identidad de juego que cargó cada uno en su cuenta — "
+            "que es el sentido de tener un equipo permanente."
+        ),
+    )
 
 
 class JugadorRead(BaseModel):
