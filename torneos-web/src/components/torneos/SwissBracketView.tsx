@@ -44,10 +44,10 @@ function construirColumnas(partidas: Partida[]) {
 
     for (const p of partidasRonda) {
       p.participaciones.forEach(part => {
-        if (part.equipo?.nombre) nombrePorEquipo.set(part.equipoId, part.equipo.nombre);
+        if (part.equipoId && part.equipo?.nombre) nombrePorEquipo.set(part.equipoId, part.equipo.nombre);
       });
       const eqA = p.participaciones[0];
-      const rec = eqA ? (record.get(eqA.equipoId) || { w: 0, l: 0 }) : { w: 0, l: 0 };
+      const rec = eqA?.equipoId ? (record.get(eqA.equipoId) || { w: 0, l: 0 }) : { w: 0, l: 0 };
       const label = `${rec.w}-${rec.l}`;
       if (!buckets.has(label)) buckets.set(label, { label, wins: rec.w, losses: rec.l, partidas: [] });
       buckets.get(label)!.partidas.push(p);
@@ -61,6 +61,7 @@ function construirColumnas(partidas: Partida[]) {
     for (const p of partidasRonda) {
       if (!RESUELTOS.has(p.estado)) continue;
       for (const part of p.participaciones) {
+        if (!part.equipoId) continue;
         const rec = record.get(part.equipoId) || { w: 0, l: 0 };
         if (part.esGanador) rec.w += 1;
         else if (p.participaciones.length === 2) rec.l += 1;

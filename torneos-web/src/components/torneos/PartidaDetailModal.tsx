@@ -56,7 +56,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
   const eqA = partida.participaciones[0];
   const eqB = partida.participaciones[1];
-  const miParticipacion = [eqA, eqB].find(p => p && misEquipoIds.has(p.equipoId));
+  const miParticipacion = [eqA, eqB].find(p => p?.equipoId && misEquipoIds.has(p.equipoId));
   const rivalParticipacion = [eqA, eqB].find(p => p && p !== miParticipacion);
   const soyCapitan = !!miParticipacion;
   const soyOrganizador = usuario?.rol === 'organizador';
@@ -120,7 +120,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
   };
 
   const handleCheckIn = async () => {
-    if (!miParticipacion) return;
+    if (!miParticipacion?.equipoId) return;
     setLoading(true); setError(null);
     try {
       await api.checkInPartida(partida.faseId, partida.id, miParticipacion.equipoId);
@@ -152,7 +152,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
   };
 
   const handleConfirmar = async () => {
-    if (!miParticipacion) return;
+    if (!miParticipacion?.equipoId) return;
     setLoading(true); setError(null);
     try {
       await api.confirmarResultadoAdmin(partida.faseId, partida.id, miParticipacion.equipoId);
@@ -236,12 +236,12 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                   <p className="text-xs text-white/50">Reportá el marcador final de tu partida.</p>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[11px] text-white/40 mb-1">{miParticipacion?.equipo.nombre} (vos)</label>
+                      <label className="block text-[11px] text-white/40 mb-1">{miParticipacion?.equipo?.nombre ?? 'Tu equipo'} (vos)</label>
                       <input type="number" min={0} max={5} value={marcadorPropio} onChange={e => setMarcadorPropio(Number(e.target.value))}
                         className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-center font-mono font-bold text-white" />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-white/40 mb-1">{rivalParticipacion?.equipo.nombre || 'Rival'}</label>
+                      <label className="block text-[11px] text-white/40 mb-1">{rivalParticipacion?.equipo?.nombre || 'Rival'}</label>
                       <input type="number" min={0} max={5} value={marcadorRival} onChange={e => setMarcadorRival(Number(e.target.value))}
                         className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-center font-mono font-bold text-white" />
                     </div>

@@ -88,13 +88,15 @@ export interface Inscripcion {
 export interface ParticipacionPartida {
   id: string;
   partidaId: string;
-  equipoId: string;
-  equipo: Equipo;
+  equipoId: string | null;
+  equipo?: Equipo;
   mapasGanados?: number; // Para enfrentamiento directo (MLBB, BO3/BO5)
   esGanador?: boolean;
   posicion?: number;     // Para multi-equipo (Free Fire)
   bajas?: number;        // Kills en caída
   puntos?: number;       // Calculado por sistema de puntos
+  esBye?: boolean;
+  esByeSeed?: boolean;
 }
 
 export interface Partida {

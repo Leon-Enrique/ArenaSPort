@@ -840,7 +840,7 @@ export const MOCK_FASES_64_TRIPLE: Fase[] = [
     edicionId: 'ed-64-triple',
     orden: 1,
     nombre: 'Fase 1: 16 Grupos de 4 (Round Robin / 64 Equipos)',
-    modeloCompetencia: 'grupos',
+    modeloCompetencia: 'enfrentamiento_directo',
     formato: 'round_robin',
     estado: 'finalizada',
     cuposAvance: 16,
