@@ -892,6 +892,25 @@ def vincular_discord(
     a un jugador con su cuenta real de Discord después, para que pueda
     reportar resultados. Solo el organizador lo hace — evita que cualquiera
     se autoproclame capitán de un equipo ajeno.
+
+    Además es el puente hacia el modelo nuevo, y por eso hace más que antes.
+
+    No hay migración automática posible de los datos viejos: los rosters
+    históricos son texto tipeado por el capitán, sin cuenta detrás, y una
+    cuenta no se puede fabricar desde un apodo. Lo único que sabe quién es
+    quién es un humano, y este endpoint es justamente donde ese humano lo
+    dice. Así que cada vinculación migra a esa persona:
+
+      - le crea su `IdentidadDeJuego` con los datos que ya estaban en el
+        roster, si todavía no tenía una para este juego;
+      - la suma al roster permanente del equipo;
+      - y si es el capitán y el equipo no tiene dueño, lo deja de dueño.
+
+    Ese último punto desatasca lo que hoy bloquea todo: los equipos
+    existentes no tienen dueño, así que nadie puede reinscribirlos.
+
+    Nada de esto pisa datos: si la persona ya cargó su identidad, la suya
+    gana — es de ella, no del roster que alguien tipeó por ella.
     """
     inscripcion = db.get(Inscripcion, inscripcion_id)
     if not inscripcion or inscripcion.edicion_id != edicion_id:
@@ -901,10 +920,93 @@ def vincular_discord(
     if not jugador or jugador.inscripcion_id != inscripcion_id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese jugador no es de esta inscripción.")
 
+    # Antes no se comprobaba, y por eso quedaron vinculaciones apuntando a
+    # cuentas que no existen: el jugador figuraba vinculado y seguía sin
+    # poder reportar nada.
+    persona = db.query(Usuario).filter(Usuario.discord_id == discord_id).first()
+    if not persona:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "No hay ninguna cuenta con ese identificador. La persona tiene "
+            "que registrarse antes de que puedas vincularla.",
+        )
+
     jugador.discord_id = discord_id
+    edicion = db.get(Edicion, edicion_id)
+    equipo = db.get(Equipo, inscripcion.equipo_id)
+
+    _migrar_jugador_al_modelo_nuevo(db, jugador, persona, equipo, edicion)
+
     db.commit()
     db.refresh(inscripcion)
     return inscripcion
+
+
+def _migrar_jugador_al_modelo_nuevo(
+    db: DbSession, jugador: Jugador, persona: Usuario, equipo: Equipo, edicion
+) -> None:
+    """Lleva a un jugador histórico al modelo de cuentas. Ver
+    `vincular_discord`, que es el único lugar que lo llama.
+
+    No hace commit: viaja con el de la vinculación que lo dispara.
+    """
+    identidad = (
+        db.query(IdentidadDeJuego)
+        .filter(
+            IdentidadDeJuego.usuario_id == persona.id,
+            IdentidadDeJuego.juego_id == edicion.juego_id,
+        )
+        .first()
+    )
+    if identidad is None:
+        # Si esa identidad ya la declaró otra cuenta, no se toca: puede ser
+        # un roster viejo con el ID de otro, y pisarlo sería creer más en
+        # un dato tipeado hace meses que en el que su dueño cargó. Se
+        # vincula igual; la identidad la resuelve `/identidades/duenio`.
+        ocupada = (
+            db.query(IdentidadDeJuego)
+            .filter(
+                IdentidadDeJuego.juego_id == edicion.juego_id,
+                IdentidadDeJuego.clave_identidad == jugador.clave_identidad,
+            )
+            .first()
+        )
+        if ocupada is None:
+            db.add(
+                IdentidadDeJuego(
+                    usuario_id=persona.id,
+                    juego_id=edicion.juego_id,
+                    identidad=jugador.identidad,
+                    clave_identidad=jugador.clave_identidad,
+                )
+            )
+
+    if equipo is None:
+        return
+
+    ya_miembro = (
+        db.query(MiembroEquipo)
+        .filter(
+            MiembroEquipo.equipo_id == equipo.id,
+            MiembroEquipo.juego_id == edicion.juego_id,
+            MiembroEquipo.usuario_id == persona.id,
+        )
+        .first()
+    )
+    if ya_miembro is None:
+        db.add(
+            MiembroEquipo(
+                equipo_id=equipo.id,
+                juego_id=edicion.juego_id,
+                usuario_id=persona.id,
+            )
+        )
+
+    # Los 52 equipos que ya existen no tienen dueño, así que nadie puede
+    # reinscribirlos. Es la misma regla de siempre —el capitán es el dueño,
+    # ver `vincular_al_capitan`— aplicada tarde.
+    if jugador.es_capitan and equipo.propietario_usuario_id is None:
+        equipo.propietario_usuario_id = persona.id
 
 
 @router.post(
