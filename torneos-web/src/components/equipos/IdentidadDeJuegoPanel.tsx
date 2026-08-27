@@ -81,7 +81,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
 
   if (cargando) {
     return (
-      <div className="glass-card rounded-2xl p-6 flex items-center gap-3 text-white/40">
+      <div className="glass-card rounded-[6px] p-6 flex items-center gap-3 text-tinta-3">
         <Loader2 size={16} className="animate-spin" />
         <span className="text-sm">Cargando tu identidad de juego…</span>
       </div>
@@ -95,16 +95,16 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
 
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border transition-colors ${
+      className={`relative overflow-hidden rounded-[6px] border transition-colors ${
         falta
-          ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-slate-900/80 to-slate-900/90'
-          : 'glass-card border-white/8'
+          ? 'border-atencion/40 bg-superficie estado-atencion'
+          : 'glass-card'
       }`}
     >
       {/* Halo de color: ámbar cuando falta algo, cyan cuando está resuelto. */}
       <div
         className={`pointer-events-none absolute -top-24 -right-16 h-48 w-48 rounded-full blur-3xl ${
-          falta ? 'bg-amber-500/20' : 'bg-cyan-500/10'
+          falta ? 'bg-amber-500/20' : 'bg-elevada'
         }`}
       />
 
@@ -112,22 +112,22 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
         <header className="flex items-start justify-between gap-4 mb-5">
           <div className="flex items-start gap-3">
             <div
-              className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+              className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] ${
                 falta
-                  ? 'bg-amber-500/15 text-amber-400'
-                  : 'bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 text-cyan-300'
+                  ? 'bg-amber-500/15 text-atencion'
+                  : 'bg-elevada text-tinta-2'
               }`}
             >
               <Gamepad2 size={18} />
             </div>
             <div>
-              <h2 className="font-bold tracking-tight text-white flex items-center gap-2">
+              <h2 className="font-bold tracking-tight text-tinta flex items-center gap-2">
                 Tu ID de {juego.nombre}
                 {!falta && !recienGuardado && (
-                  <ShieldCheck size={14} className="text-cyan-400" />
+                  <ShieldCheck size={14} className="text-tinta-2" />
                 )}
               </h2>
-              <p className="text-xs text-white/45 mt-0.5 max-w-md leading-relaxed">
+              <p className="text-xs text-tinta-3 mt-0.5 max-w-md leading-relaxed">
                 Se carga una sola vez y sirve para todos tus torneos. Tu rival
                 ve este nick para encontrarte y jugar la partida.
               </p>
@@ -137,7 +137,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
           {!mostrarForm && (
             <button
               onClick={() => { setEditando(true); setValores(identidad?.identidad ?? {}); }}
-              className="shrink-0 flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:border-purple-500/50 hover:text-white"
+              className="shrink-0 flex items-center gap-1.5 rounded-[4px] border border-borde px-3 py-1.5 text-xs font-medium text-tinta-2 transition-colors hover:border-borde-fuerte hover:text-tinta"
             >
               <Pencil size={12} /> Corregir
             </button>
@@ -145,10 +145,10 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
         </header>
 
         {falta && !editando && (
-          <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/8 px-4 py-3">
-            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-400" />
-            <p className="text-[13px] leading-relaxed text-amber-200/90">
-              <strong className="font-semibold text-amber-300">Falta cargarlo.</strong>{' '}
+          <div className="mb-5 flex items-start gap-2.5 rounded-[6px] border border-atencion/25 bg-atencion/10 px-4 py-3">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-atencion" />
+            <p className="text-[13px] leading-relaxed text-atencion">
+              <strong className="font-semibold text-atencion">Falta cargarlo.</strong>{' '}
               Sin esto tu capitán no puede inscribirte en ningún torneo, aunque
               ya estés en el equipo.
             </p>
@@ -156,9 +156,9 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
         )}
 
         {recienGuardado && (
-          <div className="mb-5 flex items-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/8 px-4 py-3">
-            <CheckCircle2 size={15} className="text-cyan-400" />
-            <p className="text-[13px] text-cyan-200/90">
+          <div className="mb-5 flex items-center gap-2 rounded-[6px] border border-ok/25 bg-ok/10 px-4 py-3">
+            <CheckCircle2 size={15} className="text-tinta-2" />
+            <p className="text-[13px] text-ok">
               Guardado. Se actualizó en todos tus equipos.
             </p>
           </div>
@@ -169,9 +169,9 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
             <div className="grid gap-3 sm:grid-cols-3">
               {campos.map((campo) => (
                 <label key={campo.nombre} className="block">
-                  <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">
+                  <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-tinta-3">
                     {campo.etiqueta}
-                    {campo.requerido && <span className="ml-1 text-purple-400">*</span>}
+                    {campo.requerido && <span className="ml-1 text-acento-claro">*</span>}
                   </span>
                   <input
                     value={valores[campo.nombre] ?? ''}
@@ -180,7 +180,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
                     }
                     required={campo.requerido}
                     autoComplete="off"
-                    className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-colors focus:border-purple-500/60 focus:bg-slate-950"
+                    className="w-full rounded-[4px] border border-borde bg-hundida px-3 py-2 text-sm text-tinta placeholder-tinta-4 outline-none transition-colors focus:border-acento focus:bg-hundida"
                     placeholder={campo.etiqueta}
                   />
                 </label>
@@ -188,7 +188,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
             </div>
 
             {error && (
-              <p className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-3 py-2 text-[13px] text-red-300">
+              <p className="flex items-start gap-2 rounded-[4px] border border-vivo/30 bg-vivo/10 px-3 py-2 text-[13px] text-vivo">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 {error}
               </p>
@@ -198,7 +198,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
               <button
                 type="submit"
                 disabled={guardando}
-                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-900/30 transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-[4px] bg-acento px-4 py-2 text-sm font-semibold text-tinta  transition-opacity hover:bg-acento-hover disabled:opacity-50"
               >
                 {guardando && <Loader2 size={14} className="animate-spin" />}
                 {falta ? 'Guardar mi ID' : 'Guardar cambios'}
@@ -207,7 +207,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
                 <button
                   type="button"
                   onClick={() => { setEditando(false); setError(null); }}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-[4px] px-3 py-2 text-sm text-tinta-3 transition-colors hover:text-tinta"
                 >
                   <X size={14} /> Cancelar
                 </button>
@@ -219,12 +219,12 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
             {campos.map((campo) => (
               <div
                 key={campo.nombre}
-                className="rounded-xl border border-white/8 bg-slate-950/40 px-3.5 py-2.5"
+                className="rounded-[6px] border border-borde bg-hundida px-3.5 py-2.5"
               >
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-white/35">
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-tinta-3">
                   {campo.etiqueta}
                 </dt>
-                <dd className="mt-0.5 truncate font-mono text-sm text-white/90">
+                <dd className="mt-0.5 truncate font-mono text-sm text-tinta">
                   {identidad?.identidad[campo.nombre] || '—'}
                 </dd>
               </div>

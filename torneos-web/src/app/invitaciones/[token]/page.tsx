@@ -17,7 +17,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   AlertTriangle, ArrowRight, CheckCircle2, Gamepad2, Loader2, LogIn,
-  ShieldX, Sparkles, Users,
+  ShieldX, Users,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -40,6 +40,10 @@ export default function InvitacionPage() {
   const [error, setError] = useState<string | null>(null);
   const [listo, setListo] = useState(false);
 
+  // `api.setToken` va fuera del try y antes del await a propósito: es
+  // sincrónico y tiene que estar puesto ANTES de pedir el preview, si no
+  // la invitación dirigida a esta persona se leería sin sesión y
+  // respondería 404.
   const cargar = useCallback(async () => {
     const sesion = localStorage.getItem(TOKEN_KEY);
     if (sesion) api.setToken(sesion);
@@ -52,7 +56,17 @@ export default function InvitacionPage() {
     }
   }, [token]);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  // La llamada va dentro de una función async declarada acá adentro, y no
+  // suelta en el cuerpo del efecto: así React ve que todos los setState
+  // ocurren después de un await y no en el render, que es lo que dispara
+  // cascadas.
+  useEffect(() => {
+    let vigente = true;
+    (async () => {
+      if (vigente) await cargar();
+    })();
+    return () => { vigente = false; };
+  }, [cargar]);
 
   const entrar = async () => {
     setEntrando(true);
@@ -73,7 +87,7 @@ export default function InvitacionPage() {
       <main className="flex flex-1 items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           {cargando && (
-            <div className="flex items-center justify-center gap-3 py-20 text-white/40">
+            <div className="flex items-center justify-center gap-3 py-20 text-tinta-3">
               <Loader2 size={18} className="animate-spin" />
               <span className="text-sm">Abriendo la invitación…</span>
             </div>
@@ -87,11 +101,11 @@ export default function InvitacionPage() {
                 <>
                   <button
                     onClick={() => setAuthAbierto(true)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/40 transition-opacity hover:opacity-90"
+                    className="flex w-full items-center justify-center gap-2 rounded-[6px] bg-acento px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-acento-hover"
                   >
                     <LogIn size={15} /> Crear mi cuenta y entrar
                   </button>
-                  <p className="mt-3 text-center text-[11px] leading-relaxed text-white/30">
+                  <p className="mt-3 text-center text-[11px] leading-relaxed text-tinta-4">
                     Cuando te registres volvés acá y entrás al equipo. Te toma
                     menos de un minuto.
                   </p>
@@ -99,14 +113,14 @@ export default function InvitacionPage() {
               ) : (
                 <>
                   {error && (
-                    <p className="mb-3 flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-3 py-2 text-[13px] text-red-300">
+                    <p className="mb-3 flex items-start gap-2 rounded-[4px] border border-vivo/30 bg-vivo/10 px-3 py-2 text-[13px] text-vivo">
                       <AlertTriangle size={14} className="mt-0.5 shrink-0" /> {error}
                     </p>
                   )}
                   <button
                     onClick={entrar}
                     disabled={entrando}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/40 transition-opacity hover:opacity-90 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-[6px] bg-acento px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-acento-hover disabled:opacity-50"
                   >
                     {entrando
                       ? <Loader2 size={15} className="animate-spin" />
@@ -115,9 +129,9 @@ export default function InvitacionPage() {
                   </button>
 
                   {!preview.ya_cargaste_tu_identidad && (
-                    <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
-                      <Gamepad2 size={14} className="mt-0.5 shrink-0 text-amber-400" />
-                      <p className="text-[12px] leading-relaxed text-amber-200/85">
+                    <div className="mt-4 flex items-start gap-2.5 rounded-[6px] border border-atencion/25 bg-atencion/10 px-4 py-3">
+                      <Gamepad2 size={14} className="mt-0.5 shrink-0 text-atencion" />
+                      <p className="text-[12px] leading-relaxed text-atencion">
                         Después vas a tener que cargar tu ID de{' '}
                         {preview.juego_nombre} en tu perfil. Sin eso no te
                         pueden inscribir en los torneos.
@@ -156,25 +170,20 @@ function Tarjeta({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-8 shadow-2xl shadow-black/40">
-      <div className="pointer-events-none absolute -top-28 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-purple-600/20 blur-3xl" />
-
-      <div className="relative text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-0.5 shadow-lg shadow-purple-900/40">
-          <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-slate-950">
-            <Users size={24} className="text-purple-300" />
-          </div>
+    <div className="rounded-[8px] border border-borde bg-superficie p-8">
+      <div className="text-center">
+        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-[6px] bg-elevada border border-borde">
+          <Users size={20} className="text-tinta-2" />
         </div>
 
-        <p className="mb-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-cyan-400">
-          <Sparkles size={10} />
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-tinta-3">
           {preview.dirigida_a_vos ? 'Te invitaron' : 'Invitación a un equipo'}
         </p>
 
-        <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-white">
+        <h1 className="mb-2 text-[24px] font-bold tracking-[-0.025em] text-tinta">
           {preview.equipo_nombre}
         </h1>
-        <p className="mb-7 text-sm leading-relaxed text-white/45">
+        <p className="mb-7 text-[14px] leading-relaxed text-tinta-3">
           Te suman al plantel de {preview.juego_nombre}. Vas a poder salirte
           solo cuando quieras.
         </p>
@@ -187,30 +196,30 @@ function Tarjeta({
 
 function YaEstas({ equipo }: { equipo: string }) {
   return (
-    <div className="rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-cyan-500/10 to-slate-950/95 p-10 text-center shadow-2xl shadow-black/40">
-      <CheckCircle2 size={40} className="mx-auto mb-4 text-cyan-400" />
-      <h1 className="mb-2 text-xl font-extrabold text-white">
+    <div className="rounded-[8px] border border-borde bg-superficie estado-ok p-10 text-center">
+      <CheckCircle2 size={32} className="mx-auto mb-4 text-ok" />
+      <h1 className="mb-2 text-[19px] font-semibold tracking-[-0.02em] text-tinta">
         Ya estás en {equipo}
       </h1>
-      <p className="text-sm text-white/45">Te llevamos a tu perfil…</p>
+      <p className="text-sm text-tinta-3">Te llevamos a tu perfil…</p>
     </div>
   );
 }
 
 function InvitacionInvalida() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-10 text-center">
-      <ShieldX size={34} className="mx-auto mb-4 text-white/25" />
-      <h1 className="mb-2 text-lg font-bold text-white">
+    <div className="rounded-[8px] border border-borde bg-superficie p-10 text-center">
+      <ShieldX size={34} className="mx-auto mb-4 text-tinta-4" />
+      <h1 className="mb-2 text-lg font-bold text-tinta">
         Esta invitación no sirve
       </h1>
-      <p className="mx-auto mb-6 max-w-xs text-sm leading-relaxed text-white/40">
+      <p className="mx-auto mb-6 max-w-xs text-sm leading-relaxed text-tinta-3">
         Puede que haya vencido, que ya se haya usado, o que el capitán la haya
         dado de baja. Pedile uno nuevo.
       </p>
       <Link
         href="/"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 transition-colors hover:text-purple-300"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-acento-claro transition-colors hover:text-acento"
       >
         Ir al inicio <ArrowRight size={12} />
       </Link>

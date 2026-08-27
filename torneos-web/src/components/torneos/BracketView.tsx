@@ -60,29 +60,28 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
   return (
     <div className="w-full space-y-6">
       {/* ── HEADER SUPERIOR DE LA ETAPA ── */}
-      <div className="bg-[#0e101d] rounded-2xl p-5 border border-slate-800 shadow-xl space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <div className="bg-superficie rounded-[6px] p-5 border border-borde space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-borde-sutil pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className={`w-2.5 h-2.5 rounded-full ${currentFase?.estado === 'finalizada' ? 'bg-emerald-400' : 'bg-cyan-400 animate-pulse'}`} />
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest font-mono">
+              <span className={`w-[5px] h-[5px] rounded-full ${currentFase?.estado === 'finalizada' ? 'bg-tinta-4' : 'bg-vivo punto-vivo'}`} />
+              <span className="text-[10px] font-semibold text-tinta-3 uppercase tracking-[0.08em]">
                 {currentFase?.estado === 'finalizada' ? 'Torneo Finalizado' : currentFase?.estado === 'inscripciones_abiertas' ? 'Inscripciones en Curso' : 'En Curso'} • {totalTeams} slots • {totalRounds} Ronda{totalRounds !== 1 ? 's' : ''}
               </span>
             </div>
-            <h2 className="text-xl font-black text-white tracking-wide flex items-center gap-2">
-              <Trophy size={20} className="text-purple-400" />
-              {currentFase?.nombre || 'Cuadro de Brackets'}
+            <h2 className="text-[18px] font-semibold text-tinta tracking-[-0.02em] mt-0.5">
+              {currentFase?.nombre || 'Cuadro'}
             </h2>
             <div className="flex flex-wrap gap-2 mt-2">
               {(currentFase as any)?.cuposAvance > 1 && (
-                <div className="inline-flex items-center gap-1.5 bg-emerald-900/30 border border-emerald-500/40 rounded-lg px-3 py-1 text-xs font-bold text-emerald-400">
+                <div className="inline-flex items-center gap-1.5 bg-superficie border border-borde rounded-[4px] px-2.5 py-1 text-[11.5px] text-tinta-2">
                   <CheckCircle2 size={13} />
                   {(currentFase as any).cuposAvance} clasificados avanzan a la siguiente fase
                 </div>
               )}
               {(currentFase as any)?.numByes > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-slate-900/80 border border-slate-600/40 rounded-lg px-3 py-1 text-xs font-bold text-slate-400">
-                  <span className="text-slate-300">BYE ×{(currentFase as any).numByes}</span>
+                <div className="inline-flex items-center gap-1.5 bg-superficie border border-borde rounded-[4px] px-2.5 py-1 text-[11.5px] text-tinta-3">
+                  <span className="text-tinta-2">BYE ×{(currentFase as any).numByes}</span>
                   <span className="font-normal">— Los top seeds reciben pase directo a Ronda 2</span>
                 </div>
               )}
@@ -91,22 +90,22 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
 
           {/* Selector de Etapas si hay varias */}
           {fases.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-              <span className="text-[11px] font-bold text-slate-500 uppercase px-2 flex items-center gap-1">
-                <Layers size={13} className="text-purple-400" /> Etapas:
+            <div className="flex items-center gap-1 overflow-x-auto">
+              <span className="text-[10px] font-semibold text-tinta-3 uppercase tracking-[0.08em] px-1">
+                Etapas
               </span>
               {fases.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => { setActiveFaseId(f.id); setSelectedRoundFilter('all'); }}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                  className={`px-3 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors flex items-center gap-1.5 ${
                     activeFaseId === f.id
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      ? 'bg-borde text-tinta'
+                      : 'text-tinta-3 hover:text-tinta hover:bg-elevada'
                   }`}
                 >
                   <span>{f.nombre}</span>
-                  <span className="text-[10px] opacity-70 font-mono">({f.partidas.length})</span>
+                  <span className="text-[10px] text-tinta-4 font-mono tabular">({f.partidas.length})</span>
                 </button>
               ))}
             </div>
@@ -118,10 +117,10 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedRoundFilter('all')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
+              className={`px-3 py-1.5 rounded-[4px] text-[12px] font-medium shrink-0 transition-colors ${
                 selectedRoundFilter === 'all'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                  : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-borde text-tinta'
+                  : 'text-tinta-3 hover:text-tinta hover:bg-elevada'
               }`}
             >
               Todo el Cuadro Conectado ({totalRounds} Rondas)
@@ -131,10 +130,10 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
               <button
                 key={rNum}
                 onClick={() => setSelectedRoundFilter(rNum)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
+                className={`px-3 py-1.5 rounded-[4px] text-[12px] font-medium shrink-0 transition-colors ${
                   selectedRoundFilter === rNum
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-borde text-tinta'
+                    : 'text-tinta-3 hover:text-tinta hover:bg-elevada'
                 }`}
               >
                 Round {rNum} ({getRoundLabel(rNum, totalRounds)})
@@ -145,13 +144,13 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
       </div>
 
       {/* ── ARBOL DE BRACKETS CON LÍNEAS CONECTORAS EXACTAS (ESTILO TOORNAMENT) ── */}
-      <div className="w-full overflow-x-auto overflow-y-auto max-h-[750px] bg-[#0c0d18] rounded-2xl border border-slate-800 p-6 scrollbar-thin scrollbar-thumb-purple-600/50">
+      <div className="w-full overflow-x-auto overflow-y-auto max-h-[750px] bg-hundida rounded-[6px] border border-borde p-6">
         
         {/* VISTA FILTRADA POR 1 SOLA RONDA (Columna simple) */}
         {selectedRoundFilter !== 'all' ? (
           <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center pb-3 border-b border-slate-800">
-              <span className="text-sm font-black uppercase tracking-wider text-white">
+            <div className="text-center pb-3 border-b border-borde">
+              <span className="text-[13px] font-semibold text-tinta">
                 Round {selectedRoundFilter}: {getRoundLabel(selectedRoundFilter, totalRounds)}
               </span>
             </div>
@@ -168,7 +167,7 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                     className={`w-full overflow-hidden cursor-pointer transition-all shadow-lg ${
                       (partida as any).isBye
                         ? 'bg-slate-900/40 border border-slate-700/40 rounded-xl opacity-80 hover:opacity-100'
-                        : 'bg-[#161726] hover:bg-[#1e2034] border border-[#2a2d48] hover:border-purple-500 rounded-xl'
+                        : 'bg-superficie hover:bg-elevada border border-borde hover:border-borde-fuerte rounded-[4px]'
                     }`}
                   >
                     <div className="px-3 py-1 bg-slate-950/90 border-b border-[#222438] flex items-center justify-between text-[10px] text-slate-400 font-mono">
@@ -245,10 +244,10 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                       <div
                         key={partida.id}
                         onClick={() => onSelectPartida && onSelectPartida(partida)}
-                        className={`absolute rounded-xl overflow-hidden cursor-pointer transition-all shadow-xl group z-10 ${
+                        className={`absolute rounded-[4px] overflow-hidden cursor-pointer transition-colors group z-10 ${
                           (partida as any).isBye
-                            ? 'bg-slate-900/50 border border-slate-700/50 opacity-75 hover:opacity-100'
-                            : 'bg-[#161726] hover:bg-[#1e2034] border border-[#272a42] hover:border-purple-500'
+                            ? 'bg-hundida border border-borde-sutil'
+                            : 'bg-superficie hover:bg-elevada border border-borde hover:border-borde-fuerte'
                         }`}
                         style={{
                           left: `${leftPos}px`,
@@ -257,42 +256,49 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                           height: `${CARD_H}px`
                         }}
                       >
-                        {/* TEAM A */}
-                        <div className={`px-2.5 h-[31px] flex items-center justify-between border-b border-[#202235] text-xs ${
-                          partA?.esGanador && !(partida as any).isBye ? 'bg-purple-950/40' : ''
-                        }`}>
-                          <span className={`truncate max-w-[145px] text-[11px] ${
+                        {/* El ganador se marca atenuando al perdedor, no
+                            pintándole el marcador de verde: en una llave de
+                            16 partidas, 16 chips verdes tapan el cuadro. */}
+                        <div className="px-2.5 h-[31px] flex items-center justify-between border-b border-borde-sutil">
+                          <span className={`truncate max-w-[145px] text-[11.5px] ${
                             (partida as any).isBye
-                              ? 'text-slate-400 font-semibold'
+                              ? 'text-tinta-2 font-medium'
                               : partA?.esGanador
-                              ? 'text-white font-black'
+                              ? 'text-tinta font-semibold'
                               : partA?.equipo
-                              ? 'text-slate-300 font-medium'
-                              : 'text-slate-500 italic'
+                              ? isDone ? 'text-tinta-3' : 'text-tinta-2'
+                              : 'text-tinta-4'
                           }`}>
-                            {(partida as any).isBye ? (partA?.equipo?.nombre || 'Seed #?') : (partA?.equipo?.nombre || 'Por Definir')}
+                            {(partida as any).isBye ? (partA?.equipo?.nombre || 'Seed #?') : (partA?.equipo?.nombre || 'Por definir')}
                           </span>
                           {(partida as any).isBye ? (
-                            <span className="text-[9px] font-bold bg-cyan-900/60 text-cyan-400 border border-cyan-700/40 px-1.5 rounded font-mono">BYE ✓</span>
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.06em] text-tinta-3">Bye</span>
                           ) : (
-                            <span className={`font-mono text-xs font-bold px-1.5 py-0.2 rounded min-w-[20px] text-center ${
-                              partA?.esGanador ? 'bg-emerald-500 text-slate-950 font-black shadow' : isDone ? 'text-slate-400 bg-slate-900/80' : 'text-slate-600 bg-slate-900/30'
+                            <span className={`font-mono tabular text-[12.5px] min-w-[18px] text-center ${
+                              partA?.esGanador ? 'text-tinta font-semibold' : isDone ? 'text-tinta-3' : 'text-tinta-4'
                             }`}>
-                              {partA?.mapasGanados ?? 0}
+                              {isDone || partA?.mapasGanados ? (partA?.mapasGanados ?? 0) : '–'}
                             </span>
                           )}
                         </div>
 
-                        {/* TEAM B */}
-                        <div className="px-2.5 h-[31px] flex items-center justify-between text-xs">
-                          <span className="truncate max-w-[145px] text-[11px] text-slate-600 italic font-mono">
-                            {(partida as any).isBye ? '— BYE —' : (partB?.equipo?.nombre || 'Por Definir')}
+                        <div className="px-2.5 h-[31px] flex items-center justify-between">
+                          <span className={`truncate max-w-[145px] text-[11.5px] ${
+                            (partida as any).isBye
+                              ? 'text-tinta-4'
+                              : partB?.esGanador
+                              ? 'text-tinta font-semibold'
+                              : partB?.equipo
+                              ? isDone ? 'text-tinta-3' : 'text-tinta-2'
+                              : 'text-tinta-4'
+                          }`}>
+                            {(partida as any).isBye ? 'Pasa directo' : (partB?.equipo?.nombre || 'Por definir')}
                           </span>
                           {!(partida as any).isBye && (
-                            <span className={`font-mono text-xs font-bold px-1.5 py-0.2 rounded min-w-[20px] text-center ${
-                              partB?.esGanador ? 'bg-emerald-500 text-slate-950 font-black shadow' : isDone ? 'text-slate-400 bg-slate-900/80' : 'text-slate-600 bg-slate-900/30'
+                            <span className={`font-mono tabular text-[12.5px] min-w-[18px] text-center ${
+                              partB?.esGanador ? 'text-tinta font-semibold' : isDone ? 'text-tinta-3' : 'text-tinta-4'
                             }`}>
-                              {partB?.mapasGanados ?? 0}
+                              {isDone || partB?.mapasGanados ? (partB?.mapasGanados ?? 0) : '–'}
                             </span>
                           )}
                         </div>
