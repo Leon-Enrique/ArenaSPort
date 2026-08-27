@@ -9,7 +9,8 @@
 import {
   ApiBandejaNotificaciones, ApiCampoIdentidad, ApiDisputa, ApiEdicion, ApiEquipoResumen, ApiFase, ApiInscripcion,
   ApiInscripcionCreada, ApiJuego, ApiMensajePartida, ApiMiInscripcion, ApiMiPartida, ApiNotificacion, ApiPartida, ApiReporteResultado,
-  ApiResumenEdicion, ApiTablaGrupo, ApiTokenOut, ApiTorneo, ApiUsuario, ApiUsuarioAdmin,
+  ApiResumenEdicion, ApiStaff, ApiTablaGrupo, ApiTokenOut, ApiTorneo, ApiUsuario, ApiUsuarioAdmin,
+  ApiUsuarioBusqueda, RolStaff,
   ApiEquipoEnListado, ApiMiEquipo, ApiPerfilEquipo, ApiPerfilJugador,
 } from '@/lib/api-types';
 import {
@@ -431,6 +432,32 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify({ es_organizador: esOrganizador, puede_gestionar_organizadores: puedeGestionar }),
     });
+  }
+
+  /** Para elegir a quién sumar como staff de un torneo. Alcanza con ser
+   *  organizador de cualquier torneo — no hace falta el permiso de
+   *  gestionar organizadores globales, que es más estricto. */
+  async buscarUsuarios(q: string): Promise<ApiUsuarioBusqueda[]> {
+    const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+    return this.request<ApiUsuarioBusqueda[]>(`/usuarios/buscar${qs}`);
+  }
+
+  // ──────────────────────────────────────────
+  // STAFF DE TORNEO (admin)
+  // ──────────────────────────────────────────
+  async getStaffDeTorneo(torneoId: string): Promise<ApiStaff[]> {
+    return this.request<ApiStaff[]>(`/torneos/${torneoId}/staff`);
+  }
+
+  async agregarStaff(torneoId: string, usuarioId: number, rol: RolStaff): Promise<ApiStaff> {
+    return this.request<ApiStaff>(`/torneos/${torneoId}/staff`, {
+      method: 'POST',
+      body: JSON.stringify({ usuario_id: usuarioId, rol }),
+    });
+  }
+
+  async quitarStaff(torneoId: string, usuarioId: number): Promise<void> {
+    return this.request<void>(`/torneos/${torneoId}/staff/${usuarioId}`, { method: 'DELETE' });
   }
 
   // ──────────────────────────────────────────

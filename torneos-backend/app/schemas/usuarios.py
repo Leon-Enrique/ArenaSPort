@@ -69,3 +69,24 @@ class CambiarRolIn(BaseModel):
             "Si se omite, no se toca el valor actual."
         ),
     )
+
+
+class UsuarioBusquedaOut(BaseModel):
+    """Lo mínimo para elegir a alguien de una lista: quién es, y si ya
+    tiene acceso global.
+
+    Deliberadamente más chico que `UsuarioAdminOut`. El buscador lo usa
+    cualquier organizador para armar el staff de su torneo, y para eso no
+    necesita — ni debería — ver el estado de permisos de toda la
+    plataforma. `es_organizador` sí viaja, pero por lo contrario: para
+    poder avisar que agregar a esa persona no cambiaría nada, porque ya
+    entra a todos los torneos.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    discord_id: str
+    discord_username: str
+    discord_avatar_url: str | None
+    es_organizador: bool

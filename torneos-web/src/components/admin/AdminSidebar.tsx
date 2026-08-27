@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, ClipboardList,
   ChevronDown, ChevronRight, Plus, Menu, X, Settings,
-  Swords, ListChecks, Crown, LogOut, ArrowLeft, ExternalLink
+  Swords, ListChecks, Crown, LogOut, ArrowLeft, ExternalLink, UserPlus
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { ApiEdicion, ApiTorneo } from '@/lib/api-types';
@@ -170,6 +170,15 @@ export default function AdminSidebar() {
                     >
                       <Settings size={12} />
                       <span>Configuración</span>
+                    </Link>
+                    <Link
+                      href={`/admin/torneos/${torneo.id}/staff`}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all ${
+                        isActive(`/admin/torneos/${torneo.id}/staff`) ? 'text-violet-300 bg-violet-500/20' : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                      }`}
+                    >
+                      <UserPlus size={12} />
+                      <span>Staff</span>
                     </Link>
 
                     <div className="mt-1">

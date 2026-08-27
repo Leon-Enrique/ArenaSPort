@@ -213,3 +213,83 @@ class TestGestionDelStaff:
             headers=auth(escenario["organizador"]),
         )
         assert r.status_code == 404
+
+
+class TestElBuscadorDeUsuarios:
+    """El buscador existe para poder armar el staff de un torneo eligiendo
+    de una lista, en vez de tener que averiguar el id de alguien a mano.
+
+    Lo que se vigila acá es que no se convierta en una puerta de atrás a
+    `listar_usuarios`: el permiso es más bajo a propósito, así que lo que
+    devuelve tiene que ser más chico.
+    """
+
+    def _buscar(self, cliente, quien, **params):
+        return cliente.get("/api/usuarios/buscar", params=params, headers=auth(quien))
+
+    def test_el_organizador_busca_por_nombre(self, cliente, escenario):
+        r = self._buscar(cliente, escenario["organizador"], q="arb")
+        assert r.status_code == 200
+        assert [u["discord_username"] for u in r.json()] == ["Arbitro"]
+
+    def test_no_hace_falta_acertar_las_mayusculas(self, cliente, escenario):
+        r = self._buscar(cliente, escenario["organizador"], q="ARBIT")
+        assert [u["discord_username"] for u in r.json()] == ["Arbitro"]
+
+    def test_tambien_encuentra_por_discord_id_exacto(self, cliente, escenario):
+        """Pegar el ID de Discord es la forma sin ambigüedad de encontrar a
+        alguien cuando hay varios nombres parecidos."""
+        r = self._buscar(cliente, escenario["organizador"], q="ajeno")
+        assert [u["id"] for u in r.json()] == [escenario["ajeno"].id]
+
+    def test_sin_termino_devuelve_a_todos(self, cliente, escenario):
+        """Abrir el buscador sin escribir nada tiene que mostrar caras, no
+        una lista vacía."""
+        r = self._buscar(cliente, escenario["organizador"])
+        assert len(r.json()) == 4
+
+    def test_el_guion_bajo_no_es_un_comodin(self, cliente, escenario, db):
+        """`_` significa 'cualquier carácter' en LIKE y es común en los
+        nombres de Discord: sin escaparlo, buscar `leo_` traería `leon`."""
+        db.add(Usuario(discord_id="leo_", discord_username="leo_pro"))
+        db.add(Usuario(discord_id="leon", discord_username="leonardo"))
+        db.commit()
+
+        r = self._buscar(cliente, escenario["organizador"], q="leo_")
+        assert [u["discord_username"] for u in r.json()] == ["leo_pro"]
+
+    def test_no_ofrece_cuentas_desactivadas(self, cliente, escenario, db):
+        """Darle acceso a una cuenta apagada sería darle acceso a nadie."""
+        escenario["ajeno"].esta_activo = False
+        db.commit()
+
+        r = self._buscar(cliente, escenario["organizador"], q="ajeno")
+        assert r.json() == []
+
+    def test_no_expone_el_estado_de_permisos(self, cliente, escenario):
+        """El permiso para llamar acá es más bajo que el de `GET /usuarios`,
+        así que lo que devuelve tiene que ser más chico: nada de
+        `puede_gestionar_organizadores` ni `esta_activo`."""
+        fila = self._buscar(cliente, escenario["organizador"], q="arb").json()[0]
+        assert set(fila) == {
+            "id", "discord_id", "discord_username", "discord_avatar_url", "es_organizador",
+        }
+
+    def test_marca_a_quien_ya_es_organizador_global(self, cliente, escenario):
+        """Para poder avisar que sumarlo no cambiaría nada: ya entra a todos
+        los torneos."""
+        fila = self._buscar(cliente, escenario["organizador"], q="Org").json()[0]
+        assert fila["es_organizador"] is True
+
+    def test_no_es_para_cualquiera(self, cliente, escenario):
+        assert self._buscar(cliente, escenario["ajeno"], q="a").status_code == 403
+
+    def test_el_staff_de_un_torneo_tampoco_lo_usa(self, cliente, escenario):
+        """Sumar staff es del organizador global, así que el buscador que
+        alimenta esa pantalla también."""
+        assert self._buscar(cliente, escenario["admin"], q="a").status_code == 403
+
+    def test_el_limite_no_se_puede_estirar(self, cliente, escenario):
+        r = self._buscar(cliente, escenario["organizador"], limite=9999)
+        assert r.status_code == 200
+        assert len(r.json()) <= 50

@@ -1,18 +1,36 @@
-"""Gestión de organizadores. Todo acá exige `puede_gestionar_organizadores`
-— no alcanza con ser organizador a secas — porque esta es la única parte
-del sistema donde el propio permiso de gestión está en juego. Sin ese
-segundo nivel, cualquier organizador promovido podría sacarle el rol a
-quien lo promovió a él.
+"""Usuarios: lo propio de cada uno, y la gestión de organizadores.
+
+Repartir el rol de organizador exige `puede_gestionar_organizadores` — no
+alcanza con ser organizador a secas — porque esta es la única parte del
+sistema donde el propio permiso de gestión está en juego. Sin ese segundo
+nivel, cualquier organizador promovido podría sacarle el rol a quien lo
+promovió a él.
+
+`buscar_usuarios` es la excepción deliberada: alcanza con ser organizador.
+Sirve para elegir a quién sumar como staff de un torneo, que es una
+decisión acotada a ese torneo, y devuelve una vista recortada que no
+expone el estado de permisos de nadie.
 """
 
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps import CurrentUser, DbSession, RequiereGestionDeOrganizadores
+from app.api.deps import (
+    CurrentUser,
+    DbSession,
+    RequiereGestionDeOrganizadores,
+    RequiereOrganizador,
+)
 from app.domain.enums import EstadoPartida
 from app.models import Edicion, Fase, Jugador, Partida, ParticipacionEnPartida, Torneo, Usuario
-from app.schemas.usuarios import CambiarRolIn, MiInscripcionOut, MiPartidaOut, UsuarioAdminOut
+from app.schemas.usuarios import (
+    CambiarRolIn,
+    MiInscripcionOut,
+    MiPartidaOut,
+    UsuarioAdminOut,
+    UsuarioBusquedaOut,
+)
 
 router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 
@@ -165,6 +183,49 @@ def listar_usuarios(
     if discord_id:
         q = q.filter(Usuario.discord_id == discord_id)
     return q.order_by(Usuario.ultimo_login_at.desc()).all()
+
+
+@router.get("/buscar", response_model=list[UsuarioBusquedaOut])
+def buscar_usuarios(
+    db: DbSession,
+    _organizador: RequiereOrganizador,
+    q: str = "",
+    limite: int = 20,
+) -> list[Usuario]:
+    """Busca gente por nombre de Discord (o por `discord_id` exacto) para
+    poder elegirla de una lista.
+
+    Existe aparte de `listar_usuarios` por el permiso: sumar staff a un
+    torneo es una decisión acotada a ese torneo, así que la puede tomar
+    cualquier organizador; tocar quién es organizador global, no. Por eso
+    lo que se devuelve acá es `UsuarioBusquedaOut`, que no incluye el
+    estado de permisos de nadie.
+
+    Sin `q` devuelve los últimos que iniciaron sesión: abrir el buscador
+    y ya ver caras conocidas resuelve el caso común sin escribir nada.
+
+    Solo aparece quien alguna vez inició sesión — antes de eso no hay
+    fila que elegir — y nunca las cuentas desactivadas: darle acceso a
+    una cuenta apagada sería darle acceso a nadie.
+    """
+    consulta = db.query(Usuario).filter(Usuario.esta_activo.is_(True))
+
+    termino = q.strip()
+    if termino:
+        # Un `_` en el nombre es común en Discord y en LIKE significa
+        # "cualquier carácter": sin escaparlo, buscar "leo_" traería
+        # también "leon".
+        patron = termino.translate(str.maketrans({"\\": "\\\\", "%": "\\%", "_": "\\_"}))
+        consulta = consulta.filter(
+            (Usuario.discord_username.ilike(f"%{patron}%", escape="\\"))
+            | (Usuario.discord_id == termino)
+        )
+
+    return (
+        consulta.order_by(Usuario.ultimo_login_at.desc())
+        .limit(max(1, min(limite, 50)))
+        .all()
+    )
 
 
 @router.patch("/{usuario_id}/rol", response_model=UsuarioAdminOut)

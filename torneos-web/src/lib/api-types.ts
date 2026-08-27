@@ -248,6 +248,25 @@ export interface ApiUsuarioAdmin {
   ultimo_login_at: string;
 }
 
+export interface ApiUsuarioBusqueda {
+  id: number;
+  discord_id: string;
+  discord_username: string;
+  discord_avatar_url: string | null;
+  es_organizador: boolean;
+}
+
+export type RolStaff = 'administrador' | 'arbitro';
+
+export interface ApiStaff {
+  id: number;
+  torneo_id: number;
+  usuario_id: number;
+  usuario_nombre: string;
+  usuario_avatar_url: string | null;
+  rol: RolStaff;
+}
+
 export interface ApiDisputa {
   id: number;
   partida_id: number;

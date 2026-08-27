@@ -473,7 +473,22 @@ class StaffOut(BaseModel):
     torneo_id: int
     usuario_id: int
     usuario_nombre: str = ""
+    usuario_avatar_url: str | None = None
     rol: RolStaff
+
+
+def _staff_out(staff: StaffDeTorneo, usuario: Usuario | None) -> StaffOut:
+    """El usuario se pasa aparte porque no siempre viene de la misma
+    consulta, y porque puede faltar: si la cuenta se borró, la fila de
+    staff sigue ahí y hay que poder mostrarla para poder sacarla."""
+    return StaffOut(
+        id=staff.id,
+        torneo_id=staff.torneo_id,
+        usuario_id=staff.usuario_id,
+        usuario_nombre=usuario.discord_username if usuario else "—",
+        usuario_avatar_url=usuario.discord_avatar_url if usuario else None,
+        rol=staff.rol,
+    )
 
 
 @router_torneos.get("/{torneo_id}/staff", response_model=list[StaffOut])
@@ -483,16 +498,7 @@ def listar_staff(torneo_id: int, db: DbSession, _organizador: RequiereOrganizado
         raise HTTPException(status.HTTP_404_NOT_FOUND, "El torneo no existe.")
 
     filas = db.query(StaffDeTorneo).filter(StaffDeTorneo.torneo_id == torneo_id).all()
-    salida = []
-    for f in filas:
-        usuario = db.get(Usuario, f.usuario_id)
-        salida.append(
-            StaffOut(
-                id=f.id, torneo_id=f.torneo_id, usuario_id=f.usuario_id,
-                usuario_nombre=usuario.discord_username if usuario else "—", rol=f.rol,
-            )
-        )
-    return salida
+    return [_staff_out(f, db.get(Usuario, f.usuario_id)) for f in filas]
 
 
 @router_torneos.post("/{torneo_id}/staff", response_model=StaffOut, status_code=status.HTTP_201_CREATED)
@@ -530,19 +536,13 @@ def agregar_staff(
         existente.rol = datos.rol
         db.commit()
         db.refresh(existente)
-        return StaffOut(
-            id=existente.id, torneo_id=torneo_id, usuario_id=datos.usuario_id,
-            usuario_nombre=usuario.discord_username, rol=existente.rol,
-        )
+        return _staff_out(existente, usuario)
 
     staff = StaffDeTorneo(torneo_id=torneo_id, usuario_id=datos.usuario_id, rol=datos.rol)
     db.add(staff)
     db.commit()
     db.refresh(staff)
-    return StaffOut(
-        id=staff.id, torneo_id=torneo_id, usuario_id=datos.usuario_id,
-        usuario_nombre=usuario.discord_username, rol=staff.rol,
-    )
+    return _staff_out(staff, usuario)
 
 
 @router_torneos.delete("/{torneo_id}/staff/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)

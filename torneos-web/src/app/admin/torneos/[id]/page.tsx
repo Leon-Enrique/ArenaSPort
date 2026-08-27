@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Users, Swords, ShieldAlert, Trophy, Plus,
-  Settings, Eye, Loader2, AlertTriangle, Trash2
+  Settings, Eye, Loader2, AlertTriangle, Trash2, UserPlus
 } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { ApiEdicion, ApiTorneo } from '@/lib/api-types';
@@ -117,6 +117,12 @@ export default function TorneoDetailPage() {
                   <Eye size={13} /> Vista pública
                 </Link>
               )}
+              <Link
+                href={`/admin/torneos/${torneoId}/staff`}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-xl border border-white/20 transition-all"
+              >
+                <UserPlus size={13} /> Staff
+              </Link>
               <Link
                 href={`/admin/torneos/${torneoId}/ediciones/nueva`}
                 className="flex items-center gap-1.5 px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-all"
