@@ -29,6 +29,19 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+# Postgres exige un booleano de verdad en un ALTER ... SET DEFAULT: con `1`
+# corta con "la columna es de tipo boolean pero la expresion default es de
+# tipo integer". SQLite lo acepta igual, asi que el error solo aparece en
+# produccion — y como el Procfile encadena `alembic upgrade head && uvicorn`,
+# se lleva puesto el deploy entero.
+#
+# Ojo: en las migraciones anteriores `server_default="1"` sobre booleanos SI
+# funciona, porque van dentro de un CREATE TABLE, donde Postgres castea el
+# literal. Es solo el ALTER el que no perdona.
+VERDADERO = sa.text("true")
+FALSO = sa.text("false")
+
+
 def upgrade() -> None:
     """Upgrade schema."""
     with op.batch_alter_table("ediciones", schema=None) as batch_op:
@@ -36,7 +49,7 @@ def upgrade() -> None:
             "requiere_equipo_permanente",
             existing_type=sa.Boolean(),
             existing_nullable=False,
-            server_default=sa.text("1"),
+            server_default=VERDADERO,
         )
 
 
@@ -47,5 +60,5 @@ def downgrade() -> None:
             "requiere_equipo_permanente",
             existing_type=sa.Boolean(),
             existing_nullable=False,
-            server_default=sa.text("0"),
+            server_default=FALSO,
         )

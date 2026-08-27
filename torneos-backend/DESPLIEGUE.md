@@ -59,13 +59,21 @@ Las que sí hay que poner a mano:
 
 | Variable | Valor | Si no la ponés |
 |---|---|---|
-| `JWT_SECRET` | Generar uno nuevo | Cualquiera que lea el repo puede firmar tokens de organizador |
+| `JWT_SECRET` | Generar uno nuevo (≥32 chars) | Cualquiera que lea el repo puede firmar tokens de organizador |
 | `DEBUG` | `false` | Queda `/docs` abierto al público |
-| `CORS_ORIGINS` | El dominio del frontend | El navegador bloquea todas las llamadas |
+| `CORS_ORIGINS` | Dominio real del frontend (Vercel), sin `/` al final | El navegador bloquea todas las llamadas |
+| `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` | De la app en Discord Developers | Nadie puede iniciar sesión |
+| `DISCORD_REDIRECT_URI` | `https://TU-BACKEND/api/auth/discord/callback` (mismo valor en Discord) | El login Discord falla al volver |
 | `DISCORD_IDS_ORGANIZADORES_INICIALES` | Tu Discord ID | **Nadie puede administrar nada**: no hay forma de crear el primer organizador |
 | `ALMACENAMIENTO_LOCAL` | `false` | Las evidencias se escriben en disco efímero y se pierden en cada deploy |
 | `R2_*` | Credenciales de Cloudflare R2 | Ídem |
-| `RUN_SEED` | `true` | El catálogo queda vacío y no se puede crear ningún torneo |
+| `RUN_SEED` | `true` (al menos en el primer deploy) | El catálogo queda vacío y no se puede crear ningún torneo |
+
+En el frontend (`torneos-web` en Vercel):
+
+| Variable | Valor |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://TU-BACKEND/api` (con `/api` al final) |
 
 Para el secreto:
 

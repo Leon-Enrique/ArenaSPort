@@ -97,3 +97,22 @@ def test_la_migracion_del_chat_funciona_offline(sql_para_postgres):
     que inspeccionar, así que tiene que saber saltear ese chequeo — si no,
     la generación del SQL se corta a la mitad de la cadena."""
     assert "CREATE TABLE mensajes_partida" in sql_para_postgres
+
+
+def test_alter_default_booleano_usa_true_false(sql_para_postgres):
+    """Postgres rechaza `SET DEFAULT 1` en un ALTER de columna boolean.
+
+    En CREATE TABLE el literal entero se casteá; en ALTER no. Usar `1`/`0`
+    acá tira el deploy entero porque el Procfile encadena
+    `alembic upgrade head && uvicorn`.
+    """
+    alters_con_entero = re.findall(
+        r"ALTER COLUMN \w+ SET DEFAULT [01]\b",
+        sql_para_postgres,
+        flags=re.IGNORECASE,
+    )
+    assert not alters_con_entero, (
+        "ALTER ... SET DEFAULT con entero sobre boolean rompe Postgres: "
+        f"{alters_con_entero}"
+    )
+    assert "requiere_equipo_permanente SET DEFAULT true" in sql_para_postgres
