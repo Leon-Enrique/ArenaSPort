@@ -1,85 +1,147 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-dark: #0a0e17;
-    --card-bg: rgba(15, 23, 42, 0.75);
-    --border-color: rgba(51, 65, 85, 0.6);
-    --neon-blue: #06b6d4;
-    --neon-purple: #8b5cf6;
-    --neon-gold: #f59e0b;
-  }
+/* ──────────────────────────────────────────────────────────────
+   Sistema visual
+   ──────────────────────────────────────────────────────────────
+   La regla de fondo: el color significa algo o no está.
 
+   Antes había ~90 gradientes violeta→cyan, glows con text-shadow y
+   glassmorphism en cada tarjeta. Cuando todo destaca, nada destaca —
+   y es lo que hacía que la página se leyera como plantilla en vez de
+   como herramienta. Acá hay UNA escala de grises neutra, UN acento
+   reservado para acciones, y tres colores que comunican estado.
+
+   Referencia: Battlefy, Toornament, start.gg. Ninguna usa gradientes
+   decorativos ni glow; la jerarquía la dan el borde, el fondo y la
+   tipografía.
+   ────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Estas dos líneas son las que faltaban: layout.tsx cargaba las
+     fuentes con next/font y nadie las mapeaba, así que `font-sans`
+     caía al stack por defecto y el body las pisaba con system-ui.
+     Se descargaban en cada visita y no se aplicaban nunca. */
+  --font-sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono-jetbrains), ui-monospace, monospace;
+
+  /* Superficies. Neutras y con poca separación entre sí: la
+     profundidad se construye con el borde, no con el salto de tono. */
+  --color-fondo: #0b0b0c;
+  --color-superficie: #141416;
+  --color-elevada: #1a1a1d;
+  --color-hundida: #101012;
+
+  --color-borde: #26262a;
+  --color-borde-fuerte: #35353a;
+  --color-borde-sutil: #1d1d21;
+
+  /* Texto */
+  --color-tinta: #f2f2f3;
+  --color-tinta-2: #c8c8cd;
+  --color-tinta-3: #6e6e75;
+  --color-tinta-4: #4a4a52;
+
+  /* Acento — SOLO acciones y navegación activa. Si aparece en un
+     título, en un ícono decorativo o en un borde de tarjeta, se está
+     usando mal. */
+  --color-acento: #5b57d1;
+  --color-acento-claro: #8b87f5;
+  --color-acento-hover: #6a66dd;
+
+  /* Estados. Cada uno responde una pregunta distinta del torneo. */
+  --color-vivo: #e5484d;      /* al aire — convención de transmisión */
+  --color-atencion: #e8a33d;  /* falta algo que alguien tiene que hacer */
+  --color-ok: #3e9b62;        /* confirmado, aprobado, cerrado */
+}
+
+@layer base {
   body {
-    background-color: var(--bg-dark);
-    color: #f1f5f9;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-tinta);
     min-height: 100vh;
     overflow-x: hidden;
+    /* Sin font-family acá: lo pone `font-sans` en el <body> de
+       layout.tsx, que ahora sí resuelve a Archivo. */
   }
 
-  /* Custom esports scrollbar */
+  /* Las cifras de un torneo se leen en columna —marcadores, IDs de
+     juego, cupos— así que tienen que ocupar todas lo mismo. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #090d16;
+    background: var(--color-fondo);
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 9999px;
+    background: var(--color-borde);
+    border-radius: 999px;
+    border: 3px solid var(--color-fondo);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3b82f6;
+    background: var(--color-borde-fuerte);
   }
 }
 
-/* Glassmorphism utility */
+/* ──────────────────────────────────────────────────────────────
+   Superficies
+
+   `glass-card` y `glass-panel` conservan el nombre a propósito: los
+   usan una docena de componentes, y redefinirlas acá los actualiza a
+   todos de una vez sin tocar doce archivos. Ya no son de vidrio —
+   son superficies planas— pero renombrarlas sería un cambio mecánico
+   grande a cambio de nada.
+   ────────────────────────────────────────────────────────────── */
+
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde-sutil);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s ease-in-out;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  transition: border-color 0.15s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(124, 58, 237, 0.5);
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+  border-color: var(--color-borde-fuerte);
 }
 
-/* Gaming text glow */
-.text-glow-purple {
-  text-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+/* Estado en 2px de borde izquierdo, quieto. Antes esto era una
+   animación de box-shadow en bucle infinito: cansa, compite con el
+   contenido y en una lista de 16 partidas es directamente ruido. */
+.estado-vivo {
+  border-left: 2px solid var(--color-vivo);
 }
 
-.text-glow-cyan {
-  text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+.estado-atencion {
+  border-left: 2px solid var(--color-atencion);
 }
 
-.text-glow-gold {
-  text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+.estado-ok {
+  border-left: 2px solid var(--color-ok);
 }
 
-/* Glowing border pulse for LIVE matches */
-@keyframes live-pulse {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-    border-color: rgba(34, 197, 94, 0.8);
+/* El punto rojo de "en vivo". Único lugar donde queda movimiento, y
+   es un latido lento sobre un elemento de 5px — no sobre el borde de
+   una tarjeta entera. */
+@keyframes latido {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.punto-vivo {
+  animation: latido 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .punto-vivo {
+    animation: none;
   }
-  50% {
-    box-shadow: 0 0 18px rgba(34, 197, 94, 0.8);
-    border-color: rgba(34, 197, 94, 1);
-  }
-}
-
-.live-match-border {
-  animation: live-pulse 2s infinite ease-in-out;
 }

@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Archivo y no Inter: es una grotesca con más carácter, aguanta
+// pantallas densas de datos, y no arrastra el aire de plantilla que
+// tiene Inter por estar en todos lados.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
+// Para cifras: marcadores, IDs de juego, cupos. Los dígitos ocupan
+// todos lo mismo, así que las columnas se alinean solas.
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-mono-jetbrains",
   subsets: ["latin"],
 });
 
@@ -32,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${jetbrainsMono.variable} dark antialiased`}>
-      <body className="min-h-screen bg-[#0a0e17] text-slate-100 font-sans">
+    <html lang="es" className={`${archivo.variable} ${jetbrainsMono.variable} dark antialiased`}>
+      <body className="min-h-screen bg-fondo text-tinta font-sans">
         {children}
       </body>
     </html>

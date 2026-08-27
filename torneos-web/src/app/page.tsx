@@ -7,8 +7,7 @@ import Footer from '@/components/Footer';
 import { api } from '@/lib/api';
 import { Edicion } from '@/types';
 import {
-  Trophy, Users, Sparkles, Calendar, Award,
-  ChevronRight, Gamepad2, CheckCircle2, Clock, Loader2, PlusCircle
+  Trophy, Users, ChevronRight, CheckCircle2, Loader2, PlusCircle
 } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = {
@@ -45,40 +44,37 @@ export default function Home() {
   const equiposTotales = ediciones.reduce((acc, e) => acc + e.equiposInscritosCount, 0);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080811] text-slate-100 selection:bg-violet-600 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-fondo text-tinta selection:bg-acento selection:text-white">
       <Navbar />
 
-      <main className="flex-1 space-y-20 pb-24">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden pt-10 pb-16">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-violet-600/25 via-indigo-600/20 to-cyan-500/20 blur-[140px] rounded-full pointer-events-none" />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="max-w-3xl mx-auto text-center space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-950/70 border border-violet-500/40 text-xs font-semibold text-violet-300 shadow-inner">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Plataforma Profesional de Esports Móviles
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-                COMPITE EN LAS LIGAS DE <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-violet-400 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
-                  ESPORTS DE LATINOAMÉRICA
-                </span>
+      <main className="flex-1 space-y-14 pb-20">
+        {/* Portada.
+            Antes: un halo de gradiente de 800×400 con blur de 140px, un
+            título con gradiente de tres colores y una píldora "Plataforma
+            Profesional". Nada de eso decía qué hay adentro.
+            Ahora la portada dice el estado real de la liga — y si hay algo
+            en vivo, eso es lo que importa. */}
+        <section className="border-b border-borde-sutil">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14">
+            <div className="max-w-2xl">
+              <h1 className="text-[34px] sm:text-[42px] font-bold tracking-[-0.03em] text-tinta leading-[1.08]">
+                Torneos de Mobile Legends<br className="hidden sm:inline" /> en Bolivia
               </h1>
-
-              <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Inscribe a tu escuadra en torneos oficiales con cuadro de llaves en vivo, control de árbitros y premios garantizados.
+              <p className="mt-3 text-[14px] sm:text-[15px] text-tinta-3 leading-relaxed max-w-xl">
+                Inscribí a tu equipo, seguí el cuadro en vivo y reportá tus
+                resultados. Sin planillas ni grupos de WhatsApp.
               </p>
 
               {!loading && !error && (
-                <div className="grid grid-cols-2 gap-4 pt-4 max-w-sm mx-auto">
+                <div className="flex items-center gap-8 mt-8">
                   <div>
-                    <span className="font-mono text-2xl sm:text-3xl font-black text-white block">{torneosActivos}</span>
-                    <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Torneos Activos</span>
+                    <div className="font-mono tabular text-[28px] font-semibold text-tinta leading-none">{torneosActivos}</div>
+                    <div className="text-[10px] text-tinta-3 uppercase tracking-[0.08em] font-semibold mt-1.5">Torneos activos</div>
                   </div>
+                  <div className="w-px h-9 bg-borde" />
                   <div>
-                    <span className="font-mono text-2xl sm:text-3xl font-black text-violet-400 block">{equiposTotales}</span>
-                    <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Equipos Inscritos</span>
+                    <div className="font-mono tabular text-[28px] font-semibold text-tinta leading-none">{equiposTotales}</div>
+                    <div className="text-[10px] text-tinta-3 uppercase tracking-[0.08em] font-semibold mt-1.5">Equipos inscritos</div>
                   </div>
                 </div>
               )}
@@ -88,54 +84,59 @@ export default function Home() {
 
         {/* TOURNAMENTS EXPLORER */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/8 pb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">Explorador Oficial</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2.5">
-                <Gamepad2 className="text-violet-400" /> Torneos y Temporadas
+              <h2 className="text-[22px] font-bold tracking-[-0.025em] text-tinta">
+                Torneos
               </h2>
+              <p className="text-[13px] text-tinta-3 mt-1">
+                {ediciones.length} {ediciones.length === 1 ? 'torneo' : 'torneos'}
+                {torneosActivos > 0 && ` · ${torneosActivos} ${torneosActivos === 1 ? 'activo' : 'activos'}`}
+              </p>
             </div>
 
             {juegosDisponibles.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center bg-[#131322] p-1 rounded-xl border border-white/10">
-                  <button
-                    onClick={() => setSelectedJuego('todos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedJuego === 'todos' ? 'bg-violet-600 text-white shadow-md' : 'text-white/40 hover:text-white'}`}
-                  >
-                    Todos
-                  </button>
-                  {juegosDisponibles.map((j) => (
+                {/* Un solo juego activo no es una elección: el selector
+                    solo aparece cuando hay algo que elegir. */}
+                {juegosDisponibles.length > 1 && (
+                  <div className="flex items-center gap-1">
                     <button
-                      key={j.id}
-                      onClick={() => setSelectedJuego(j.codigo)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedJuego === j.codigo ? 'bg-violet-600 text-white shadow-md' : 'text-white/40 hover:text-white'}`}
+                      onClick={() => setSelectedJuego('todos')}
+                      className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors ${selectedJuego === 'todos' ? 'bg-borde text-tinta' : 'text-tinta-3 hover:text-tinta'}`}
                     >
-                      {j.codigo.toUpperCase()}
+                      Todos
                     </button>
-                  ))}
-                </div>
+                    {juegosDisponibles.map((j) => (
+                      <button
+                        key={j.id}
+                        onClick={() => setSelectedJuego(j.codigo)}
+                        className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors ${selectedJuego === j.codigo ? 'bg-borde text-tinta' : 'text-tinta-3 hover:text-tinta'}`}
+                      >
+                        {j.codigo.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                <div className="flex items-center bg-[#131322] p-1 rounded-xl border border-white/10">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => setStatusFilter('todos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${statusFilter === 'todos' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
+                    className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors ${statusFilter === 'todos' ? 'bg-borde text-tinta' : 'text-tinta-3 hover:text-tinta'}`}
                   >
                     Todos
                   </button>
                   <button
                     onClick={() => setStatusFilter('en_curso')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${statusFilter === 'en_curso' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-white/40 hover:text-white'}`}
+                    className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors ${statusFilter === 'en_curso' ? 'bg-borde text-tinta' : 'text-tinta-3 hover:text-tinta'}`}
                   >
-                    En Curso
+                    En vivo
                   </button>
                   <button
                     onClick={() => setStatusFilter('inscripciones_abiertas')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${statusFilter === 'inscripciones_abiertas' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-white/40 hover:text-white'}`}
+                    className={`px-2.5 py-1.5 rounded-[4px] text-[12px] font-medium transition-colors ${statusFilter === 'inscripciones_abiertas' ? 'bg-borde text-tinta' : 'text-tinta-3 hover:text-tinta'}`}
                   >
-                    Inscripciones Abiertas
+                    Inscripciones
                   </button>
                 </div>
               </div>
@@ -160,67 +161,79 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEdiciones.map((edicion) => (
-                <div
+                /* La cabecera decorativa de 128px se fue: era un gradiente
+                   con un ícono al 10% de opacidad, o sea 128px que no
+                   decían nada. Ahora el estado vive en 3px de franja y
+                   esos pixeles son datos. */
+                <Link
                   key={edicion.id}
-                  className="bg-[#11111f] rounded-3xl overflow-hidden border border-white/8 flex flex-col justify-between group hover:border-violet-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/10"
+                  href={`/torneos/${edicion.slug}`}
+                  className="group bg-superficie border border-borde rounded-[6px] overflow-hidden flex flex-col hover:border-borde-fuerte transition-colors"
                 >
-                  <div className="relative h-32 overflow-hidden bg-gradient-to-br from-violet-950 to-slate-950 flex items-center justify-center">
-                    <Gamepad2 className="w-10 h-10 text-white/10" />
-                    <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-violet-950/90 border border-violet-500 text-violet-300 backdrop-blur-md">
-                        {edicion.juego.nombre}
-                      </span>
-                      {(edicion.estado === 'en_curso' || edicion.estado === 'inscripciones_abiertas') && (
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase backdrop-blur-md ${
-                          edicion.estado === 'en_curso' ? 'bg-emerald-950/90 border border-emerald-500 text-emerald-300' : 'bg-cyan-950/90 border border-cyan-500 text-cyan-300'
-                        }`}>
-                          {ESTADO_LABEL[edicion.estado]}
-                        </span>
-                      )}
-                    </div>
-                    {edicion.bolsaPremios && (
-                      <div className="absolute bottom-3 right-3.5 bg-amber-500/20 backdrop-blur-md border border-amber-500/40 px-3.5 py-1 rounded-xl text-amber-300 font-mono font-black text-xs flex items-center gap-1.5">
-                        <Award className="w-3.5 h-3.5 text-amber-400" /> {edicion.bolsaPremios}
-                      </div>
-                    )}
-                  </div>
+                  <div className={`h-[3px] ${
+                    edicion.estado === 'en_curso' ? 'bg-vivo'
+                      : edicion.estado === 'inscripciones_abiertas' ? 'bg-ok'
+                      : 'bg-borde'
+                  }`} />
 
-                  <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <h3 className="font-extrabold text-base text-white group-hover:text-violet-300 transition-colors leading-snug">
-                        {edicion.nombre}
-                      </h3>
-                    </div>
-
-                    <div className="space-y-2.5 pt-4 border-t border-white/5 text-xs">
-                      <div className="flex items-center justify-between text-white/80">
-                        <span className="flex items-center gap-1.5 text-white/40">
-                          <Users className="w-3.5 h-3.5 text-violet-400" /> Equipos:
-                        </span>
-                        <span className="font-mono font-bold text-white">
-                          {edicion.equiposInscritosCount}{edicion.maxEquipos ? ` / ${edicion.maxEquipos}` : ''}
-                        </span>
+                  <div className="p-[18px] flex flex-col gap-3.5 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          {edicion.estado === 'en_curso' ? (
+                            <span className="flex items-center gap-1.5 text-vivo">
+                              <span className="w-[5px] h-[5px] rounded-full bg-vivo punto-vivo" />
+                              En vivo
+                            </span>
+                          ) : (
+                            <span className={edicion.estado === 'inscripciones_abiertas' ? 'text-ok' : 'text-tinta-3'}>
+                              {ESTADO_LABEL[edicion.estado] ?? 'Terminado'}
+                            </span>
+                          )}
+                          <span className="text-tinta-4">·</span>
+                          <span className="text-tinta-3">{edicion.juego.nombre}</span>
+                        </div>
+                        <h3 className="font-semibold text-[15.5px] tracking-[-0.015em] text-tinta leading-tight">
+                          {edicion.nombre}
+                        </h3>
                       </div>
-                      {edicion.fechaInicio && (
-                        <div className="flex items-center justify-between text-white/80">
-                          <span className="flex items-center gap-1.5 text-white/40">
-                            <Calendar className="w-3.5 h-3.5 text-cyan-400" /> Inicio:
-                          </span>
-                          <span className="font-mono font-semibold text-white/70">
-                            {new Date(edicion.fechaInicio).toLocaleDateString('es-BO')}
-                          </span>
+
+                      {edicion.bolsaPremios && (
+                        <div className="text-right shrink-0">
+                          <div className="font-mono tabular text-[14px] font-semibold text-tinta">{edicion.bolsaPremios}</div>
+                          <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3 mt-0.5">Premio</div>
                         </div>
                       )}
                     </div>
 
-                    <Link
-                      href={`/torneos/${edicion.slug}`}
-                      className="w-full mt-4 py-3 rounded-xl bg-[#16162a] group-hover:bg-gradient-to-r group-hover:from-violet-600 group-hover:to-cyan-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all border border-white/8 group-hover:border-transparent shadow-lg"
-                    >
-                      Ver Torneo <ChevronRight className="w-4 h-4" />
-                    </Link>
+                    {/* Los datos como tabla y no como lista de "Etiqueta:
+                        valor" repetida: se comparan de una tarjeta a otra
+                        porque están en la misma posición. */}
+                    <div className="grid grid-cols-2 gap-px bg-borde border border-borde rounded-[4px] overflow-hidden mt-auto">
+                      <div className="bg-superficie px-2.5 py-2">
+                        <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Equipos</div>
+                        <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
+                          {edicion.equiposInscritosCount}
+                          {edicion.maxEquipos && <span className="text-tinta-4">/{edicion.maxEquipos}</span>}
+                        </div>
+                      </div>
+                      <div className="bg-superficie px-2.5 py-2">
+                        <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Inicio</div>
+                        <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
+                          {edicion.fechaInicio
+                            ? new Date(edicion.fechaInicio).toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit' })
+                            : '—'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end">
+                      <span className="text-[12.5px] font-semibold text-acento-claro flex items-center gap-1">
+                        Ver torneo <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
