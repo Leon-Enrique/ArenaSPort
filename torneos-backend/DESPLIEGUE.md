@@ -24,9 +24,10 @@ Limitaciones que aceptás al no pagar:
 ### Orden
 
 1. Subir el monorepo a GitHub (Render y Vercel despliegan desde ahí).
-2. Crear proyecto en Supabase → copiar la URI de Postgres (Direct connection,
-   puerto `5432`, con `sslmode=require`). **No** uses el pooler `6543` para
-   Alembic: las migraciones fallan o se cuelgan.
+2. Crear proyecto en Supabase → copiar la URI de Postgres. En Render free
+   **no uses Direct** (IPv6): en Connect elegí **Session pooler** (puerto
+   `5432`, host `*.pooler.supabase.com`). Si falla la migración, probá
+   Transaction pooler. Direct solo sirve desde tu PC o con add-on IPv4.
 3. En Render: *New → Web Service* → repo → **Root Directory** = `torneos-backend`.
    Build: `pip install -r requirements.txt`.  
    Start: el `Procfile` ya hace `alembic upgrade head && uvicorn ... --workers 1`.
