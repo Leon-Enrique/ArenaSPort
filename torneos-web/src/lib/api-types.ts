@@ -337,6 +337,8 @@ export interface ApiPerfilEquipo {
   tag: string | null;
   logo_url: string | null;
   created_at: string;
+  /** Quién administra el equipo, y queda de capitán en cada inscripción. */
+  propietario_usuario_id: number | null;
   record_global: ApiRecord;
   torneos_jugados: number;
   titulos: number;
@@ -378,4 +380,65 @@ export interface ApiMiEquipo {
   tag: string | null;
   logo_url: string | null;
   torneos_jugados: number;
+}
+
+// ──────────────────────────────────────────
+// IDENTIDAD DE JUEGO Y ROSTER PERMANENTE
+//
+// El ID de juego vive en la CUENTA, no en el equipo: se carga una vez y
+// sirve para siempre. Por eso el capitán nunca lo tipea — cuando suma a
+// alguien, sale de la cuenta de esa persona.
+// ──────────────────────────────────────────
+
+export interface ApiIdentidadDeJuego {
+  id: number;
+  juego_id: number;
+  identidad: Record<string, string>;
+  actualizada_at: string;
+}
+
+export interface ApiMiembroEquipo {
+  id: number;
+  usuario_id: number;
+  usuario_nombre: string | null;
+  /** null = lo sumaron pero todavía no cargó su ID de juego. */
+  identidad: Record<string, string> | null;
+  esta_activo: boolean;
+  created_at: string;
+}
+
+export interface ApiJugadorBuscado {
+  usuario_id: number;
+  nombre: string;
+  /** El nick del juego, que es como el capitán lo conoce. */
+  nick: string | null;
+}
+
+export interface ApiInvitacionCreada {
+  id: number;
+  token: string;
+  expira_at: string;
+  usuario_destino_id: number | null;
+}
+
+export interface ApiInvitacion {
+  id: number;
+  estado: 'pendiente' | 'aceptada' | 'revocada';
+  expira_at: string;
+  created_at: string;
+  usuario_destino_id: number | null;
+  aceptada_por_usuario_id: number | null;
+}
+
+export interface ApiInvitacionPreview {
+  equipo_id: number;
+  equipo_nombre: string;
+  juego_id: number;
+  juego_nombre: string;
+  campos_requeridos: string[];
+  expira_at: string;
+  dirigida_a_vos: boolean;
+  ya_cargaste_tu_identidad: boolean;
+  /** Se está mirando el link sin sesión: hay que registrarse y volver. */
+  necesitas_cuenta: boolean;
 }

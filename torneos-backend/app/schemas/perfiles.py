@@ -49,6 +49,13 @@ class PerfilEquipoOut(BaseModel):
     logo_url: str | None
     created_at: datetime
 
+    # Quién administra el equipo. Es también quién queda de capitán en cada
+    # inscripción, así que la pantalla de plantel lo necesita para marcarlo.
+    # Va acá y no en el roster porque es del equipo, no de una membresía.
+    # Es un id de cuenta, no un dato de contacto: Battlefy y Toornament
+    # también muestran públicamente quién capitanea un equipo.
+    propietario_usuario_id: int | None
+
     record_global: RecordOut
     torneos_jugados: int
     titulos: int

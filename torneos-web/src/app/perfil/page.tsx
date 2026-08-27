@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import IdentidadDeJuegoPanel from '@/components/equipos/IdentidadDeJuegoPanel';
 import { api } from '@/lib/api';
 import { ApiError } from '@/lib/api';
 import { ApiMiEquipo, ApiMiInscripcion, ApiMiPartida } from '@/lib/api-types';
@@ -144,6 +145,10 @@ export default function PerfilPage() {
           </div>
         </div>
 
+        {/* Va primero de todo: sin el ID cargado no te pueden inscribir en
+            ningún torneo, así que es lo más urgente que puede haber acá. */}
+        <IdentidadDeJuegoPanel />
+
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
             <Swords size={15} className="text-cyan-400" /> Mis Partidas
@@ -242,12 +247,22 @@ export default function PerfilPage() {
                     {eq.torneos_jugados} {eq.torneos_jugados === 1 ? 'torneo jugado' : 'torneos jugados'}
                   </span>
                 </div>
-                <Link
-                  href={`/equipos/${eq.id}`}
-                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-semibold transition-all shrink-0"
-                >
-                  Ver perfil
-                </Link>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {/* El plantel es lo que se usa seguido; el perfil público
+                      es para mirar historial. Por eso este va primero. */}
+                  <Link
+                    href={`/equipos/${eq.id}/roster`}
+                    className="px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/30 text-purple-300 hover:text-purple-200 text-[11px] font-semibold transition-all flex items-center gap-1.5"
+                  >
+                    <Users size={11} /> Plantel
+                  </Link>
+                  <Link
+                    href={`/equipos/${eq.id}`}
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-semibold transition-all"
+                  >
+                    Ver perfil
+                  </Link>
+                </div>
               </div>
             ))
           )}

@@ -12,6 +12,8 @@ import {
   ApiResumenEdicion, ApiStaff, ApiTablaGrupo, ApiTokenOut, ApiTorneo, ApiUsuario, ApiUsuarioAdmin,
   ApiUsuarioBusqueda, RolStaff,
   ApiEquipoEnListado, ApiMiEquipo, ApiPerfilEquipo, ApiPerfilJugador,
+  ApiIdentidadDeJuego, ApiInvitacion, ApiInvitacionCreada, ApiInvitacionPreview,
+  ApiJugadorBuscado, ApiMiembroEquipo,
 } from '@/lib/api-types';
 import {
   Disputa, Edicion, Equipo, Fase, Inscripcion, Jugador, Juego, Partida,
@@ -69,6 +71,18 @@ class ApiClient {
   async getJuegos(): Promise<Juego[]> {
     const juegos = await this.request<ApiJuego[]>('/juegos');
     return juegos.map(mapJuego);
+  }
+
+  /**
+   * Los juegos sin mapear al tipo de dominio.
+   *
+   * El formulario de identidad de juego necesita dos cosas que `mapJuego`
+   * transforma: el `id` numérico —para cruzarlo con `identidad.juego_id`—
+   * y el nombre EXACTO de cada campo, que es la clave que espera el
+   * backend. Un `key` renombrado del lado del cliente rompería el guardado.
+   */
+  async getJuegosCrudos(): Promise<ApiJuego[]> {
+    return this.request<ApiJuego[]>('/juegos');
   }
 
   // ──────────────────────────────────────────
@@ -275,6 +289,85 @@ class ApiClient {
   ): Promise<ApiMiEquipo> {
     return this.request<ApiMiEquipo>(`/equipos/${equipoId}`, {
       method: 'PATCH', body: JSON.stringify(data),
+    });
+  }
+
+  // ──────────────────────────────────────────
+  // IDENTIDAD DE JUEGO Y ROSTER PERMANENTE
+  // ──────────────────────────────────────────
+
+  /** Los IDs de juego que cargó el usuario, uno por juego. */
+  async getMisIdentidades(): Promise<ApiIdentidadDeJuego[]> {
+    return this.request<ApiIdentidadDeJuego[]>('/usuarios/me/identidades');
+  }
+
+  /**
+   * Carga o corrige el ID de juego propio. Solo para uno mismo: el sentido
+   * de tenerlo en la cuenta es que nadie lo escriba por vos.
+   *
+   * Corregirlo se propaga a todos tus equipos, porque el roster guarda el
+   * vínculo y no una copia.
+   */
+  async guardarMiIdentidad(data: {
+    identidad: Record<string, string>;
+    juego_id?: number;
+  }): Promise<ApiIdentidadDeJuego> {
+    return this.request<ApiIdentidadDeJuego>('/usuarios/me/identidades', {
+      method: 'PUT', body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Busca gente para sumar a un equipo, por nick de juego o nombre de cuenta.
+   * El ID de juego matchea solo exacto y nunca vuelve en la respuesta.
+   */
+  async buscarJugadores(q: string): Promise<ApiJugadorBuscado[]> {
+    if (!q.trim()) return [];
+    return this.request<ApiJugadorBuscado[]>(`/jugadores/buscar?q=${encodeURIComponent(q.trim())}`);
+  }
+
+  async getMiembrosEquipo(equipoId: number): Promise<ApiMiembroEquipo[]> {
+    return this.request<ApiMiembroEquipo[]>(`/equipos/${equipoId}/miembros`);
+  }
+
+  /** El capitán suma directo: el sumado no acepta nada, pero le llega aviso. */
+  async agregarMiembro(equipoId: number, usuarioId: number): Promise<ApiMiembroEquipo> {
+    return this.request<ApiMiembroEquipo>(`/equipos/${equipoId}/miembros`, {
+      method: 'POST', body: JSON.stringify({ usuario_id: usuarioId }),
+    });
+  }
+
+  /** Salirse solo, o que el capitán te saque. Es la misma ruta. */
+  async sacarDelRoster(equipoId: number, miembroId: number): Promise<ApiMiembroEquipo> {
+    return this.request<ApiMiembroEquipo>(`/equipos/${equipoId}/miembros/${miembroId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async crearInvitacion(equipoId: number): Promise<ApiInvitacionCreada> {
+    return this.request<ApiInvitacionCreada>(`/equipos/${equipoId}/invitaciones`, {
+      method: 'POST', body: JSON.stringify({}),
+    });
+  }
+
+  async getInvitaciones(equipoId: number): Promise<ApiInvitacion[]> {
+    return this.request<ApiInvitacion[]>(`/equipos/${equipoId}/invitaciones`);
+  }
+
+  async revocarInvitacion(equipoId: number, invitacionId: number): Promise<ApiInvitacion> {
+    return this.request<ApiInvitacion>(`/equipos/${equipoId}/invitaciones/${invitacionId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /** No pide sesión: el link existe para quien todavía no tiene cuenta. */
+  async verInvitacion(token: string): Promise<ApiInvitacionPreview> {
+    return this.request<ApiInvitacionPreview>(`/invitaciones/${encodeURIComponent(token)}`);
+  }
+
+  async aceptarInvitacion(token: string): Promise<ApiMiembroEquipo> {
+    return this.request<ApiMiembroEquipo>(`/invitaciones/${encodeURIComponent(token)}/aceptar`, {
+      method: 'POST',
     });
   }
 

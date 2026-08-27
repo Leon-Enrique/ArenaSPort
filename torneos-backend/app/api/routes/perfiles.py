@@ -367,6 +367,7 @@ def perfil_de_equipo(equipo_id: int, db: DbSession) -> PerfilEquipoOut:
         tag=equipo.tag,
         logo_url=equipo.logo_url,
         created_at=equipo.created_at,
+        propietario_usuario_id=equipo.propietario_usuario_id,
         record_global=_a_record_out(record_global),
         torneos_jugados=len(historial),
         titulos=titulos,
