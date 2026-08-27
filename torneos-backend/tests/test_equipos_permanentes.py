@@ -52,6 +52,12 @@ def escenario(db):
             torneo_id=torneo.id, juego_id=juego.id, numero=numero,
             nombre=f"Temporada {numero}", slug=f"copa-anual-t{numero}",
             estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+            # Casi todo este archivo prueba la MECÁNICA del equipo
+            # permanente (reuso, dueño, historial), no la regla de si el
+            # torneo exige cuenta. Esa tiene su propia clase más abajo, y
+            # desde que el default se dio vuelta hay que apagarla acá para
+            # poder seguir inscribiendo rosters sueltos.
+            requiere_equipo_permanente=False,
         )
         db.add(e)
         ediciones.append(e)
@@ -86,10 +92,17 @@ def inscribir(cliente, edicion_id, nombre="Dragons", headers=None, equipo_id=Non
     )
 
 
-class TestInscripcionAnonimaSigueFuncionando:
-    """La regresión que más importa: el 97% de las inscripciones no tienen
-    cuenta, y anotarse sin login es una ventaja deliberada para torneos de
-    base."""
+class TestInscripcionSueltaCuandoElTorneoLaPermite:
+    """Anotarse sin cuenta dejó de ser el default, pero NO se borró.
+
+    Era una ventaja deliberada para torneos de base, y sigue estando: el
+    organizador la habilita apagando `requiere_equipo_permanente` en su
+    edición, igual que el "Permanent teams only" de Toornament. Lo que
+    cambió es de qué lado arranca el interruptor, no que exista.
+
+    Estos tests corren con el flag apagado (ver la fixture) y vigilan que
+    ese camino siga entero.
+    """
 
     def test_sin_sesion_se_puede_inscribir(self, cliente, escenario):
         r = inscribir(cliente, escenario["edicion_1"].id)
@@ -225,8 +238,42 @@ class TestTorneoQueExigeEquipoPermanente:
     """El flag por edición, copiado de Toornament: el organizador decide si
     su torneo pide cuenta o no, en vez de imponerlo la plataforma."""
 
-    def test_por_defecto_esta_apagado(self, escenario):
-        assert escenario["edicion_1"].requiere_equipo_permanente is False
+    def test_por_defecto_viene_prendido(self, db, escenario):
+        """Se dio vuelta cuando la identidad de juego pasó a vivir en la
+        cuenta: sin cuenta no hay dónde guardar el ID, a quién avisarle que
+        lo sumaron, ni cómo dejar que se vaya solo del equipo.
+
+        Se construye una edición nueva a mano porque la fixture de este
+        archivo lo apaga a propósito.
+        """
+        nueva = Edicion(
+            torneo_id=escenario["edicion_1"].torneo_id,
+            juego_id=escenario["edicion_1"].juego_id,
+            numero=9,
+            nombre="Recién creada",
+            slug="copa-anual-t9",
+            estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+        )
+        db.add(nueva)
+        db.commit()
+        assert nueva.requiere_equipo_permanente is True
+
+    def test_un_torneo_nuevo_rechaza_al_que_no_tiene_equipo(self, cliente, db, escenario):
+        """La consecuencia de lo anterior, vista desde afuera."""
+        nueva = Edicion(
+            torneo_id=escenario["edicion_1"].torneo_id,
+            juego_id=escenario["edicion_1"].juego_id,
+            numero=10,
+            nombre="Recién creada 2",
+            slug="copa-anual-t10",
+            estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+        )
+        db.add(nueva)
+        db.commit()
+
+        r = inscribir(cliente, nueva.id, headers=auth(escenario["capitan"]))
+        assert r.status_code == 409
+        assert "equipo permanente" in r.json()["detail"]
 
     def test_prendido_rechaza_la_inscripcion_suelta(self, cliente, escenario, db):
         escenario["edicion_1"].requiere_equipo_permanente = True

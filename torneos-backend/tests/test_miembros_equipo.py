@@ -376,3 +376,137 @@ class TestInvitacionPorLink:
         assert r.status_code == 200
         assert r.json()["ya_cargaste_tu_identidad"] is False
         assert "id_juego" in r.json()["campos_requeridos"]
+
+    def test_se_puede_ver_sin_cuenta(self, cliente, escenario):
+        """El link existe para el que todavía no está registrado: darle 401
+        en la única ruta que le da sentido lo dejaba sin poder ver siquiera
+        a qué equipo lo invitan."""
+        token = self._invitar(cliente, escenario).json()["token"]
+        r = cliente.get(f"/api/invitaciones/{token}")
+        assert r.status_code == 200
+        assert r.json()["equipo_nombre"] == "Dragons"
+        assert r.json()["necesitas_cuenta"] is True
+
+    def test_pero_entrar_sigue_exigiendo_cuenta(self, cliente, escenario):
+        token = self._invitar(cliente, escenario).json()["token"]
+        assert cliente.post(f"/api/invitaciones/{token}/aceptar").status_code == 401
+
+
+class TestBuscarJugadoresParaSumar:
+    """Un capitán conoce a su jugador por el nick del juego, no por su
+    nombre de Discord. El buscador de `/usuarios/buscar` no sirve acá: pide
+    ser organizador y solo mira el nombre de cuenta."""
+
+    def _buscar(self, cliente, quien, q):
+        return cliente.get(f"/api/jugadores/buscar?q={q}", headers=auth(quien))
+
+    def test_por_nick_del_juego(self, cliente, escenario):
+        cargar_identidad(cliente, escenario["jugador"], ident(nick="Lyon"))
+        r = self._buscar(cliente, escenario["capitan"], "lyo")
+        assert r.status_code == 200
+        assert [j["usuario_id"] for j in r.json()] == [escenario["jugador"].id]
+
+    def test_por_nombre_de_cuenta(self, cliente, escenario):
+        r = self._buscar(cliente, escenario["capitan"], "Jugad")
+        assert [j["nombre"] for j in r.json()] == ["Jugador"]
+
+    def test_por_id_de_juego_exacto(self, cliente, escenario):
+        cargar_identidad(cliente, escenario["jugador"])
+        r = self._buscar(cliente, escenario["capitan"], "123456789")
+        assert [j["usuario_id"] for j in r.json()] == [escenario["jugador"].id]
+
+    def test_un_id_parcial_no_encuentra_nada(self, cliente, escenario):
+        """Si el ID matcheara parcial, escribir '1' iría trayendo los IDs de
+        MLBB de media plataforma."""
+        cargar_identidad(cliente, escenario["jugador"])
+        assert self._buscar(cliente, escenario["capitan"], "12345").json() == []
+
+    def test_nunca_devuelve_el_id_de_juego(self, cliente, escenario):
+        cargar_identidad(cliente, escenario["jugador"])
+        encontrado = self._buscar(cliente, escenario["capitan"], "Lyon").json()[0]
+        assert encontrado["nick"] == "Lyon"
+        assert "123456789" not in str(encontrado)
+
+    def test_no_hace_falta_ser_organizador(self, cliente, escenario):
+        """Es el punto: el capitán común tiene que poder usarlo."""
+        assert self._buscar(cliente, escenario["capitan"], "Jug").status_code == 200
+
+    def test_sin_sesion_no(self, cliente, escenario):
+        assert cliente.get("/api/jugadores/buscar?q=Jug").status_code == 401
+
+    def test_sin_termino_no_lista_a_todo_el_mundo(self, cliente, escenario):
+        assert self._buscar(cliente, escenario["capitan"], "").json() == []
+
+
+class TestIdentidadOcupada:
+    """El otro lado del 409 de `guardar_mi_identidad`. Sin esto, el primero
+    que escribe un ID lo bloquea para siempre y el mensaje de error manda a
+    una puerta que no existe."""
+
+    @pytest.fixture
+    def organizador(self, db):
+        u = Usuario(discord_id="org-1", discord_username="Org", es_organizador=True)
+        db.add(u)
+        db.commit()
+        return u
+
+    def test_el_organizador_ve_quien_la_tiene(self, cliente, escenario, organizador):
+        cargar_identidad(cliente, escenario["otro"])
+        r = cliente.get(
+            "/api/identidades/duenio?id_juego=123456789&server=2251",
+            headers=auth(organizador),
+        )
+        assert r.status_code == 200
+        assert r.json()["usuario_nombre"] == "Otro"
+
+    def test_un_capitan_comun_no_puede_espiar_identidades(
+        self, cliente, escenario, organizador
+    ):
+        cargar_identidad(cliente, escenario["otro"])
+        r = cliente.get(
+            "/api/identidades/duenio?id_juego=123456789&server=2251",
+            headers=auth(escenario["capitan"]),
+        )
+        assert r.status_code == 403
+
+    def test_liberarla_deja_al_duenio_real_cargarla(
+        self, cliente, escenario, organizador, db
+    ):
+        cargar_identidad(cliente, escenario["otro"])
+        assert cargar_identidad(cliente, escenario["jugador"]).status_code == 409
+
+        identidad_id = db.query(IdentidadDeJuego).one().id
+        r = cliente.delete(
+            f"/api/identidades/{identidad_id}", headers=auth(organizador)
+        )
+        assert r.status_code == 204
+
+        assert cargar_identidad(cliente, escenario["jugador"]).status_code == 200
+
+    def test_al_que_la_pierde_se_le_avisa(self, cliente, escenario, organizador, db):
+        """Puede ser el legítimo y el equivocado ser quien reclamó."""
+        cargar_identidad(cliente, escenario["otro"])
+        identidad_id = db.query(IdentidadDeJuego).one().id
+        cliente.delete(f"/api/identidades/{identidad_id}", headers=auth(organizador))
+
+        aviso = db.query(Notificacion).one()
+        assert aviso.usuario_id == escenario["otro"].id
+        assert aviso.tipo == "identidad_liberada"
+
+    def test_liberarla_no_lo_saca_de_sus_equipos(
+        self, cliente, escenario, organizador, db
+    ):
+        cargar_identidad(cliente, escenario["otro"])
+        agregar(cliente, escenario, escenario["otro"])
+        identidad_id = db.query(IdentidadDeJuego).one().id
+
+        cliente.delete(f"/api/identidades/{identidad_id}", headers=auth(organizador))
+
+        miembro = db.query(MiembroEquipo).one()
+        assert miembro.esta_activo is True
+
+    def test_una_identidad_que_nadie_tiene_da_404(self, cliente, escenario, organizador):
+        r = cliente.get(
+            "/api/identidades/duenio?id_juego=000&server=1", headers=auth(organizador)
+        )
+        assert r.status_code == 404

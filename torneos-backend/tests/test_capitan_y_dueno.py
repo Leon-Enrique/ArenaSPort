@@ -57,6 +57,10 @@ def escenario(db):
     edicion = Edicion(
         torneo_id=torneo.id, juego_id=juego.id, numero=1, nombre="T1",
         slug="copa-t1", estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+        # Este archivo no prueba la regla de equipo permanente: inscribe
+        # rosters sueltos. Explícito para no depender del default, que
+        # ahora exige cuenta (ver Edicion.requiere_equipo_permanente).
+        requiere_equipo_permanente=False,
     )
     db.add(edicion)
     db.flush()

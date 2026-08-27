@@ -116,17 +116,22 @@ class Edicion(Base):
         Boolean, default=False, server_default="0"
     )
 
-    # Si está en True, para inscribirse hay que elegir un equipo permanente
-    # ya existente (y por lo tanto tener cuenta). En False —el default— se
-    # puede seguir anotando un equipo suelto sin loguearse.
+    # Si está en True —el default— para inscribirse hay que elegir un equipo
+    # permanente ya existente, y por lo tanto tener cuenta. En False se
+    # puede anotar un equipo suelto sin loguearse.
     #
-    # Es configurable por edición, no global, copiando lo que hace
-    # Toornament: forzar cuenta en todos los torneos agregaría fricción
-    # justo en el embudo que más importa (que los equipos se anoten), así
-    # que la decisión la toma el organizador de cada torneo. El que quiere
-    # historial acumulado lo prende; el torneo de base sigue como está.
+    # Sigue siendo por edición y no global, copiando lo que hace Toornament
+    # con su "Permanent teams only": forzar cuenta en TODOS los torneos
+    # agrega fricción justo en el embudo que más importa —que los equipos
+    # se anoten— y esa es una decisión de cada torneo, no de la plataforma.
+    #
+    # El default se dio vuelta cuando la identidad de juego pasó a vivir en
+    # la cuenta (ver IdentidadDeJuego): sin cuenta no hay dónde guardar el
+    # ID, no hay a quién avisarle que lo sumaron, y no hay forma de que se
+    # vaya solo del equipo. El torneo de base sigue siendo posible apagando
+    # esto, y ahí se vuelve al roster tipeado por el capitán.
     requiere_equipo_permanente: Mapped[bool] = mapped_column(
-        Boolean, default=False, server_default="0"
+        Boolean, default=True, server_default="1"
     )
 
     # Canal de Discord al que se publican los avisos de esta edición. Solo

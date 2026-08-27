@@ -22,9 +22,14 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
-from app.api.deps import CurrentUser, DbSession
+from app.api.deps import CurrentUser, DbSession, RequiereOrganizador, UsuarioOpcional
 from app.core import notificaciones
-from app.domain.roster import ConfigJuego, ErrorRoster, validar_identidad
+from app.domain.roster import (
+    ConfigJuego,
+    ErrorRoster,
+    construir_clave_identidad,
+    validar_identidad,
+)
 from app.models import (
     Equipo,
     IdentidadDeJuego,
@@ -35,18 +40,22 @@ from app.models import (
 )
 from app.schemas.miembros import (
     AgregarMiembro,
+    DuenioDeIdentidadOut,
     IdentidadDeJuegoOut,
     IdentidadEntrada,
     InvitacionCreada,
     InvitacionCrear,
     InvitacionOut,
     InvitacionPreview,
+    JugadorBuscadoOut,
     MiembroOut,
 )
 
 router_equipos = APIRouter(prefix="/equipos/{equipo_id}", tags=["miembros"])
 router_invitaciones = APIRouter(prefix="/invitaciones", tags=["miembros"])
 router_identidades = APIRouter(prefix="/usuarios/me/identidades", tags=["miembros"])
+router_identidades_admin = APIRouter(prefix="/identidades", tags=["miembros"])
+router_jugadores = APIRouter(prefix="/jugadores", tags=["miembros"])
 
 
 def _ahora() -> datetime:
@@ -156,8 +165,9 @@ def guardar_mi_identidad(
     if de_otro:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            "Otra cuenta ya declaró esa identidad de juego. Si es tuya y "
-            "perdiste el acceso a esa cuenta, escribile al organizador.",
+            "Otra cuenta ya declaró esa identidad de juego. Si es la tuya, "
+            "pedile a un organizador que la libere — puede hacerlo sin "
+            "tocarte la cuenta ni sacarte de ningún equipo.",
         )
 
     identidad = (
@@ -184,6 +194,151 @@ def guardar_mi_identidad(
     db.commit()
     db.refresh(identidad)
     return identidad
+
+
+@router_identidades_admin.get("/duenio", response_model=DuenioDeIdentidadOut)
+def quien_tiene_esta_identidad(
+    db: DbSession,
+    _organizador: RequiereOrganizador,
+    id_juego: str,
+    juego_id: int | None = None,
+    server: str | None = None,
+) -> DuenioDeIdentidadOut:
+    """Quién tiene declarada una identidad de juego.
+
+    Existe por el caso de la identidad ocupada: alguien escribe mal su ID
+    —o el de otro— y a partir de ahí el dueño real no puede cargar el suyo.
+    El error que ve esa persona le dice que hable con el organizador, así
+    que el organizador necesita poder ver quién la tiene y liberarla.
+
+    Solo por coincidencia exacta y solo para organizadores: buscar por
+    fragmentos convertiría esto en un volcado de los IDs de juego de todos.
+    """
+    juego = _resolver_juego(db, juego_id)
+    identidad_parcial = {"id_juego": id_juego}
+    if server is not None:
+        identidad_parcial["server"] = server
+    try:
+        clave = construir_clave_identidad(identidad_parcial, juego.campos_clave())
+    except ErrorRoster as e:
+        raise HTTPException(422, str(e)) from e
+
+    fila = (
+        db.query(IdentidadDeJuego)
+        .filter(
+            IdentidadDeJuego.juego_id == juego.id,
+            IdentidadDeJuego.clave_identidad == clave,
+        )
+        .first()
+    )
+    if not fila:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, "Nadie tiene declarada esa identidad."
+        )
+    duenio = db.get(Usuario, fila.usuario_id)
+    return DuenioDeIdentidadOut(
+        identidad_id=fila.id,
+        usuario_id=fila.usuario_id,
+        usuario_nombre=duenio.discord_username if duenio else None,
+        identidad=fila.identidad,
+        actualizada_at=fila.actualizada_at,
+    )
+
+
+@router_identidades_admin.delete("/{identidad_id}", status_code=status.HTTP_204_NO_CONTENT)
+def liberar_identidad(
+    identidad_id: int,
+    db: DbSession,
+    organizador: RequiereOrganizador,
+    background_tasks: BackgroundTasks,
+) -> None:
+    """Libera una identidad de juego para que su dueño real pueda cargarla.
+
+    Es el otro lado del 409 de `guardar_mi_identidad`: sin esto, el primero
+    que escribe un ID lo bloquea para siempre y el mensaje de error manda a
+    una puerta que no existe.
+
+    Al que la pierde se le avisa, porque puede ser el legítimo y el
+    equivocado ser quien reclamó. No se borra su cuenta ni se lo saca de
+    ningún equipo: solo deja de tener ese ID declarado, y puede cargar el
+    que le corresponda.
+    """
+    fila = db.get(IdentidadDeJuego, identidad_id)
+    if not fila:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Esa identidad no existe.")
+
+    afectado = db.get(Usuario, fila.usuario_id)
+    if afectado:
+        notificaciones.notificar(
+            db,
+            background_tasks,
+            tipo="identidad_liberada",
+            usuarios=[afectado],
+            titulo="Se liberó tu identidad de juego",
+            cuerpo=(
+                f"{organizador.discord_username} liberó la identidad de juego "
+                "que tenías declarada. Si era la tuya, volvé a cargarla desde "
+                "tu perfil."
+            ),
+            url="/perfil",
+        )
+
+    db.delete(fila)
+    db.commit()
+
+
+@router_jugadores.get("/buscar", response_model=list[JugadorBuscadoOut])
+def buscar_jugadores(
+    db: DbSession, usuario: CurrentUser, q: str = "", limite: int = 20
+) -> list[JugadorBuscadoOut]:
+    """Busca gente para sumar a un equipo, por nick de juego o por nombre
+    de cuenta.
+
+    Existe aparte de `/usuarios/buscar` por dos razones. Aquel pide ser
+    organizador —se hizo para armar el staff de un torneo— así que un
+    capitán común no puede usarlo. Y busca solo por nombre de cuenta,
+    cuando un capitán conoce a su jugador por el nick del juego: si se
+    conocieron jugando, el nombre de Discord no lo sabe.
+
+    El ID de juego matchea solo EXACTO. Con coincidencia parcial, escribir
+    "1" iría trayendo los IDs de MLBB de media plataforma; exacto significa
+    que ya lo tenías, no que lo estás pescando. Por lo mismo la respuesta
+    nunca incluye el ID: devuelve el nick, que es lo que hace falta para
+    reconocer a alguien.
+    """
+    termino = q.strip()
+    if not termino:
+        return []
+
+    patron = termino.translate(str.maketrans({"\\": "\\\\", "%": "\\%", "_": "\\_"}))
+    nick = IdentidadDeJuego.identidad["nick"].as_string()
+
+    filas = (
+        db.query(Usuario, IdentidadDeJuego)
+        .outerjoin(IdentidadDeJuego, IdentidadDeJuego.usuario_id == Usuario.id)
+        .filter(
+            Usuario.esta_activo.is_(True),
+            (Usuario.discord_username.ilike(f"%{patron}%", escape="\\"))
+            | (nick.ilike(f"%{patron}%", escape="\\"))
+            # La clave es "id_juego|server", así que el ID exacto entra por
+            # el prefijo; para un juego de clave simple entra por igualdad.
+            | (IdentidadDeJuego.clave_identidad == termino)
+            | (IdentidadDeJuego.clave_identidad.like(f"{patron}|%", escape="\\")),
+        )
+        .limit(max(1, min(limite, 50)))
+        .all()
+    )
+
+    vistos: dict[int, JugadorBuscadoOut] = {}
+    for u, identidad in filas:
+        if u.id in vistos:
+            continue
+        vistos[u.id] = JugadorBuscadoOut(
+            usuario_id=u.id,
+            nombre=u.discord_username,
+            nick=identidad.identidad.get("nick") if identidad else None,
+        )
+    return list(vistos.values())
 
 
 # --------------------------------------------------------------------------
@@ -469,13 +624,19 @@ def revocar_invitacion(
 
 
 def _invitacion_utilizable(
-    db: DbSession, token: str, usuario: Usuario
+    db: DbSession, token: str, usuario: Usuario | None
 ) -> InvitacionAEquipo:
     """La invitación del token, si quien la trae puede usarla.
 
     Todos los rechazos son 404 a propósito, incluido el de la invitación
     dirigida a otro. Distinguir "no existe" de "existe pero no es para vos"
     convertiría a la ruta en un oráculo para adivinar tokens ajenos.
+
+    Sin sesión no se comprueba el destinatario, porque todavía no hay a
+    quién comparar: es el caso del que abre el link antes de registrarse.
+    No filtra nada que el portador del token no tenga ya —el nombre del
+    equipo que lo invitó— y aceptar sí exige sesión, que es donde la
+    comprobación importa.
     """
     invitacion = (
         db.query(InvitacionAEquipo).filter(InvitacionAEquipo.token == token).first()
@@ -485,7 +646,8 @@ def _invitacion_utilizable(
     if _ahora() > invitacion.expira_at:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Esta invitación venció.")
     if (
-        invitacion.usuario_destino_id is not None
+        usuario is not None
+        and invitacion.usuario_destino_id is not None
         and invitacion.usuario_destino_id != usuario.id
     ):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Esta invitación no sirve.")
@@ -493,19 +655,32 @@ def _invitacion_utilizable(
 
 
 @router_invitaciones.get("/{token}", response_model=InvitacionPreview)
-def ver_invitacion(token: str, db: DbSession, usuario: CurrentUser) -> InvitacionPreview:
-    """Qué equipo te está invitando, antes de entrar."""
+def ver_invitacion(
+    token: str, db: DbSession, usuario: UsuarioOpcional
+) -> InvitacionPreview:
+    """Qué equipo te está invitando, antes de entrar.
+
+    No pide sesión, y es a propósito: el link existe justamente para quien
+    todavía no tiene cuenta. Devolverle un 401 en la única ruta que da
+    sentido al link lo dejaba sin poder ver siquiera a qué lo invitan.
+
+    `necesitas_cuenta` le dice al frontend que mande a registrarse primero
+    y vuelva con el mismo token.
+    """
     invitacion = _invitacion_utilizable(db, token, usuario)
     equipo = db.get(Equipo, invitacion.equipo_id)
     juego = db.get(Juego, invitacion.juego_id)
-    ya_cargo = (
-        db.query(IdentidadDeJuego)
-        .filter(
-            IdentidadDeJuego.usuario_id == usuario.id,
-            IdentidadDeJuego.juego_id == juego.id,
+
+    ya_cargo = None
+    if usuario is not None:
+        ya_cargo = (
+            db.query(IdentidadDeJuego)
+            .filter(
+                IdentidadDeJuego.usuario_id == usuario.id,
+                IdentidadDeJuego.juego_id == juego.id,
+            )
+            .first()
         )
-        .first()
-    )
     return InvitacionPreview(
         equipo_id=equipo.id,
         equipo_nombre=equipo.nombre,
@@ -513,8 +688,10 @@ def ver_invitacion(token: str, db: DbSession, usuario: CurrentUser) -> Invitacio
         juego_nombre=juego.nombre,
         campos_requeridos=juego.campos_requeridos(),
         expira_at=invitacion.expira_at,
-        dirigida_a_vos=invitacion.usuario_destino_id is not None,
+        dirigida_a_vos=usuario is not None
+        and invitacion.usuario_destino_id == usuario.id,
         ya_cargaste_tu_identidad=ya_cargo is not None,
+        necesitas_cuenta=usuario is None,
     )
 
 

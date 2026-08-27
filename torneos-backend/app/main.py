@@ -92,6 +92,8 @@ app.include_router(perfiles.router_jugadores, prefix="/api")
 app.include_router(miembros.router_equipos, prefix="/api")
 app.include_router(miembros.router_invitaciones, prefix="/api")
 app.include_router(miembros.router_identidades, prefix="/api")
+app.include_router(miembros.router_identidades_admin, prefix="/api")
+app.include_router(miembros.router_jugadores, prefix="/api")
 
 
 @app.get("/api/health", tags=["health"])

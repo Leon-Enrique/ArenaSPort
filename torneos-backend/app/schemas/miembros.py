@@ -102,3 +102,31 @@ class InvitacionPreview(BaseModel):
     expira_at: datetime
     dirigida_a_vos: bool
     ya_cargaste_tu_identidad: bool
+
+    # True cuando se mira el link sin sesión. El frontend manda a
+    # registrarse y vuelve con el mismo token.
+    necesitas_cuenta: bool = False
+
+
+class JugadorBuscadoOut(BaseModel):
+    """Un resultado del buscador de jugadores.
+
+    Devuelve el nick y NO el ID de juego: el nick alcanza para reconocer a
+    alguien, y publicar el ID convertiría el buscador en un directorio de
+    identidades ajenas.
+    """
+
+    usuario_id: int
+    nombre: str
+    nick: str | None = None
+
+
+class DuenioDeIdentidadOut(BaseModel):
+    """Quién tiene declarada una identidad, para que un organizador pueda
+    liberarla. Ver `liberar_identidad`."""
+
+    identidad_id: int
+    usuario_id: int
+    usuario_nombre: str | None
+    identidad: dict
+    actualizada_at: datetime

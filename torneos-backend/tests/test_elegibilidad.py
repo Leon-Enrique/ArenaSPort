@@ -59,6 +59,10 @@ def edicion(db):
     ed = Edicion(
         torneo_id=torneo.id, juego_id=juego.id, numero=1, nombre="T1", slug="copa-t1",
         estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+        # Este archivo no prueba la regla de equipo permanente: inscribe
+        # rosters sueltos. Explícito para no depender del default, que
+        # ahora exige cuenta (ver Edicion.requiere_equipo_permanente).
+        requiere_equipo_permanente=False,
     )
     db.add(ed)
     db.commit()
@@ -187,6 +191,10 @@ class TestOtrasEdiciones:
         otra = Edicion(
             torneo_id=edicion.torneo_id, juego_id=edicion.juego_id, numero=2,
             nombre="T2", slug="copa-t2", estado=EstadoEdicion.INSCRIPCIONES_ABIERTAS,
+        # Este archivo no prueba la regla de equipo permanente: inscribe
+        # rosters sueltos como antes. Explicito para no depender del
+        # default, que ahora exige cuenta (ver Edicion.requiere_equipo_permanente).
+        requiere_equipo_permanente=False,
         )
         db.add(otra)
         db.commit()
