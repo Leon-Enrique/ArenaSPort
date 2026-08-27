@@ -176,6 +176,31 @@ def _verificar_capitan_de_inscripcion(db: DbSession, usuario, inscripcion: Inscr
         )
 
 
+def _equipo_del_usuario(db: DbSession, equipo_id: int, usuario) -> Equipo:
+    """Trae un equipo comprobando que quien pregunta tenga derecho a él.
+
+    Vive aparte porque no lo usa solo la inscripción: cualquier cosa que
+    exponga el roster permanente de un equipo tiene que pasar por acá
+    primero. Sin este chequeo, pedir el equipo de otro alcanzaría para
+    leerle el plantel entero.
+    """
+    equipo = db.get(Equipo, equipo_id)
+    if not equipo:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese equipo no existe.")
+    if usuario is None:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Para inscribir un equipo existente hay que iniciar sesión.",
+        )
+    es_duenio = equipo.propietario_usuario_id == usuario.id
+    if not es_duenio and not usuario.es_organizador:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Este equipo no es tuyo. Solo su dueño puede inscribirlo.",
+        )
+    return equipo
+
+
 def _resolver_equipo(
     db: DbSession, edicion, datos: InscripcionCreate, usuario, nombre_normalizado: str
 ) -> tuple[Equipo, list[str]]:
@@ -197,20 +222,7 @@ def _resolver_equipo(
     avisos: list[str] = []
 
     if datos.equipo_id is not None:
-        equipo = db.get(Equipo, datos.equipo_id)
-        if not equipo:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Ese equipo no existe.")
-        if usuario is None:
-            raise HTTPException(
-                status.HTTP_401_UNAUTHORIZED,
-                "Para inscribir un equipo existente hay que iniciar sesión.",
-            )
-        es_duenio = equipo.propietario_usuario_id == usuario.id
-        if not es_duenio and not usuario.es_organizador:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "Este equipo no es tuyo. Solo su dueño puede inscribirlo.",
-            )
+        equipo = _equipo_del_usuario(db, datos.equipo_id, usuario)
 
         ya_inscrito = (
             db.query(Inscripcion)

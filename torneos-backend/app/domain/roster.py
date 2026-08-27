@@ -61,6 +61,26 @@ def construir_clave_identidad(identidad: dict, campos_clave: list[str]) -> str:
     return "|".join(partes)
 
 
+def validar_identidad(identidad: dict, config: ConfigJuego) -> str:
+    """Valida la identidad de UN jugador y devuelve su clave.
+
+    `normalizar_roster` valida el equipo entero de una vez, que es el flujo
+    del capitán cargando el formulario. Esto es el otro camino: el jugador
+    que acepta una invitación carga sus propios datos y llega solo, sin
+    equipo alrededor contra el cual validar tamaños ni suplentes.
+
+    La regla de qué campos son obligatorios es la misma en los dos lados a
+    propósito — si se duplicara, un jugador podría entrar por invitación
+    con datos que el formulario del capitán habría rechazado.
+    """
+    faltantes = [
+        c for c in config.campos_requeridos if not str(identidad.get(c, "")).strip()
+    ]
+    if faltantes:
+        raise ErrorRoster(f"Te faltan datos: {', '.join(faltantes)}.")
+    return construir_clave_identidad(identidad, config.campos_clave)
+
+
 def normalizar_roster(
     entradas: list[JugadorEntrada],
     config: ConfigJuego,

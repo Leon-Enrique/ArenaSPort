@@ -73,6 +73,132 @@ class Equipo(Base):
     )
 
     inscripciones: Mapped[list["Inscripcion"]] = relationship(back_populates="equipo")
+    miembros: Mapped[list["MiembroEquipo"]] = relationship(back_populates="equipo")
+
+
+class MiembroEquipo(Base):
+    """Un jugador que pertenece al equipo ENTRE torneos.
+
+    `Jugador` es el plantel de UNA inscripción y muere con ella; esto es la
+    gente del equipo, que sobrevive a la edición. Sirve para lo que antes
+    obligaba a retipear todo: el capitán inscribe su equipo en el torneo
+    siguiente y el roster ya viene cargado.
+
+    Va por juego a propósito. `clave_identidad` se deriva de los campos que
+    cada juego declara como clave (`Juego.campos_clave`), así que la
+    identidad de MLBB —id + server— no es la misma que la de otro juego. Un
+    equipo que juega dos cosas tiene dos rosters permanentes, no uno
+    mezclado.
+
+    `usuario_id` NO es opcional, y esa es la decisión de fondo: cada
+    miembro es una persona con cuenta, no un texto que tipeó el capitán.
+    Se llega acá aceptando una invitación, nunca por carga de terceros. El
+    jugador es dueño de su propia fila —la edita él, y se va del equipo
+    solo— que era justamente el problema a resolver: antes, salirse
+    dependía de que el capitán quisiera sacarte.
+
+    El precio de esto es que se terminó la inscripción anónima: si todo
+    jugador necesita cuenta, el capitán también.
+
+    Ojo con lo que NO cambia: la elegibilidad ("¿este jugador ya está en
+    otro equipo de esta edición?") se sigue decidiendo por
+    `Jugador.clave_identidad` y su índice único parcial. La cuenta se suma
+    como segunda restricción, no como reemplazo — y de paso tapa un hueco
+    que antes no se veía: dos cuentas de la plataforma declarando el mismo
+    ID de juego chocan igual contra la clave de identidad.
+    """
+
+    __tablename__ = "miembros_equipo"
+    __table_args__ = (
+        UniqueConstraint(
+            "equipo_id",
+            "juego_id",
+            "clave_identidad",
+            name="uq_miembro_equipo_identidad",
+        ),
+        # Dos filas para la misma persona en el mismo equipo no significan
+        # nada, y romperían "el jugador edita SU fila" al no haber una sola.
+        UniqueConstraint(
+            "equipo_id", "juego_id", "usuario_id", name="uq_miembro_equipo_usuario"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    equipo_id: Mapped[int] = mapped_column(ForeignKey("equipos.id"), index=True)
+    juego_id: Mapped[int] = mapped_column(ForeignKey("juegos.id"), index=True)
+
+    # Mismo formato que `Jugador.identidad`: {"nick": ..., "id_juego": ...}
+    identidad: Mapped[dict] = mapped_column(JSON)
+    clave_identidad: Mapped[str] = mapped_column(String(200), index=True)
+
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), index=True)
+
+    # Baja sin borrar: quién estuvo en el equipo es historia, y borrar la
+    # fila haría que un jugador que se fue y volvió pierda el rastro.
+    esta_activo: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="1", nullable=False
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone()
+    )
+
+    equipo: Mapped["Equipo"] = relationship(back_populates="miembros")
+
+
+class InvitacionAEquipo(Base):
+    """Una invitación a sumarse al roster permanente de un equipo.
+
+    Con la cuenta obligatoria, esto deja de ser una comodidad y pasa a ser
+    el ÚNICO camino para que alguien entre a un equipo: el capitán ya no
+    puede tipear a nadie. Por eso vive en una tabla y no en memoria como
+    `app/core/tickets.py` — un ticket de stream dura un minuto y se puede
+    perder al reiniciar, una invitación tiene que sobrevivir a que el
+    jugador la abra mañana.
+
+    Dos formas, misma tabla:
+      - `usuario_destino_id` nulo: link abierto, lo acepta el primero que
+        lo abra teniendo cuenta. Es el "mandale el link por WhatsApp".
+      - `usuario_destino_id` puesto: dirigida a alguien que el capitán
+        buscó por nombre. Nadie más la puede aceptar aunque tenga el link.
+
+    No hay estado 'vencida': se deriva de `expira_at` al leerla. Un estado
+    guardado que solo un cron mantiene al día es un estado que va a estar
+    mal — la regla vive en el código que la consulta.
+    """
+
+    __tablename__ = "invitaciones_equipo"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    equipo_id: Mapped[int] = mapped_column(ForeignKey("equipos.id"), index=True)
+    juego_id: Mapped[int] = mapped_column(ForeignKey("juegos.id"), index=True)
+
+    # Se guarda en claro y se devuelve UNA sola vez, al crearla. Es un
+    # secreto de portador de bajo valor —sirve para entrar a un equipo, no
+    # para operar una cuenta— y hachearlo obligaría a re-mostrar un link
+    # que ya no se podría reconstruir. Lo que sí se cuida es que no
+    # aparezca en los listados.
+    token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+    creada_por_usuario_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id"), index=True
+    )
+    usuario_destino_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"), index=True
+    )
+
+    # pendiente | aceptada | revocada
+    estado: Mapped[str] = mapped_column(String(20), default="pendiente", index=True)
+    expira_at: Mapped[datetime] = mapped_column(DateTimeUTC)
+
+    aceptada_por_usuario_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id")
+    )
+    aceptada_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone()
+    )
 
 
 class Inscripcion(Base):

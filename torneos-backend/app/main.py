@@ -10,6 +10,7 @@ from app.api.routes import (
     evidencias,
     fases,
     inscripciones,
+    miembros,
     notificaciones,
     partidas,
     perfiles,
@@ -88,6 +89,8 @@ app.include_router(partidas.router_disputas, prefix="/api")
 app.include_router(stream.router, prefix="/api")
 app.include_router(perfiles.router_equipos, prefix="/api")
 app.include_router(perfiles.router_jugadores, prefix="/api")
+app.include_router(miembros.router_equipos, prefix="/api")
+app.include_router(miembros.router_invitaciones, prefix="/api")
 
 
 @app.get("/api/health", tags=["health"])
