@@ -1,0 +1,35 @@
+# Deploy gratis en Render (API). Front → Vercel. DB → Supabase.
+# En el dashboard: New → Blueprint → este repo.
+#
+# La API free se duerme ~15 min sin tráfico.
+
+services:
+  - type: web
+    name: torneos-api
+    runtime: python
+    plan: free
+    rootDir: torneos-backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: RUN_SEED
+        value: "true"
+      - key: ALMACENAMIENTO_LOCAL
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: DISCORD_REDIRECT_URI
+        sync: false
+      - key: DISCORD_IDS_ORGANIZADORES_INICIALES
+        sync: false

@@ -10,6 +10,69 @@ casi todo aplica igual a Render o Fly.
 
 ---
 
+## Deploy gratis (probar sin gastar)
+
+Stack: **Vercel** (front) + **Render free** (API) + **Supabase free** (Postgres).
+
+Limitaciones que aceptás al no pagar:
+
+- La API en Render **se duerme** ~15 min sin tráfico → el próximo hit tarda 30–60 s.
+- Supabase free puede **pausar** el proyecto si nadie lo usa en días.
+- Con `ALMACENAMIENTO_LOCAL=true` las evidencias viven en disco efímero de Render:
+  **se pierden al redeploy**. Para capturas reales, después sumá R2 (también tiene capa gratis).
+
+### Orden
+
+1. Subir el monorepo a GitHub (Render y Vercel despliegan desde ahí).
+2. Crear proyecto en Supabase → copiar la URI de Postgres (Direct connection,
+   puerto `5432`, con `sslmode=require`). **No** uses el pooler `6543` para
+   Alembic: las migraciones fallan o se cuelgan.
+3. En Render: *New → Web Service* → repo → **Root Directory** = `torneos-backend`.
+   Build: `pip install -r requirements.txt`.  
+   Start: el `Procfile` ya hace `alembic upgrade head && uvicorn ... --workers 1`.
+   Plan: Free.
+4. Variables en Render (mínimo):
+
+   | Variable | Valor |
+   |---|---|
+   | `DATABASE_URL` | URI de Supabase (directa) |
+   | `JWT_SECRET` | `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+   | `DEBUG` | `false` |
+   | `RUN_SEED` | `true` |
+   | `ALMACENAMIENTO_LOCAL` | `true` (demo gratis) |
+   | `CORS_ORIGINS` | URL de Vercel (la llenás después; podés poner un placeholder y editar) |
+   | Discord (opcional al inicio) | Ver abajo |
+
+5. Anotá la URL de Render (`https://….onrender.com`). Probá:
+   `curl https://TU-API.onrender.com/api/health` y `/api/juegos`.
+6. En Vercel: importar el mismo repo → **Root Directory** = `torneos-web`.
+   Env: `NEXT_PUBLIC_API_URL=https://TU-API.onrender.com/api`.
+7. Volvé a Render y poné `CORS_ORIGINS=https://TU-APP.vercel.app` (sin `/` final).
+8. Redeploy del front si hace falta.
+
+### Login / primer organizador
+
+- **Discord (gratis):** creá una app en
+  [Discord Developers](https://discord.com/developers/applications), OAuth2
+  redirect = `https://TU-API.onrender.com/api/auth/discord/callback`, y llená
+  `DISCORD_*` + tu ID en `DISCORD_IDS_ORGANIZADORES_INICIALES`.
+- **Sin Discord:** el registro local (`/api/auth/local/registro`) deja a todos
+  como no-organizador. En el SQL Editor de Supabase, después del primer
+  registro:
+
+  ```sql
+  UPDATE usuarios
+  SET es_organizador = true, puede_gestionar_organizadores = true
+  WHERE email = 'tu@email.com';
+  ```
+
+### Qué NO es gratis forever (recordatorio)
+
+Cuando abras un torneo de verdad: API always-on (Railway/Render paid) y
+evidencias en R2. Este camino es para **ver que el deploy funciona**.
+
+---
+
 ## Las tres cosas que rompen el despliegue si se pasan por alto
 
 **1. Las migraciones tienen que correr antes de que arranque la app.**
