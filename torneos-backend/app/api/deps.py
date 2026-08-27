@@ -116,6 +116,19 @@ def _torneo_de_fase(db: Session, fase_id: int) -> int | None:
     return _torneo_de_edicion(db, fase.edicion_id) if fase else None
 
 
+def _torneo_de_disputa(db: Session, disputa_id: int) -> int | None:
+    """Única de las tres: `disputa_id` no es un parámetro que la ruta
+    pueda resolver con un solo `get()` como `edicion_id` o `fase_id` —
+    hace falta seguir `Disputa.partida.fase_id` primero. Por eso
+    `/disputas/{id}/resolver` se quedó en organizador global cuando se
+    armó el staff por torneo (ver StaffDeTorneo): no había de dónde sacar
+    el torneo sin esta consulta extra."""
+    from app.models import Disputa
+
+    disputa = db.get(Disputa, disputa_id)
+    return _torneo_de_fase(db, disputa.partida.fase_id) if disputa else None
+
+
 def _puede_operar(db: Session, usuario: Usuario, torneo_id: int | None, solo_admin: bool) -> bool:
     from app.domain.enums import RolStaff
     from app.models import StaffDeTorneo
@@ -172,6 +185,18 @@ def staff_de_fase(db: DbSession, usuario: CurrentUser, fase_id: int) -> Usuario:
     return usuario
 
 
+def staff_de_disputa(db: DbSession, usuario: CurrentUser, disputa_id: int) -> Usuario:
+    """Árbitro o superior, resolviendo el torneo desde la disputa.
+
+    Resolver una disputa es trabajo de día de partido — lo mismo que
+    programar o corregir un resultado — así que alcanza con ser árbitro,
+    no hace falta ser administrador."""
+    if not _puede_operar(db, usuario, _torneo_de_disputa(db, disputa_id), solo_admin=False):
+        _negar(solo_admin=False)
+    return usuario
+
+
 RequiereStaffDeEdicion = Annotated[Usuario, Depends(staff_de_edicion)]
 RequiereAdminDeEdicion = Annotated[Usuario, Depends(admin_de_edicion)]
 RequiereStaffDeFase = Annotated[Usuario, Depends(staff_de_fase)]
+RequiereStaffDeDisputa = Annotated[Usuario, Depends(staff_de_disputa)]

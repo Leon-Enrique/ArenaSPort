@@ -8,6 +8,7 @@ from app.api.deps import (
     CurrentUser,
     DbSession,
     RequiereOrganizador,
+    RequiereStaffDeDisputa,
     RequiereStaffDeFase,
 )
 from app.core import notificaciones
@@ -981,15 +982,22 @@ def listar_disputas(
 
 @router_disputas.post("/{disputa_id}/resolver", response_model=DisputaRead)
 def resolver_disputa(
-    disputa_id: int, datos: ResolverDisputaIn, db: DbSession, _organizador: RequiereOrganizador
+    disputa_id: int, datos: ResolverDisputaIn, db: DbSession, _staff: RequiereStaffDeDisputa
 ) -> Disputa:
-    """El organizador decide. Dos acciones cubiertas por ahora:
+    """El organizador o el staff del torneo de esta disputa deciden. Tres
+    acciones:
 
     - 'reprogramar': la partida vuelve a 'programada', se juega de nuevo.
     - 'walkover': se declara ganador directo sin jugar.
+    - 'confirmar_resultado': se carga el marcador que corresponde.
 
-    Cargar un resultado real y confirmarlo es el flujo normal de reporte,
-    que todavía no existe (es el próximo paso pendiente).
+    Alcanza con ser árbitro — resolver una disputa es trabajo de día de
+    partido, igual que programar o corregir un resultado. Hasta que
+    existió `RequiereStaffDeDisputa`, esta ruta se había quedado en
+    organizador global porque no tiene `fase_id` en la URL para resolver
+    el torneo con un simple `get()`; un árbitro igual podía dejar la
+    partida resuelta desde `/corregir-resultado`, pero la `Disputa` en sí
+    seguía 'abierta' hasta que pasara un organizador.
     """
     disputa = db.get(Disputa, disputa_id)
     if not disputa:

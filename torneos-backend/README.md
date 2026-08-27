@@ -585,12 +585,19 @@ la partida vuelve a `programada` para reprogramarla, porque no hay ganador que d
 **"Reportar problema" es un canal aparte del reporte normal de resultado.** Sirve para
 escalar directo al organizador — el rival no aparece, hay lag, sospecha de trampa — sin
 pasar por el flujo de marcador. Abre una `Disputa`, la partida pasa a `en_disputa`, y
-queda en la bandeja `/api/disputas` hasta que el organizador la resuelve con motivo.
+queda en la bandeja `/api/disputas` hasta que el staff del torneo la resuelve con motivo.
 
-**Resolver una disputa** tiene dos acciones por ahora: `walkover` (declara ganador
-directo) o `reprogramar` (vuelve a `programada`, se juega de nuevo). Cargar un
-resultado real y confirmarlo es el flujo normal de reporte, que todavía no existe —
-es el próximo paso pendiente, junto con el generador de llaves.
+**Resolver una disputa** tiene tres acciones: `walkover` (declara ganador directo),
+`reprogramar` (vuelve a `programada`, se juega de nuevo) y `confirmar_resultado`
+(carga el marcador que corresponde, para zanjar una impugnación sin forzar un
+walkover de algo que sí se jugó).
+
+Alcanza con ser **árbitro** del torneo: resolver una disputa es trabajo de día de
+partido, igual que programar o corregir un resultado. Esta ruta se quedó en
+organizador global más tiempo que las demás porque no tiene `fase_id` en la URL,
+así que resolver a qué torneo pertenece necesita una consulta extra
+(`Disputa → Partida → Fase → Edición → Torneo`); eso es lo que hace
+`RequiereStaffDeDisputa` en `app/api/deps.py`.
 
 ## Nota técnica: fechas y SQLite
 

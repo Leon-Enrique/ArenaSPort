@@ -6,8 +6,10 @@ from app.domain.enums import EstadoPartida, LadoLlave
 
 
 class PartidaCreate(BaseModel):
-    """Alta manual de una partida. El generador de llaves (pendiente) va a
-    llamar a esta misma lógica en lote una vez que exista.
+    """Alta manual de una partida, para colgar un cruce suelto.
+
+    El caso normal ya no pasa por acá: `POST /fases/{id}/sortear` genera la
+    estructura entera de la fase de una vez según su formato.
     """
 
     equipo_ids: list[int] = Field(min_length=2)

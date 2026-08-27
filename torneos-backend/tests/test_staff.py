@@ -22,7 +22,7 @@ from app.domain.enums import (
     RolStaff,
 )
 from app.main import app
-from app.models import Edicion, Fase, Juego, Partida, StaffDeTorneo, Torneo, Usuario
+from app.models import Disputa, Edicion, Equipo, Fase, Juego, Partida, StaffDeTorneo, Torneo, Usuario
 
 
 @pytest.fixture
@@ -293,3 +293,73 @@ class TestElBuscadorDeUsuarios:
         r = self._buscar(cliente, escenario["organizador"], limite=9999)
         assert r.status_code == 200
         assert len(r.json()) <= 50
+
+
+class TestResolverDisputa:
+    """`/disputas/{id}/resolver` era la última ruta que se había quedado en
+    organizador global cuando se armó el staff por torneo: no tiene
+    `fase_id` en la URL, así que el torneo no se podía resolver con un
+    `get()` directo como en las demás rutas. `RequiereStaffDeDisputa`
+    hace esa consulta extra (Disputa -> Partida -> Fase -> Edición ->
+    Torneo).
+
+    Alcanza con ser árbitro: resolver una disputa es trabajo de día de
+    partido, igual que programar o corregir un resultado.
+    """
+
+    def _abrir_disputa(self, db, escenario, copa) -> Disputa:
+        """Salta el flujo real de impugnación (que exige ser capitán de un
+        equipo inscripto) y crea la disputa directo — acá lo que se prueba
+        es quién puede RESOLVERLA, no cómo se abre."""
+        equipo = Equipo(nombre="Equipo que reclama")
+        db.add(equipo)
+        db.flush()
+        disputa = Disputa(
+            partida_id=escenario[copa]["partida"].id,
+            abierta_por_equipo_id=equipo.id,
+            motivo="Reclamo de prueba",
+        )
+        db.add(disputa)
+        db.commit()
+        db.refresh(disputa)
+        return disputa
+
+    def _resolver(self, cliente, disputa, quien):
+        return cliente.post(
+            f"/api/disputas/{disputa.id}/resolver",
+            json={"resolucion": "Resuelto en la prueba.", "accion": "reprogramar"},
+            headers=auth(quien),
+        )
+
+    def test_el_arbitro_de_ese_torneo_puede_resolver(self, cliente, escenario, db):
+        disputa = self._abrir_disputa(db, escenario, "a")
+        assert self._resolver(cliente, disputa, escenario["arbitro"]).status_code == 200
+
+    def test_el_administrador_de_ese_torneo_tambien_puede(self, cliente, escenario, db):
+        disputa = self._abrir_disputa(db, escenario, "a")
+        assert self._resolver(cliente, disputa, escenario["admin"]).status_code == 200
+
+    def test_el_organizador_global_sigue_pudiendo(self, cliente, escenario, db):
+        disputa = self._abrir_disputa(db, escenario, "a")
+        assert self._resolver(cliente, disputa, escenario["organizador"]).status_code == 200
+
+    def test_el_staff_de_otro_torneo_no_puede(self, cliente, escenario, db):
+        """El alcance no se desborda: staff de la Copa A no toca una
+        disputa de la Copa B."""
+        disputa = self._abrir_disputa(db, escenario, "b")
+        assert self._resolver(cliente, disputa, escenario["arbitro"]).status_code == 403
+
+    def test_un_ajeno_no_puede(self, cliente, escenario, db):
+        disputa = self._abrir_disputa(db, escenario, "a")
+        assert self._resolver(cliente, disputa, escenario["ajeno"]).status_code == 403
+
+    def test_una_disputa_inexistente_no_filtra_si_existe(self, cliente, escenario):
+        """Sin ser staff de ningún torneo, la respuesta es la misma
+        (403) exista o no la disputa — no hay forma de usar esta ruta
+        para confirmar IDs ajenos."""
+        r = cliente.post(
+            "/api/disputas/999999/resolver",
+            json={"resolucion": "x", "accion": "reprogramar"},
+            headers=auth(escenario["ajeno"]),
+        )
+        assert r.status_code == 403
