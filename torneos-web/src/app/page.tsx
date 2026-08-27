@@ -144,17 +144,17 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center gap-2 text-white/40 text-sm py-20">
+            <div className="flex items-center justify-center gap-2 text-tinta-3 text-sm py-20">
               <Loader2 className="animate-spin" size={18} /> Cargando torneos...
             </div>
           ) : error ? (
-            <div className="bg-[#11111f] border border-rose-500/20 rounded-3xl p-10 text-center text-sm text-white/50">
-              No pudimos conectar con el servidor. Verificá que el backend esté corriendo en <code className="text-cyan-400">localhost:8000</code>.
+            <div className="bg-superficie border border-vivo/25 estado-vivo rounded-[8px] p-10 text-center text-[13px] text-tinta-2">
+              No pudimos conectar con el servidor. Verificá que el backend esté corriendo en <code className="text-tinta-2">localhost:8000</code>.
             </div>
           ) : filteredEdiciones.length === 0 ? (
-            <div className="bg-[#11111f] border border-white/8 rounded-3xl p-12 text-center space-y-3">
-              <PlusCircle className="w-8 h-8 text-white/20 mx-auto" />
-              <p className="text-sm text-white/50">
+            <div className="glass-card p-12 text-center space-y-3">
+              <PlusCircle className="w-8 h-8 text-tinta-4 mx-auto" />
+              <p className="text-sm text-tinta-3">
                 {ediciones.length === 0 ? 'Todavía no hay torneos publicados.' : 'Ningún torneo coincide con el filtro elegido.'}
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function Home() {
                 <Link
                   key={edicion.id}
                   href={`/torneos/${edicion.slug}`}
-                  className="group bg-superficie border border-borde rounded-[6px] overflow-hidden flex flex-col hover:border-borde-fuerte transition-colors"
+                  className="group glass-card overflow-hidden flex flex-col hover:-translate-y-px"
                 >
                   <div className={`h-[3px] ${
                     edicion.estado === 'en_curso' ? 'bg-vivo'
@@ -209,15 +209,15 @@ export default function Home() {
                     {/* Los datos como tabla y no como lista de "Etiqueta:
                         valor" repetida: se comparan de una tarjeta a otra
                         porque están en la misma posición. */}
-                    <div className="grid grid-cols-2 gap-px bg-borde border border-borde rounded-[4px] overflow-hidden mt-auto">
-                      <div className="bg-superficie px-2.5 py-2">
+                    <div className="grid grid-cols-2 gap-px bg-borde-sutil border border-borde-sutil rounded-[5px] overflow-hidden mt-auto">
+                      <div className="bg-hundida px-2.5 py-2">
                         <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Equipos</div>
                         <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
                           {edicion.equiposInscritosCount}
                           {edicion.maxEquipos && <span className="text-tinta-4">/{edicion.maxEquipos}</span>}
                         </div>
                       </div>
-                      <div className="bg-superficie px-2.5 py-2">
+                      <div className="bg-hundida px-2.5 py-2">
                         <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Inicio</div>
                         <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
                           {edicion.fechaInicio
@@ -241,29 +241,29 @@ export default function Home() {
 
         {/* HOW TO COMPETE SECTION */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#11111f] rounded-3xl p-8 sm:p-12 border border-white/8 space-y-10">
+          <div className="glass-card p-8 sm:p-12 space-y-10">
             <div className="text-center max-w-2xl mx-auto space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-white">¿Cómo Participar en Nuestros Torneos?</h2>
-              <p className="text-xs sm:text-sm text-white/40">Sigue 3 pasos sencillos desde la inscripción hasta la coronación de campeones.</p>
+              <h2 className="text-[22px] sm:text-[26px] font-bold text-tinta">¿Cómo Participar en Nuestros Torneos?</h2>
+              <p className="text-xs sm:text-sm text-tinta-3">Sigue 3 pasos sencillos desde la inscripción hasta la coronación de campeones.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {[
-                { step: '01', title: 'Inscríbete', desc: 'Registra a tu equipo con sus Game IDs oficiales en el torneo que quieras.', icon: <Users className="text-violet-400" size={20} /> },
-                { step: '02', title: 'Espera tu Cuadro', desc: 'Cuando cierran las inscripciones, el organizador sortea las llaves.', icon: <CheckCircle2 className="text-cyan-400" size={20} /> },
+                { step: '01', title: 'Inscríbete', desc: 'Registra a tu equipo con sus Game IDs oficiales en el torneo que quieras.', icon: <Users className="text-tinta-2" size={20} /> },
+                { step: '02', title: 'Espera tu Cuadro', desc: 'Cuando cierran las inscripciones, el organizador sortea las llaves.', icon: <CheckCircle2 className="text-tinta-2" size={20} /> },
                 { step: '03', title: 'Compite y Gana', desc: 'Jugá tus partidas siguiendo el bracket y sumá puntos para el premio.', icon: <Trophy className="text-green-400" size={20} /> },
               ].map((item, idx) => (
-                <div key={idx} className="p-6 rounded-2xl bg-[#0b0b14] border border-white/5 space-y-3 relative group hover:border-violet-500/30 transition-all">
+                <div key={idx} className="p-6 rounded-[6px] bg-hundida border border-borde-sutil space-y-3 relative group hover:border-borde transition-colors">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-[6px] bg-elevada border border-borde-sutil flex items-center justify-center">
                       {item.icon}
                     </div>
-                    <span className="font-mono text-xl font-black text-white/20 group-hover:text-violet-400 transition-colors">
+                    <span className="font-mono tabular text-[18px] font-semibold text-tinta-4 group-hover:text-tinta-3 transition-colors">
                       {item.step}
                     </span>
                   </div>
                   <h3 className="font-bold text-sm text-white">{item.title}</h3>
-                  <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+                  <p className="text-xs text-tinta-3 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>

@@ -59,11 +59,11 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   if (checking || !usuario) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#08080f] text-white/40 gap-2 text-sm px-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-fondo text-tinta-3 gap-2 text-sm px-6 text-center">
         <div className="flex items-center gap-2">
           <Loader2 className="animate-spin" size={18} /> Verificando acceso...
         </div>
-        {mensaje && <p className="text-xs text-amber-400/90 max-w-md">{mensaje}</p>}
+        {mensaje && <p className="text-xs text-atencion/90 max-w-md">{mensaje}</p>}
       </div>
     );
   }

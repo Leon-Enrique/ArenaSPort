@@ -36,7 +36,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-fondo border-b border-borde-sutil">
+      <header className="sticky top-0 z-50 w-full glass-panel border-b border-borde-sutil">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
 
           {/* El logo era un cuadrado con gradiente de tres colores y un
@@ -97,7 +97,7 @@ export default function Navbar() {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-1.5 w-60 bg-elevada border border-borde rounded-[6px] py-1 z-50 shadow-lg shadow-black/40">
+                  <div className="absolute right-0 mt-1.5 w-60 bg-elevada border border-borde rounded-[8px] py-1 z-50 elevacion filo">
                     <div className="px-3.5 py-2.5 border-b border-borde-sutil">
                       <p className="text-[13px] font-semibold text-tinta truncate">{usuario.nombre}</p>
                       <p className="text-[11px] text-tinta-3 mt-0.5 capitalize">{usuario.rol}</p>
@@ -125,7 +125,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-[4px] bg-acento hover:bg-acento-hover text-white font-semibold text-[13px] transition-colors"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[5px] accion-principal text-white font-semibold text-[13px]"
               >
                 <LogIn className="w-3.5 h-3.5" /> Iniciar sesión
               </button>

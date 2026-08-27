@@ -24,29 +24,34 @@
   --font-sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-mono-jetbrains), ui-monospace, monospace;
 
-  /* Superficies. Neutras y con poca separación entre sí: la
-     profundidad se construye con el borde, no con el salto de tono. */
-  --color-fondo: #0b0b0c;
-  --color-superficie: #141416;
-  --color-elevada: #1a1a1d;
-  --color-hundida: #101012;
+  /* Superficies.
+     Con un matiz frío levísimo (los azules ~2 puntos por encima del
+     rojo) en vez de gris puro: el gris neutro perfecto se lee barato,
+     como un placeholder. Y con separación real entre niveles, porque
+     un tablero donde todo está en el mismo plano se ve plano — que fue
+     el error de la primera pasada. */
+  --color-fondo: #08090b;
+  --color-superficie: #111216;
+  --color-elevada: #191a1f;
+  --color-hundida: #0b0c0f;
 
-  --color-borde: #26262a;
-  --color-borde-fuerte: #35353a;
-  --color-borde-sutil: #1d1d21;
+  --color-borde: #24262c;
+  --color-borde-fuerte: #34373f;
+  --color-borde-sutil: #1a1c21;
 
-  /* Texto */
-  --color-tinta: #f2f2f3;
-  --color-tinta-2: #c8c8cd;
-  --color-tinta-3: #6e6e75;
-  --color-tinta-4: #4a4a52;
+  /* Texto. El blanco no es blanco puro y el gris medio sube un poco:
+     lo que no se puede leer cómodo no es elegante, es solo tenue. */
+  --color-tinta: #f4f4f6;
+  --color-tinta-2: #b8bac2;
+  --color-tinta-3: #7c7f8a;
+  --color-tinta-4: #52555e;
 
   /* Acento — SOLO acciones y navegación activa. Si aparece en un
      título, en un ícono decorativo o en un borde de tarjeta, se está
      usando mal. */
-  --color-acento: #5b57d1;
-  --color-acento-claro: #8b87f5;
-  --color-acento-hover: #6a66dd;
+  --color-acento: #5d5bd6;
+  --color-acento-claro: #9d9af8;
+  --color-acento-hover: #6f6ce4;
 
   /* Estados. Cada uno responde una pregunta distinta del torneo. */
   --color-vivo: #e5484d;      /* al aire — convención de transmisión */
@@ -63,6 +68,26 @@
     /* Sin font-family acá: lo pone `font-sans` en el <body> de
        layout.tsx, que ahora sí resuelve a Archivo. */
   }
+
+  /* Grano. Un negro plano de verdad se ve como un vacío; una capa de
+     ruido al 2.5% le da cuerpo sin que nadie pueda decir qué cambió.
+     Va en un ::before fijo para que no se repita al hacer scroll ni
+     entre en las capturas de pantalla de cada tarjeta. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Los títulos se aprietan a medida que crecen. Es lo que separa una
+     tipografía puesta de una tipografía ajustada. */
+  h1 { letter-spacing: -0.03em; }
+  h2 { letter-spacing: -0.022em; }
+  h3 { letter-spacing: -0.015em; }
 
   /* Las cifras de un torneo se leen en columna —marcadores, IDs de
      juego, cupos— así que tienen que ocupar todas lo mismo. */
@@ -97,20 +122,80 @@
    grande a cambio de nada.
    ────────────────────────────────────────────────────────────── */
 
+/* La diferencia entre "plano" y "premium" no son los gradientes de
+   colores: es el FILO. Una superficie real tiene un borde superior que
+   toma la luz y una sombra que la despega del fondo. Son dos líneas de
+   CSS y hacen más que cualquier degradado violeta.
+
+   El gradiente vertical de acá abajo es de un 2% sobre el mismo tono —
+   no es decorativo, es cómo cae la luz en una superficie. Es otra cosa
+   que un `from-violet-600 to-cyan-600`. */
 .glass-panel {
-  background: var(--color-fondo);
+  background: color-mix(in srgb, var(--color-fondo) 88%, transparent);
   border: 1px solid var(--color-borde-sutil);
+  backdrop-filter: saturate(140%) blur(12px);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
 }
 
 .glass-card {
-  background: var(--color-superficie);
+  background:
+    linear-gradient(180deg, var(--color-elevada) 0%, var(--color-superficie) 100%);
   border: 1px solid var(--color-borde);
-  border-radius: 6px;
-  transition: border-color 0.15s ease;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .glass-card:hover {
   border-color: var(--color-borde-fuerte);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    0 14px 32px -14px rgba(0, 0, 0, 0.8);
+}
+
+/* Filo superior suelto, para superficies que no son .glass-card. */
+.filo {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.elevacion {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Realce del acento: reservado para la acción principal de la pantalla.
+   Un solo botón por vista puede tener esto — si lo tienen tres, deja de
+   señalar cuál es la importante. */
+.accion-principal {
+  background: var(--color-acento);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 6px 18px -8px color-mix(in srgb, var(--color-acento) 70%, transparent);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.accion-principal:hover {
+  background: var(--color-acento-hover);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -8px color-mix(in srgb, var(--color-acento) 85%, transparent);
+}
+
+/* Foco visible y propio. El anillo del navegador sobre fondo oscuro es
+   de lo que más delata que nadie miró los detalles. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-fondo),
+    0 0 0 4px color-mix(in srgb, var(--color-acento) 80%, transparent);
+  border-radius: 4px;
 }
 
 /* Estado en 2px de borde izquierdo, quieto. Antes esto era una

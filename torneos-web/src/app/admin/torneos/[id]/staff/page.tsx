@@ -27,13 +27,13 @@ const ROL_INFO: Record<RolStaff, { label: string; desc: string; icon: React.Reac
     label: 'Administrador',
     desc: 'Arma el torneo: inscripciones, sorteo, sanciones. Todo lo que hace un árbitro también.',
     icon: <Shield size={13} />,
-    color: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
+    color: 'bg-acento/15 text-acento-claro border-borde',
   },
   arbitro: {
     label: 'Árbitro',
     desc: 'El día de partido: programar, check-in, disputas, corregir resultados.',
     icon: <Gavel size={13} />,
-    color: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    color: 'bg-cyan-500/15 text-tinta-2 border-cyan-500/30',
   },
 };
 
@@ -110,7 +110,7 @@ export default function StaffDeTorneoPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando staff...
       </div>
     );
@@ -118,7 +118,7 @@ export default function StaffDeTorneoPage() {
 
   if (!torneo) {
     return (
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto text-center py-24 text-white/40">
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto text-center py-24 text-tinta-3">
         Este torneo no existe.
       </div>
     );
@@ -128,57 +128,57 @@ export default function StaffDeTorneoPage() {
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
       <Link
         href={`/admin/torneos/${torneoId}`}
-        className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-tinta-3 hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft size={16} /> {torneo.nombre}
       </Link>
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <UserPlus size={22} className="text-violet-400" /> Staff de {torneo.nombre}
+          <UserPlus size={22} className="text-acento-claro" /> Staff de {torneo.nombre}
         </h1>
-        <p className="text-sm text-white/40 mt-1">
+        <p className="text-sm text-tinta-3 mt-1">
           Dale a alguien acceso a este torneo puntual, sin hacerlo organizador de toda la plataforma.
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+        <div className="mb-4 p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
           <AlertTriangle size={15} /> <span>{error}</span>
         </div>
       )}
 
       {/* Buscador para sumar staff */}
-      <div className="bg-[#13131f] border border-white/8 rounded-2xl p-5 mb-6">
+      <div className="bg-superficie border border-borde rounded-[6px] p-5 mb-6">
         <h2 className="text-sm font-bold text-white mb-3">Agregar a alguien</h2>
 
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-tinta-4" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por nombre de Discord..."
-              className="w-full bg-white/5 border border-white/10 text-white rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-500"
+              className="w-full bg-white/5 border border-borde text-white rounded-[6px] pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-acento"
             />
           </div>
           <select
             value={rolElegido}
             onChange={(e) => setRolElegido(e.target.value as RolStaff)}
-            className="bg-white/5 border border-white/10 text-white/80 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-violet-500"
+            className="bg-white/5 border border-borde text-tinta-2 text-xs rounded-[6px] px-3 py-2.5 focus:outline-none focus:border-acento"
           >
             {(Object.keys(ROL_INFO) as RolStaff[]).map(r => (
-              <option key={r} value={r} className="bg-[#13131f] text-white">{ROL_INFO[r].label}</option>
+              <option key={r} value={r} className="bg-superficie text-white">{ROL_INFO[r].label}</option>
             ))}
           </select>
         </div>
 
-        <p className="text-xs text-white/30 mb-3">{ROL_INFO[rolElegido].desc}</p>
+        <p className="text-xs text-tinta-4 mb-3">{ROL_INFO[rolElegido].desc}</p>
 
         <div className="space-y-1.5 min-h-[3rem]">
           {buscando && (
-            <div className="flex items-center gap-2 text-white/30 text-xs py-2">
+            <div className="flex items-center gap-2 text-tinta-4 text-xs py-2">
               <Loader2 size={13} className="animate-spin" /> Buscando...
             </div>
           )}
@@ -192,7 +192,7 @@ export default function StaffDeTorneoPage() {
             return (
               <div
                 key={u.id}
-                className="flex items-center justify-between gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5"
+                className="flex items-center justify-between gap-3 p-2.5 bg-white/5 rounded-[6px] border border-borde-sutil"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {u.discord_avatar_url ? (
@@ -201,9 +201,9 @@ export default function StaffDeTorneoPage() {
                   ) : (
                     <div className="w-7 h-7 rounded-full bg-white/10 flex-shrink-0" />
                   )}
-                  <span className="text-sm text-white/80 truncate">{u.discord_username}</span>
+                  <span className="text-sm text-tinta-2 truncate">{u.discord_username}</span>
                   {u.es_organizador && (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex-shrink-0">
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-atencion border border-amber-500/30 flex-shrink-0">
                       <Crown size={10} /> Organizador global
                     </span>
                   )}
@@ -216,7 +216,7 @@ export default function StaffDeTorneoPage() {
                   <button
                     onClick={() => handleAgregar(u)}
                     disabled={agregandoId === u.id}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-acento hover:bg-acento disabled:opacity-50 text-white text-xs font-semibold rounded-[4px] transition-all flex-shrink-0"
                   >
                     {agregandoId === u.id ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={12} />}
                     Agregar
@@ -229,11 +229,11 @@ export default function StaffDeTorneoPage() {
       </div>
 
       {/* Staff actual */}
-      <div className="bg-[#13131f] border border-white/8 rounded-2xl p-5">
+      <div className="bg-superficie border border-borde rounded-[6px] p-5">
         <h2 className="text-sm font-bold text-white mb-3">Staff actual</h2>
 
         {staff.length === 0 && (
-          <p className="text-sm text-white/30 py-6 text-center">
+          <p className="text-sm text-tinta-4 py-6 text-center">
             Nadie más tiene acceso a este torneo todavía.
           </p>
         )}
@@ -244,7 +244,7 @@ export default function StaffDeTorneoPage() {
             return (
               <div
                 key={s.id}
-                className="flex items-center justify-between gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5"
+                className="flex items-center justify-between gap-3 p-2.5 bg-white/5 rounded-[6px] border border-borde-sutil"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {s.usuario_avatar_url ? (
@@ -253,7 +253,7 @@ export default function StaffDeTorneoPage() {
                   ) : (
                     <div className="w-7 h-7 rounded-full bg-white/10 flex-shrink-0" />
                   )}
-                  <span className="text-sm text-white/80 truncate">{s.usuario_nombre}</span>
+                  <span className="text-sm text-tinta-2 truncate">{s.usuario_nombre}</span>
                   <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border flex-shrink-0 ${info.color}`}>
                     {info.icon} {info.label}
                   </span>
@@ -262,7 +262,7 @@ export default function StaffDeTorneoPage() {
                   onClick={() => handleQuitar(s.usuario_id)}
                   disabled={quitandoId === s.usuario_id}
                   title="Quitarle el acceso a este torneo"
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 text-xs rounded-lg transition-all flex-shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-tinta-3 hover:text-vivo hover:bg-rose-500/10 disabled:opacity-50 text-xs rounded-[4px] transition-all flex-shrink-0"
                 >
                   {quitandoId === s.usuario_id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
                 </button>

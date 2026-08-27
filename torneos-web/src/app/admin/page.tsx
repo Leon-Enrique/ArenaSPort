@@ -9,32 +9,42 @@ import {
 import { api } from '@/lib/api';
 import { ApiDisputa, ApiEdicion, ApiTorneo } from '@/lib/api-types';
 
+/**
+ * Tarjeta de cifra del panel.
+ *
+ * `color` ya no pinta un gradiente de fondo: marca el estado de la cifra.
+ * En un tablero de control, un número teñido tiene que querer decir algo —
+ * si todos son de colores distintos porque quedaba lindo, ninguno avisa
+ * nada. Solo lo que pide acción se destaca; el resto es neutro.
+ */
 function StatCard({
-  icon, label, value, sub, color, href
+  icon, label, value, sub, tono = 'neutro', href
 }: {
   icon: React.ReactNode; label: string; value: string | number;
-  sub?: string; color: string; href?: string;
+  sub?: string; tono?: 'neutro' | 'atencion' | 'vivo'; href?: string;
 }) {
+  const borde = tono === 'atencion' ? 'estado-atencion' : tono === 'vivo' ? 'estado-vivo' : '';
+  const cifra = tono === 'atencion' ? 'text-atencion' : tono === 'vivo' ? 'text-vivo' : 'text-tinta';
+
   const content = (
-    <div className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#13131f] to-[#0e0e1a] border border-white/8 p-6 transition-all duration-300 hover:border-white/20 ${href ? 'cursor-pointer' : ''}`}>
-      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${color} opacity-5`} />
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">{label}</p>
-          <p className="text-3xl font-bold text-white mb-1">{value}</p>
-          {sub && <p className="text-xs text-white/40">{sub}</p>}
+    <div className={`group h-full rounded-[6px] bg-superficie border border-borde ${borde} p-5 transition-colors hover:border-borde-fuerte ${href ? 'cursor-pointer' : ''}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold text-tinta-3 uppercase tracking-[0.08em] mb-2.5">{label}</p>
+          <p className={`font-mono tabular text-[30px] font-semibold leading-none ${cifra}`}>{value}</p>
+          {sub && <p className="text-[12px] text-tinta-3 mt-2">{sub}</p>}
         </div>
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>{icon}</div>
+        <div className="text-tinta-4 shrink-0">{icon}</div>
       </div>
       {href && (
-        <div className="mt-4 flex items-center gap-1 text-xs text-white/40 group-hover:text-white/70 transition-colors">
+        <div className="mt-4 flex items-center gap-1 text-[12px] text-tinta-3 group-hover:text-tinta-2 transition-colors">
           <span>Ver detalle</span>
           <ArrowRight size={12} />
         </div>
       )}
     </div>
   );
-  return href ? <Link href={href}>{content}</Link> : <div>{content}</div>;
+  return href ? <Link href={href} className="block h-full">{content}</Link> : <div>{content}</div>;
 }
 
 export default function AdminDashboard() {
@@ -69,7 +79,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando dashboard...
       </div>
     );
@@ -80,35 +90,38 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-sm text-white/40 mt-1">Resumen de actividad de tus torneos</p>
+          <p className="text-sm text-tinta-3 mt-1">Resumen de actividad de tus torneos</p>
         </div>
         <Link
           href="/admin/torneos/nuevo"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+          className="flex items-center gap-2 px-4 py-2.5 bg-acento hover:from-violet-500 hover:to-violet-400 text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} /> Crear Torneo
         </Link>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={<Trophy size={20} className="text-white" />} label="Torneos" value={torneos.length} sub={`${ediciones.length} ediciones en total`} color="from-violet-600 to-violet-800" href="/admin/torneos" />
-        <StatCard icon={<Flame size={20} className="text-white" />} label="Ediciones en Curso" value={edicionesEnCurso.length} sub="con inscripciones o partidas activas" color="from-amber-600 to-orange-700" />
-        <StatCard icon={<ClipboardList size={20} className="text-white" />} label="Inscripciones Pendientes" value={pendientesPorEdicion} sub="esperan aprobación" color="from-cyan-600 to-blue-700" href="/admin/inscripciones" />
-        <StatCard icon={<ShieldAlert size={20} className="text-white" />} label="Disputas Abiertas" value={disputasAbiertas.length} sub="requieren resolución" color="from-red-600 to-red-800" />
+        {/* Solo se tiñe lo que pide que hagas algo: inscripciones esperando
+            y disputas abiertas. Y solo cuando hay más de cero — un "0
+            disputas" en rojo enseña a ignorar el rojo. */}
+        <StatCard icon={<Trophy size={18} />} label="Torneos" value={torneos.length} sub={`${ediciones.length} ediciones en total`} href="/admin/torneos" />
+        <StatCard icon={<Flame size={18} />} label="Ediciones en curso" value={edicionesEnCurso.length} sub="con inscripciones o partidas activas" />
+        <StatCard icon={<ClipboardList size={18} />} label="Inscripciones pendientes" value={pendientesPorEdicion} sub="esperan aprobación" tono={pendientesPorEdicion > 0 ? 'atencion' : 'neutro'} href="/admin/inscripciones" />
+        <StatCard icon={<ShieldAlert size={18} />} label="Disputas abiertas" value={disputasAbiertas.length} sub="requieren resolución" tono={disputasAbiertas.length > 0 ? 'vivo' : 'neutro'} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#13131f] border border-white/8 rounded-2xl p-6">
+          <div className="bg-superficie border border-borde rounded-[6px] p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-white">Mis Torneos</h2>
-              <Link href="/admin/torneos" className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1">
+              <Link href="/admin/torneos" className="text-xs text-acento-claro hover:text-acento-claro flex items-center gap-1">
                 Ver todos <ArrowRight size={12} />
               </Link>
             </div>
             <div className="space-y-3">
               {torneos.length === 0 && (
-                <p className="text-sm text-white/30 text-center py-6">Todavía no creaste ningún torneo.</p>
+                <p className="text-sm text-tinta-4 text-center py-6">Todavía no creaste ningún torneo.</p>
               )}
               {torneos.map((torneo) => {
                 const edicionesDelTorneo = ediciones.filter(e => e.torneo_id === torneo.id);
@@ -116,45 +129,45 @@ export default function AdminDashboard() {
                   <Link
                     key={torneo.id}
                     href={`/admin/torneos/${torneo.id}`}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/8 border border-white/5 hover:border-white/15 transition-all group"
+                    className="flex items-center gap-4 p-4 rounded-[6px] bg-white/5 hover:bg-white/8 border border-borde-sutil hover:border-borde-fuerte transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-600 flex items-center justify-center flex-shrink-0 font-black text-white text-sm">
+                    <div className="w-10 h-10 rounded-[6px] bg-acento flex items-center justify-center flex-shrink-0 font-black text-white text-sm">
                       {torneo.nombre.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white truncate">{torneo.nombre}</p>
-                      <p className="text-xs text-white/40">{edicionesDelTorneo.length} edición(es)</p>
+                      <p className="text-xs text-tinta-3">{edicionesDelTorneo.length} edición(es)</p>
                     </div>
-                    <ArrowRight size={14} className="text-white/20 group-hover:text-white/60 transition-colors" />
+                    <ArrowRight size={14} className="text-tinta-4 group-hover:text-tinta-2 transition-colors" />
                   </Link>
                 );
               })}
               <Link
                 href="/admin/torneos/nuevo"
-                className="flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-white/15 hover:border-violet-500/50 text-white/30 hover:text-violet-400 transition-all text-sm"
+                className="flex items-center justify-center gap-2 p-4 rounded-[6px] border border-dashed border-borde-fuerte hover:border-acento/50 text-tinta-4 hover:text-acento-claro transition-all text-sm"
               >
                 <Plus size={16} /> Crear nuevo torneo
               </Link>
             </div>
           </div>
 
-          <div className="bg-[#13131f] border border-white/8 rounded-2xl p-6">
+          <div className="bg-superficie border border-borde rounded-[6px] p-6">
             <h2 className="text-base font-bold text-white mb-5">Ediciones en Curso</h2>
             <div className="space-y-3">
               {edicionesEnCurso.length === 0 && (
-                <p className="text-sm text-white/30 text-center py-6">No hay ediciones activas ahora mismo.</p>
+                <p className="text-sm text-tinta-4 text-center py-6">No hay ediciones activas ahora mismo.</p>
               )}
               {edicionesEnCurso.map((ed) => (
-                <div key={ed.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                <div key={ed.id} className="flex items-center gap-4 p-4 rounded-[6px] bg-white/5 border border-borde-sutil">
                   <div className={`w-2 h-12 rounded-full flex-shrink-0 ${ed.estado === 'en_curso' ? 'bg-amber-500' : 'bg-cyan-500'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{ed.nombre}</p>
                     <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs text-white/40 flex items-center gap-1">
+                      <span className="text-xs text-tinta-3 flex items-center gap-1">
                         <Users size={11} /> {ed.equipos_aprobados}{ed.max_equipos ? `/${ed.max_equipos}` : ''} equipos
                       </span>
                       {ed.fecha_inicio && (
-                        <span className="text-xs text-white/40 flex items-center gap-1">
+                        <span className="text-xs text-tinta-3 flex items-center gap-1">
                           <Calendar size={11} /> {new Date(ed.fecha_inicio).toLocaleDateString('es', { day: 'numeric', month: 'short' })}
                         </span>
                       )}
@@ -162,7 +175,7 @@ export default function AdminDashboard() {
                   </div>
                   <Link
                     href={`/admin/torneos/${ed.torneo_id}/ediciones/${ed.id}/participantes`}
-                    className="px-3 py-1.5 text-xs bg-violet-600/30 hover:bg-violet-600/60 text-violet-300 rounded-lg transition-all"
+                    className="px-3 py-1.5 text-xs bg-acento/30 hover:bg-acento/60 text-acento-claro rounded-[4px] transition-all"
                   >
                     Gestionar
                   </Link>
@@ -173,33 +186,33 @@ export default function AdminDashboard() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-[#13131f] border border-white/8 rounded-2xl p-6">
+          <div className="bg-superficie border border-borde rounded-[6px] p-6">
             <h2 className="text-base font-bold text-white mb-4">Acciones Rápidas</h2>
             <div className="space-y-2">
-              <Link href="/admin/inscripciones" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/8 hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all">
-                <span className="text-white/50"><ClipboardList size={15} /></span>
-                <span className="text-sm text-white/70 flex-1">Aprobar inscripciones</span>
+              <Link href="/admin/inscripciones" className="flex items-center gap-3 p-3 rounded-[6px] bg-white/5 border border-borde hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all">
+                <span className="text-tinta-3"><ClipboardList size={15} /></span>
+                <span className="text-sm text-tinta-2 flex-1">Aprobar inscripciones</span>
                 {pendientesPorEdicion > 0 && (
                   <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{pendientesPorEdicion}</span>
                 )}
               </Link>
-              <Link href="/admin/torneos/nuevo" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/8 hover:bg-violet-500/10 hover:border-violet-500/30 transition-all">
-                <span className="text-white/50"><Plus size={15} /></span>
-                <span className="text-sm text-white/70 flex-1">Crear nuevo torneo</span>
+              <Link href="/admin/torneos/nuevo" className="flex items-center gap-3 p-3 rounded-[6px] bg-white/5 border border-borde hover:bg-acento/10 hover:border-borde transition-all">
+                <span className="text-tinta-3"><Plus size={15} /></span>
+                <span className="text-sm text-tinta-2 flex-1">Crear nuevo torneo</span>
               </Link>
             </div>
           </div>
 
-          <div className="bg-[#13131f] border border-white/8 rounded-2xl p-6">
+          <div className="bg-superficie border border-borde rounded-[6px] p-6">
             <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-              <ShieldAlert size={15} className="text-red-400" /> Disputas Abiertas
+              <ShieldAlert size={15} className="text-vivo" /> Disputas Abiertas
             </h2>
             <div className="space-y-3">
               {disputasAbiertas.length === 0 && (
-                <p className="text-xs text-white/30">No hay disputas pendientes.</p>
+                <p className="text-xs text-tinta-4">No hay disputas pendientes.</p>
               )}
               {disputasAbiertas.slice(0, 5).map((d) => (
-                <div key={d.id} className="text-xs text-white/60 border-l-2 border-red-500/40 pl-3 py-0.5">
+                <div key={d.id} className="text-xs text-tinta-2 border-l-2 border-red-500/40 pl-3 py-0.5">
                   Partida #{d.partida_id} — {d.motivo}
                 </div>
               ))}

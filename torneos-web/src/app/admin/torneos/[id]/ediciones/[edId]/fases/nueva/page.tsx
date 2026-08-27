@@ -84,7 +84,7 @@ export default function NuevaFasePage() {
 
   if (loadingInicial) {
     return (
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando...
       </div>
     );
@@ -94,7 +94,7 @@ export default function NuevaFasePage() {
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
       <Link
         href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases`}
-        className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-tinta-3 hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
         Volver a fases
@@ -102,16 +102,16 @@ export default function NuevaFasePage() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Configurar Nueva Fase</h1>
-        <p className="text-sm text-white/40 mt-1">
+        <p className="text-sm text-tinta-3 mt-1">
           {torneo?.nombre} • {edicion?.nombre}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-[#13131f] border border-white/8 rounded-2xl p-6 sm:p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-superficie border border-borde rounded-[6px] p-6 sm:p-8 space-y-6">
         {/* Nombre & Orden */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="sm:col-span-3">
-            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
               Nombre de la Fase *
             </label>
             <input
@@ -120,11 +120,11 @@ export default function NuevaFasePage() {
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               placeholder="Ej. Playoffs Upper Bracket, Fase de Grupos A..."
-              className="w-full bg-white/5 border border-white/10 text-white placeholder-white/25 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
+              className="w-full bg-white/5 border border-borde text-white placeholder-white/25 rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento focus:ring-2 focus:ring-violet-500/20 transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
               Orden / Etapa
             </label>
             <input
@@ -132,7 +132,7 @@ export default function NuevaFasePage() {
               min={1}
               value={orden}
               onChange={e => setOrden(parseInt(e.target.value) || 1)}
-              className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm text-center focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-3 text-sm text-center focus:outline-none focus:border-acento transition-all"
             />
           </div>
         </div>
@@ -140,17 +140,17 @@ export default function NuevaFasePage() {
         {/* Modelo Competitivo */}
         {/* Formatos disponibles */}
         <div>
-          <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
+          <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-3">
             Formato de Fase
           </label>
           <div className="space-y-2.5">
             {formatosDirectos.map((f) => (
               <label
                 key={f.id}
-                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-start gap-3 p-3.5 rounded-[6px] border cursor-pointer transition-all ${
                   formato === f.id
-                    ? 'border-violet-500 bg-violet-500/10'
-                    : 'border-white/10 bg-white/5 hover:border-white/20'
+                    ? 'border-acento bg-acento/10'
+                    : 'border-borde bg-white/5 hover:border-white/20'
                 }`}
               >
                 <input
@@ -162,7 +162,7 @@ export default function NuevaFasePage() {
                 />
                 <div>
                   <p className="text-sm font-semibold text-white">{f.nombre}</p>
-                  <p className="text-xs text-white/40 mt-0.5">{f.desc}</p>
+                  <p className="text-xs text-tinta-3 mt-0.5">{f.desc}</p>
                 </div>
               </label>
             ))}
@@ -170,16 +170,16 @@ export default function NuevaFasePage() {
         </div>
 
         {/* Configuración específica según formato */}
-        <div className="pt-4 border-t border-white/8 space-y-4">
+        <div className="pt-4 border-t border-borde space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Layers size={15} className="text-cyan-400" />
+            <Layers size={15} className="text-tinta-2" />
             Parámetros de Juego
           </h3>
 
           {modeloCompetencia === 'enfrentamiento_directo' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
                   Formato de Series (Best-Of)
                 </label>
                 <div className="flex gap-2">
@@ -188,10 +188,10 @@ export default function NuevaFasePage() {
                       key={bo}
                       type="button"
                       onClick={() => setBoDefault(bo)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+                      className={`flex-1 py-2 rounded-[6px] text-xs font-bold border transition-all ${
                         boDefault === bo
-                          ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
-                          : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20'
+                          ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                          : 'border-borde bg-white/5 text-tinta-3 hover:border-white/20'
                       }`}
                     >
                       BO{bo}
@@ -201,7 +201,7 @@ export default function NuevaFasePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
                   Cupos que clasifican a la sig. fase
                 </label>
                 <input
@@ -209,13 +209,13 @@ export default function NuevaFasePage() {
                   min={1}
                   value={cuposAvance}
                   onChange={e => setCuposAvance(parseInt(e.target.value) || 1)}
-                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-violet-500"
+                  className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-2 text-sm focus:outline-none focus:border-acento"
                 />
               </div>
 
               {formato === 'round_robin' && (
                 <div>
-                  <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
                     Cantidad de Grupos
                   </label>
                   <input
@@ -223,7 +223,7 @@ export default function NuevaFasePage() {
                     min={1}
                     value={numGrupos}
                     onChange={e => setNumGrupos(parseInt(e.target.value) || 1)}
-                    className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-violet-500"
+                    className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-2 text-sm focus:outline-none focus:border-acento"
                   />
                 </div>
               )}
@@ -233,43 +233,43 @@ export default function NuevaFasePage() {
           {(formato === 'eliminacion_simple' || formato === 'eliminacion_doble') && (
             <div className="pt-2 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white/70">
+                <span className="text-xs font-semibold text-tinta-2">
                   Escalar el Best-Of por ronda (opcional) — podés agregar tantos tramos como quieras
                 </span>
                 <button
                   type="button"
                   onClick={addTramoBo}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-violet-600/20 hover:bg-violet-600/40 border border-violet-500/30 text-violet-300 text-[11px] font-semibold rounded-lg transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-acento/20 hover:bg-acento/40 border border-borde text-acento-claro text-[11px] font-semibold rounded-[4px] transition-all"
                 >
                   <Plus size={12} /> Agregar tramo
                 </button>
               </div>
 
               {tramosBo.length === 0 && (
-                <p className="text-[11px] text-white/40">Todas las rondas se juegan a BO{boDefault}.</p>
+                <p className="text-[11px] text-tinta-3">Todas las rondas se juegan a BO{boDefault}.</p>
               )}
 
               {tramosBo.length > 0 && (
                 <div className="space-y-2">
                   {tramosBo.map((tramo, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-2.5">
-                      <span className="text-[11px] text-white/40 whitespace-nowrap">Desde ronda</span>
+                    <div key={idx} className="flex items-center gap-2 bg-white/5 border border-borde rounded-[6px] p-2.5">
+                      <span className="text-[11px] text-tinta-3 whitespace-nowrap">Desde ronda</span>
                       <input
                         type="number" min={1} value={tramo.ronda}
                         onChange={e => updateTramoBo(idx, { ronda: parseInt(e.target.value) || 1 })}
-                        className="w-16 bg-[#0e0e1a] border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs font-mono font-bold text-center focus:outline-none focus:border-violet-500"
+                        className="w-16 bg-fondo border border-borde text-white rounded-[4px] px-2 py-1.5 text-xs font-mono font-bold text-center focus:outline-none focus:border-acento"
                       />
-                      <span className="text-[11px] text-white/40">→</span>
+                      <span className="text-[11px] text-tinta-3">→</span>
                       <div className="flex gap-1.5 flex-1">
                         {([1, 3, 5] as const).map(bo => (
                           <button
                             key={bo}
                             type="button"
                             onClick={() => updateTramoBo(idx, { bo })}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                            className={`flex-1 py-1.5 rounded-[4px] text-xs font-bold border transition-all ${
                               tramo.bo === bo
-                                ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
-                                : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20'
+                                ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                                : 'border-borde bg-white/5 text-tinta-3 hover:border-white/20'
                             }`}
                           >
                             BO{bo}
@@ -279,13 +279,13 @@ export default function NuevaFasePage() {
                       <button
                         type="button"
                         onClick={() => removeTramoBo(idx)}
-                        className="text-white/30 hover:text-rose-400 p-1"
+                        className="text-tinta-4 hover:text-vivo p-1"
                       >
                         <X size={14} />
                       </button>
                     </div>
                   ))}
-                  <p className="text-[10px] text-white/30">
+                  <p className="text-[10px] text-tinta-4">
                     Ej: BO{boDefault} hasta ronda {tramosBo[0].ronda - 1 || 1}, luego {tramosBo.map(t => `BO${t.bo} desde ronda ${t.ronda}`).join(', ')}.
                     {formato === 'eliminacion_doble' && ' En eliminación doble, la ronda 1 es la primera de la llave alta y la gran final cae en la última ronda de la fase.'}
                   </p>
@@ -296,36 +296,36 @@ export default function NuevaFasePage() {
 
           {formato === 'suizo' && (
             <div className="pt-2 space-y-3">
-              <label className="flex items-center gap-2 text-xs font-semibold text-white/70 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs font-semibold text-tinta-2 cursor-pointer">
                 <input
                   type="checkbox" checked={usarCorteSuizo}
                   onChange={e => setUsarCorteSuizo(e.target.checked)}
-                  className="rounded bg-white/5 border-white/20 text-violet-600 focus:ring-0"
+                  className="rounded bg-white/5 border-white/20 text-acento-claro focus:ring-0"
                 />
                 Suizo con corte (estilo M7/MPL): clasifica al llegar a N victorias, elimina al llegar a N derrotas
               </label>
               {usarCorteSuizo && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">Victorias para clasificar</label>
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">Victorias para clasificar</label>
                     <input
                       type="number" min={1} value={metaVictorias}
                       onChange={e => setMetaVictorias(parseInt(e.target.value) || 1)}
-                      className="w-full bg-white/5 border border-white/10 text-emerald-300 rounded-xl px-4 py-2 text-sm font-mono font-bold focus:outline-none focus:border-violet-500"
+                      className="w-full bg-white/5 border border-borde text-ok rounded-[6px] px-4 py-2 text-sm font-mono font-bold focus:outline-none focus:border-acento"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">Derrotas para eliminar</label>
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">Derrotas para eliminar</label>
                     <input
                       type="number" min={1} value={metaDerrotas}
                       onChange={e => setMetaDerrotas(parseInt(e.target.value) || 1)}
-                      className="w-full bg-white/5 border border-white/10 text-rose-300 rounded-xl px-4 py-2 text-sm font-mono font-bold focus:outline-none focus:border-violet-500"
+                      className="w-full bg-white/5 border border-borde text-vivo rounded-[6px] px-4 py-2 text-sm font-mono font-bold focus:outline-none focus:border-acento"
                     />
                   </div>
                 </div>
               )}
               {!usarCorteSuizo && (
-                <p className="text-[11px] text-white/40">Sin corte: todos los equipos juegan todas las rondas que generes, sin clasificar ni eliminar automáticamente.</p>
+                <p className="text-[11px] text-tinta-3">Sin corte: todos los equipos juegan todas las rondas que generes, sin clasificar ni eliminar automáticamente.</p>
               )}
             </div>
           )}
@@ -333,23 +333,23 @@ export default function NuevaFasePage() {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
             <AlertCircle size={15} /> <span>{error}</span>
           </div>
         )}
 
         {/* Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/8">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-borde">
           <Link
             href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases`}
-            className="px-5 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white text-sm transition-colors"
+            className="px-5 py-2.5 rounded-[6px] border border-borde text-tinta-2 hover:text-white text-sm transition-colors"
           >
             Cancelar
           </Link>
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-cyan-600 hover:opacity-90 text-white text-sm font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 bg-acento hover:opacity-90 text-white text-sm font-semibold rounded-[6px] shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
             Crear Fase

@@ -18,10 +18,10 @@ const FORMATO_LABELS: Record<string, string> = {
 };
 
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  cerrada: { label: 'Cerrada', color: 'bg-green-500/15 text-green-400 border-green-500/30', icon: <CheckCircle2 size={12} /> },
-  en_curso: { label: 'En Curso', color: 'bg-amber-500/15 text-amber-400 border-amber-500/30', icon: <Play size={12} /> },
-  sorteada: { label: 'Sorteada', color: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30', icon: <Play size={12} /> },
-  pendiente: { label: 'Pendiente de sorteo', color: 'bg-white/10 text-white/40 border-white/10', icon: <Clock size={12} /> },
+  cerrada: { label: 'Cerrada', color: 'bg-green-500/15 text-ok border-green-500/30', icon: <CheckCircle2 size={12} /> },
+  en_curso: { label: 'En Curso', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Play size={12} /> },
+  sorteada: { label: 'Sorteada', color: 'bg-cyan-500/15 text-tinta-2 border-cyan-500/30', icon: <Play size={12} /> },
+  pendiente: { label: 'Pendiente de sorteo', color: 'bg-white/10 text-tinta-3 border-borde', icon: <Clock size={12} /> },
 };
 
 const RESUELTOS = new Set(['confirmada', 'walkover', 'bye']);
@@ -175,7 +175,7 @@ export default function FasesAdminPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-5xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando fases...
       </div>
     );
@@ -183,41 +183,41 @@ export default function FasesAdminPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 text-xs text-white/30 mb-6">
+      <div className="flex items-center gap-2 text-xs text-tinta-4 mb-6">
         <Link href="/admin/torneos" className="hover:text-white transition-colors">Torneos</Link>
         <span>/</span>
         <Link href={`/admin/torneos/${torneoId}`} className="hover:text-white transition-colors">{torneo?.nombre}</Link>
         <span>/</span>
-        <span className="text-white/60">Fases y Etapas</span>
+        <span className="text-tinta-2">Fases y Etapas</span>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <span className="text-xs text-white/40">{edicion?.nombre}</span>
+          <span className="text-xs text-tinta-3">{edicion?.nombre}</span>
           <h1 className="text-2xl font-bold text-white">Estructura y Fases del Torneo</h1>
         </div>
         <Link
           href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/nueva`}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+          className="flex items-center gap-2 px-4 py-2.5 bg-acento hover:from-violet-500 hover:to-cyan-500 text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} /> Agregar Fase
         </Link>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+        <div className="mb-4 p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
           <AlertCircle size={15} /> <span>{error}</span>
         </div>
       )}
 
       <div className="space-y-4">
         {fases.length === 0 && (
-          <div className="bg-[#13131f] border border-white/8 rounded-2xl p-12 text-center text-white/30">
-            <Layers size={40} className="mx-auto mb-3 opacity-30 text-violet-400" />
-            <p className="text-base font-semibold text-white/70">No hay fases configuradas aún</p>
+          <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+            <Layers size={40} className="mx-auto mb-3 opacity-30 text-acento-claro" />
+            <p className="text-base font-semibold text-tinta-2">No hay fases configuradas aún</p>
             <Link
               href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/nueva`}
-              className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-xl"
+              className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-acento hover:bg-acento text-white text-xs font-semibold rounded-[6px]"
             >
               <Plus size={14} /> Crear primera fase
             </Link>
@@ -230,10 +230,10 @@ export default function FasesAdminPage() {
           const completadas = partidas.filter(p => p.estado === 'confirmada' || p.estado === 'walkover' || p.estado === 'bye').length;
 
           return (
-            <div key={fase.id} className="bg-[#13131f] border border-white/8 rounded-2xl p-6 hover:border-white/20 transition-all group">
+            <div key={fase.id} className="bg-superficie border border-borde rounded-[6px] p-6 hover:border-white/20 transition-all group">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center font-bold text-violet-300 text-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-[6px] bg-acento/10 border border-borde flex items-center justify-center font-bold text-acento-claro text-sm flex-shrink-0">
                     #{fase.orden}
                   </div>
                   <div>
@@ -243,7 +243,7 @@ export default function FasesAdminPage() {
                         {badge.icon} {badge.label}
                       </span>
                     </div>
-                    <p className="text-xs text-white/50">{FORMATO_LABELS[fase.formato] ?? fase.formato}</p>
+                    <p className="text-xs text-tinta-3">{FORMATO_LABELS[fase.formato] ?? fase.formato}</p>
                   </div>
                 </div>
 
@@ -253,7 +253,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleSortear(fase.id)}
                       disabled={sorteando === fase.id}
                       title="Arma la fase con TODOS los equipos inscritos y aprobados en la edición."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-ok text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {sorteando === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
                       Sortear (todos los inscritos)
@@ -267,7 +267,7 @@ export default function FasesAdminPage() {
                           : { faseId: fase.id, faseOrigenId: fases.find(f => f.orden < fase.orden)?.id ?? '', cuposPorGrupo: '', rondaOrigen: '' }
                       )}
                       title="Arma la fase solo con los equipos que clasificaron de otra fase ya jugada."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-xl transition-all"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-tinta-2 text-xs font-semibold rounded-[6px] transition-all"
                     >
                       <ListFilter size={13} /> Con clasificados de otra fase
                     </button>
@@ -277,7 +277,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleResetearSorteo(fase.id)}
                       disabled={reseteando === fase.id}
                       title="Borra las partidas de esta fase (nadie jugó nada todavía) y la vuelve a 'pendiente' para sortear de nuevo."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/15 hover:bg-rose-600/30 border border-rose-500/30 text-rose-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/15 hover:bg-rose-600/30 border border-rose-500/30 text-vivo text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {reseteando === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Undo2 size={13} />}
                       Resetear Sorteo
@@ -288,7 +288,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleEliminarFase(fase.id, fase.nombre)}
                       disabled={eliminandoFase === fase.id}
                       title="Borra esta fase por completo — solo funciona si ninguna partida tuvo actividad todavía."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/15 hover:bg-rose-600/30 border border-rose-500/30 text-rose-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/15 hover:bg-rose-600/30 border border-rose-500/30 text-vivo text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {eliminandoFase === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                       Eliminar Fase
@@ -298,7 +298,7 @@ export default function FasesAdminPage() {
                     <button
                       onClick={() => handleSiguienteRonda(fase.id)}
                       disabled={generandoRonda === fase.id}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-tinta-2 text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {generandoRonda === fase.id ? <Loader2 size={13} className="animate-spin" /> : <ChevronRight size={13} />}
                       Siguiente Ronda
@@ -309,7 +309,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleCerrar(fase.id)}
                       disabled={cerrando === fase.id}
                       title="Marca la fase como terminada y habilita sacar sus clasificados para la siguiente fase."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {cerrando === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Lock size={13} />}
                       Cerrar Fase
@@ -317,13 +317,13 @@ export default function FasesAdminPage() {
                   )}
                   <Link
                     href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/${fase.id}/partidas`}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-violet-600/20 hover:bg-violet-600/40 border border-violet-500/30 text-violet-300 text-xs font-semibold rounded-xl transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-acento/20 hover:bg-acento/40 border border-borde text-acento-claro text-xs font-semibold rounded-[6px] transition-all"
                   >
                     <Swords size={13} /> Partidas ({completadas}/{partidas.length})
                   </Link>
                   <Link
                     href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/${fase.id}/tabla`}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-xs rounded-xl transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-borde text-tinta-2 hover:text-white text-xs rounded-[6px] transition-all"
                   >
                     <BarChart3 size={13} /> Tabla / Posiciones
                   </Link>
@@ -333,15 +333,15 @@ export default function FasesAdminPage() {
               {sorteoAvanzado?.faseId === fase.id && (() => {
                 const faseOrigen = fases.find(f => f.id === sorteoAvanzado.faseOrigenId);
                 return (
-                  <div className="mb-4 p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20 space-y-3">
-                    <p className="text-xs font-semibold text-cyan-300">Sortear con los clasificados de otra fase</p>
+                  <div className="mb-4 p-4 rounded-[6px] bg-cyan-500/5 border border-cyan-500/20 space-y-3">
+                    <p className="text-xs font-semibold text-tinta-2">Sortear con los clasificados de otra fase</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[11px] text-white/40 mb-1">Fase de origen</label>
+                        <label className="block text-[11px] text-tinta-3 mb-1">Fase de origen</label>
                         <select
                           value={sorteoAvanzado.faseOrigenId}
                           onChange={e => setSorteoAvanzado(s => s && { ...s, faseOrigenId: e.target.value ? Number(e.target.value) : '' })}
-                          className="w-full bg-[#0e0e1a] border border-white/10 text-white rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500"
+                          className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs focus:outline-none focus:border-cyan-500"
                         >
                           <option value="">Elegir...</option>
                           {fases.filter(f => f.id !== fase.id).map(f => (
@@ -351,16 +351,16 @@ export default function FasesAdminPage() {
                       </div>
                       {faseOrigen && (faseOrigen.formato === 'round_robin' || faseOrigen.formato === 'suizo') && (
                         <div>
-                          <label className="block text-[11px] text-white/40 mb-1">Cuántos clasifican</label>
+                          <label className="block text-[11px] text-tinta-3 mb-1">Cuántos clasifican</label>
                           <input
                             type="number" min={1}
                             value={sorteoAvanzado.cuposPorGrupo}
                             onChange={e => setSorteoAvanzado(s => s && { ...s, cuposPorGrupo: e.target.value })}
                             placeholder={String(faseOrigen.config?.cupos_avance ?? '8')}
-                            className="w-full bg-[#0e0e1a] border border-white/10 text-white rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
                           />
                           {faseOrigen.formato === 'suizo' && faseOrigen.config?.meta_victorias && (
-                            <p className="text-[10px] text-white/30 mt-1">
+                            <p className="text-[10px] text-tinta-4 mt-1">
                               Esta fase suiza clasifica a quien llega a {faseOrigen.config.meta_victorias} victorias — poné ese número exacto de equipos acá.
                             </p>
                           )}
@@ -368,18 +368,18 @@ export default function FasesAdminPage() {
                       )}
                       {faseOrigen && faseOrigen.formato === 'eliminacion_simple' && (
                         <div>
-                          <label className="block text-[11px] text-white/40 mb-1">Ronda de origen (toma los ganadores de esa ronda)</label>
+                          <label className="block text-[11px] text-tinta-3 mb-1">Ronda de origen (toma los ganadores de esa ronda)</label>
                           <input
                             type="number" min={1}
                             value={sorteoAvanzado.rondaOrigen}
                             onChange={e => setSorteoAvanzado(s => s && { ...s, rondaOrigen: e.target.value })}
-                            className="w-full bg-[#0e0e1a] border border-white/10 text-white rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
                           />
                         </div>
                       )}
                     </div>
                     {faseOrigen && faseOrigen.formato !== 'round_robin' && faseOrigen.formato !== 'suizo' && faseOrigen.formato !== 'eliminacion_simple' && (
-                      <p className="text-[11px] text-amber-300/80">
+                      <p className="text-[11px] text-atencion/80">
                         Todavía no se pueden sacar clasificados automáticos de una fase &quot;{FORMATO_LABELS[faseOrigen.formato] ?? faseOrigen.formato}&quot; — hay que re-inscribir a mano.
                       </p>
                     )}
@@ -388,14 +388,14 @@ export default function FasesAdminPage() {
                         type="button"
                         onClick={handleSortearDesdeAnterior}
                         disabled={sorteando === fase.id || !faseOrigen}
-                        className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg disabled:opacity-50"
+                        className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-[4px] disabled:opacity-50"
                       >
                         {sorteando === fase.id ? 'Sorteando...' : 'Confirmar Sorteo'}
                       </button>
                       <button
                         type="button"
                         onClick={() => setSorteoAvanzado(null)}
-                        className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white text-xs rounded-lg"
+                        className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-tinta-3 hover:text-white text-xs rounded-[4px]"
                       >
                         Cancelar
                       </button>
@@ -404,19 +404,19 @@ export default function FasesAdminPage() {
                 );
               })()}
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/5 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-borde-sutil text-xs">
                 <div>
-                  <span className="text-white/30 block">Modelo Competitivo</span>
-                  <span className="text-white/80 font-medium capitalize">{fase.modelo_competencia.replace('_', ' ')}</span>
+                  <span className="text-tinta-4 block">Modelo Competitivo</span>
+                  <span className="text-tinta-2 font-medium capitalize">{fase.modelo_competencia.replace('_', ' ')}</span>
                 </div>
                 <div>
-                  <span className="text-white/30 block">Partidas Jugadas</span>
-                  <span className="text-white/80 font-medium">{completadas} de {partidas.length} listas</span>
+                  <span className="text-tinta-4 block">Partidas Jugadas</span>
+                  <span className="text-tinta-2 font-medium">{completadas} de {partidas.length} listas</span>
                 </div>
                 {(fase.formato === 'round_robin' || fase.formato === 'suizo') && (
                   <div>
-                    <span className="text-white/30 block">Clasifican a la sig. fase</span>
-                    <span className="text-emerald-300 font-bold flex items-center gap-1">
+                    <span className="text-tinta-4 block">Clasifican a la sig. fase</span>
+                    <span className="text-ok font-bold flex items-center gap-1">
                       <Trophy size={12} />
                       {fase.formato === 'suizo' && fase.config?.meta_victorias
                         ? fase.estado === 'cerrada'
@@ -429,7 +429,7 @@ export default function FasesAdminPage() {
                 <div className="flex items-center justify-end">
                   <Link
                     href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/${fase.id}/partidas`}
-                    className="text-violet-400 hover:text-violet-300 flex items-center gap-1 font-semibold group-hover:translate-x-1 transition-all"
+                    className="text-acento-claro hover:text-acento-claro flex items-center gap-1 font-semibold group-hover:translate-x-1 transition-all"
                   >
                     Administrar Llaves <ChevronRight size={14} />
                   </Link>

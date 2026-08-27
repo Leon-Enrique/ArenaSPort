@@ -357,60 +357,60 @@ export default function NuevoTorneoPage() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-8">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex items-center gap-2 text-xs text-tinta-3">
         <Link href="/admin/torneos" className="hover:text-white transition-colors">Torneos</Link>
         <span>/</span>
-        <span className="text-purple-400 font-semibold">Constructor de Torneos</span>
+        <span className="text-acento-claro font-semibold">Constructor de Torneos</span>
       </div>
 
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-800 text-purple-300 text-xs font-semibold mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/80 border border-borde text-acento-claro text-xs font-semibold mb-2">
           <Sparkles size={13} />
           <span>Constructor Multi-Fase</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-white">Crear Nuevo Torneo</h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-tinta-3 mt-1">
           Diseña las etapas de tu torneo (8, 16, 32, 64, 128 o 40 equipos) y encadena grupos, sistema suizo y playoffs.
         </p>
       </div>
 
       {/* Steps Pill */}
-      <div className="grid grid-cols-3 gap-2 bg-[#0e101d] p-2 rounded-2xl border border-slate-800 text-xs font-bold">
+      <div className="grid grid-cols-3 gap-2 bg-superficie p-2 rounded-[6px] border border-borde text-xs font-bold">
         <button
           onClick={() => setStep(1)}
-          className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 px-3 rounded-[6px] flex items-center justify-center gap-2 transition-all ${
             step === 1
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+              ? 'bg-acento text-white'
               : step > 1
-              ? 'bg-purple-950/40 text-purple-300 border border-purple-800/40'
-              : 'text-slate-500'
+              ? 'bg-elevada text-acento-claro border border-borde'
+              : 'text-tinta-4'
           }`}
         >
           <span>1. Juego y Nombre</span>
-          {step > 1 && <Check size={14} className="text-emerald-400" />}
+          {step > 1 && <Check size={14} className="text-ok" />}
         </button>
 
         <button
           onClick={() => step > 1 && setStep(2)}
-          className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 px-3 rounded-[6px] flex items-center justify-center gap-2 transition-all ${
             step === 2
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+              ? 'bg-acento text-white'
               : step > 2
-              ? 'bg-purple-950/40 text-purple-300 border border-purple-800/40'
-              : 'text-slate-500'
+              ? 'bg-elevada text-acento-claro border border-borde'
+              : 'text-tinta-4'
           }`}
         >
           <span>2. Fases y Equipos</span>
-          {step > 2 && <Check size={14} className="text-emerald-400" />}
+          {step > 2 && <Check size={14} className="text-ok" />}
         </button>
 
         <button
           onClick={() => step > 2 && setStep(3)}
-          className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 px-3 rounded-[6px] flex items-center justify-center gap-2 transition-all ${
             step === 3
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-              : 'text-slate-500'
+              ? 'bg-acento text-white'
+              : 'text-tinta-4'
           }`}
         >
           <span>3. Premios y Publicar</span>
@@ -421,10 +421,10 @@ export default function NuevoTorneoPage() {
       {/* PASO 1: SELECCIONA EL JUEGO Y EL NOMBRE DEL TORNEO       */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {step === 1 && (
-        <form onSubmit={handleNext} className="bg-[#0e101d] rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-6">
+        <form onSubmit={handleNext} className="bg-superficie rounded-[6px] p-6 sm:p-8 border border-borde space-y-6">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Gamepad2 className="text-purple-400" size={18} />
+              <Gamepad2 className="text-acento-claro" size={18} />
               ¿Qué juego vas a organizar?
             </h2>
 
@@ -432,85 +432,85 @@ export default function NuevoTorneoPage() {
               {/* MLBB */}
               <div
                 onClick={() => setJuegoCodigo('mlbb')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'mlbb'
-                    ? 'bg-purple-950/50 border-purple-500 shadow-lg shadow-purple-500/20 ring-1 ring-purple-500'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-purple-950/50 border-acento ring-1 ring-purple-500'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xl">⚔️</span>
-                  {juegoCodigo === 'mlbb' && <CheckCircle2 size={18} className="text-purple-400" />}
+                  {juegoCodigo === 'mlbb' && <CheckCircle2 size={18} className="text-acento-claro" />}
                 </div>
                 <p className="font-bold text-white text-sm">Mobile Legends: BB</p>
-                <p className="text-[11px] text-slate-400 mt-1">5v5 MOBA • 5 titulares + 2 suplentes</p>
+                <p className="text-[11px] text-tinta-3 mt-1">5v5 MOBA • 5 titulares + 2 suplentes</p>
               </div>
 
               {/* Free Fire */}
               <div
                 onClick={() => setJuegoCodigo('free_fire')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'free_fire'
                     ? 'bg-amber-950/50 border-amber-500 shadow-lg shadow-amber-500/20 ring-1 ring-amber-500'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xl">🔥</span>
-                  {juegoCodigo === 'free_fire' && <CheckCircle2 size={18} className="text-amber-400" />}
+                  {juegoCodigo === 'free_fire' && <CheckCircle2 size={18} className="text-atencion" />}
                 </div>
                 <p className="font-bold text-white text-sm">Free Fire</p>
-                <p className="text-[11px] text-slate-400 mt-1">Battle Royale • 4 titulares + 1 suplente</p>
+                <p className="text-[11px] text-tinta-3 mt-1">Battle Royale • 4 titulares + 1 suplente</p>
               </div>
 
               {/* CODM */}
               <div
                 onClick={() => setJuegoCodigo('codm')}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'codm'
-                    ? 'bg-cyan-950/50 border-cyan-500 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-500'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-cyan-950/50 border-cyan-500 ring-1 ring-cyan-500'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xl">🎯</span>
-                  {juegoCodigo === 'codm' && <CheckCircle2 size={18} className="text-cyan-400" />}
+                  {juegoCodigo === 'codm' && <CheckCircle2 size={18} className="text-tinta-2" />}
                 </div>
                 <p className="font-bold text-white text-sm">Call of Duty Mobile</p>
-                <p className="text-[11px] text-slate-400 mt-1">5v5 Multijugador • ByD / Dominio</p>
+                <p className="text-[11px] text-tinta-3 mt-1">5v5 Multijugador • ByD / Dominio</p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-slate-800">
+          <div className="space-y-4 pt-4 border-t border-borde">
             <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">Nombre del Torneo *</label>
+              <label className="block text-xs font-bold text-tinta mb-1.5">Nombre del Torneo *</label>
               <input
                 type="text"
                 required
                 placeholder="Ej. Copa Latam Mobile Legends 2026"
                 value={nombreTorneo}
                 onChange={(e) => setNombreTorneo(e.target.value)}
-                className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold text-sm focus:border-purple-500 focus:outline-none"
+                className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-white font-bold text-sm focus:border-acento focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">Descripción o Reglamento Breve (Opcional)</label>
+              <label className="block text-xs font-bold text-tinta mb-1.5">Descripción o Reglamento Breve (Opcional)</label>
               <textarea
                 rows={3}
                 placeholder="Información para los capitanes sobre horarios, servidor y canal de Discord..."
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:border-purple-500 focus:outline-none"
+                className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-tinta text-xs focus:border-acento focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-slate-800">
+          <div className="flex justify-end pt-4 border-t border-borde">
             <button
               type="submit"
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all"
+              className="px-6 py-3 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all"
             >
               <span>Continuar a Fases y Equipos</span>
               <ChevronRight size={16} />
@@ -526,12 +526,12 @@ export default function NuevoTorneoPage() {
         <div className="space-y-6">
           
           {/* SECCIÓN 1: BOTONES DE PLANTILLAS RÁPIDAS (8, 16, 32, 64, 128, 40) */}
-          <div className="bg-[#0e101d] rounded-2xl p-5 border border-slate-800 space-y-3">
+          <div className="bg-superficie rounded-[6px] p-5 border border-borde space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Zap size={14} className="text-amber-400" /> Plantillas Rápidas con 1 Clic:
+              <span className="text-xs font-bold text-acento-claro uppercase tracking-wider flex items-center gap-1.5">
+                <Zap size={14} className="text-atencion" /> Plantillas Rápidas con 1 Clic:
               </span>
-              <span className="text-[11px] text-slate-400">Selecciona para autocompletar las etapas:</span>
+              <span className="text-[11px] text-tinta-3">Selecciona para autocompletar las etapas:</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -540,97 +540,97 @@ export default function NuevoTorneoPage() {
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('8')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '8'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">8 Equipos</span>
-                <span className="text-[10px] text-slate-400 font-mono">3 Rondas</span>
+                <span className="text-[10px] text-tinta-3 font-mono">3 Rondas</span>
               </button>
 
               {/* 16 Equipos */}
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('16')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '16'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">16 Equipos</span>
-                <span className="text-[10px] text-slate-400 font-mono">4 Rondas</span>
+                <span className="text-[10px] text-tinta-3 font-mono">4 Rondas</span>
               </button>
 
               {/* 32 Equipos */}
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('32')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '32'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">32 Equipos</span>
-                <span className="text-[10px] text-slate-400 font-mono">5 Rondas</span>
+                <span className="text-[10px] text-tinta-3 font-mono">5 Rondas</span>
               </button>
 
               {/* 64 Equipos */}
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('64')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '64'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">64 Equipos</span>
-                <span className="text-[10px] text-slate-400 font-mono">6 Rondas</span>
+                <span className="text-[10px] text-tinta-3 font-mono">6 Rondas</span>
               </button>
 
               {/* 128 Equipos */}
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('128')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '128'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">128 Equipos</span>
-                <span className="text-[10px] text-cyan-400 font-mono">7 Rondas</span>
+                <span className="text-[10px] text-tinta-2 font-mono">7 Rondas</span>
               </button>
 
               {/* 40 Equipos (8 grupos de 5) */}
               <button
                 type="button"
                 onClick={() => aplicarPlantilla('40_grupos')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '40_grupos'
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/20'
-                    : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
                 <span className="text-lg font-black text-white block">40 Equipos</span>
-                <span className="text-[10px] text-purple-300 font-mono">8 grupos de 5</span>
+                <span className="text-[10px] text-acento-claro font-mono">8 grupos de 5</span>
               </button>
 
             </div>
           </div>
 
           {/* SECCIÓN 2: DIAGRAMA VISUAL EN VIVO (PIPELINE DE FASES) */}
-          <div className="bg-gradient-to-br from-[#121426] to-[#0e101d] rounded-2xl p-6 border border-purple-500/30 shadow-xl space-y-4">
+          <div className="bg-elevada rounded-[6px] p-6 border border-borde shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-300 flex items-center gap-2">
-                <Layers size={14} className="text-cyan-400" />
+              <h3 className="text-xs font-extrabold uppercase tracking-widest text-tinta-2 flex items-center gap-2">
+                <Layers size={14} className="text-tinta-2" />
                 Ruta de Clasificación en Vivo ({totalEquipos} Equipos Totales)
               </h3>
-              <span className="text-xs text-purple-300 font-mono font-bold">
+              <span className="text-xs text-acento-claro font-mono font-bold">
                 {fases.length} {fases.length === 1 ? 'Etapa' : 'Etapas Encadenadas'}
               </span>
             </div>
@@ -639,19 +639,19 @@ export default function NuevoTorneoPage() {
               {fases.map((f, idx) => (
                 <React.Fragment key={f.id}>
                   {/* Card de la Fase */}
-                  <div className="w-full md:w-64 bg-[#0a0a14] p-4 rounded-xl border border-slate-800 space-y-2 relative shadow-lg">
+                  <div className="w-full md:w-64 bg-fondo p-4 rounded-[6px] border border-borde space-y-2 relative shadow-lg">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-acento/20 text-acento-claro border border-borde">
                         Etapa #{idx + 1}
                       </span>
-                      <span className="text-[11px] font-mono text-cyan-400 font-bold">
+                      <span className="text-[11px] font-mono text-tinta-2 font-bold">
                         {f.equiposEntran} Equipos
                       </span>
                     </div>
 
                     <p className="text-xs font-extrabold text-white truncate">{f.nombre}</p>
                     
-                    <div className="text-[11px] text-slate-400 font-mono bg-slate-900/80 p-2 rounded-lg border border-slate-800/80">
+                    <div className="text-[11px] text-tinta-3 font-mono bg-superficie p-2 rounded-[4px] border border-borde">
                       {f.formato === 'round_robin' && (
                         <span>{f.numGrupos} Grupos de {f.equiposPorGrupo || Math.floor(f.equiposEntran / (f.numGrupos || 8))} escuadras</span>
                       )}
@@ -667,8 +667,8 @@ export default function NuevoTorneoPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] pt-1">
-                      <span className="text-slate-500">Avanzan:</span>
-                      <span className="font-bold text-emerald-400 flex items-center gap-1">
+                      <span className="text-tinta-4">Avanzan:</span>
+                      <span className="font-bold text-ok flex items-center gap-1">
                         <CheckCircle2 size={12} />
                         {f.cuposAvance} {idx === fases.length - 1 ? 'Campeón 🏆' : 'Equipos ➔'}
                       </span>
@@ -677,9 +677,9 @@ export default function NuevoTorneoPage() {
 
                   {/* Flecha a la siguiente etapa */}
                   {idx < fases.length - 1 && (
-                    <div className="flex items-center justify-center text-purple-400 my-2 md:my-0">
+                    <div className="flex items-center justify-center text-acento-claro my-2 md:my-0">
                       <ArrowRight size={20} className="hidden md:block animate-pulse" />
-                      <span className="md:hidden text-xs font-bold text-purple-300">↓ Pasan {f.cuposAvance} Equipos ↓</span>
+                      <span className="md:hidden text-xs font-bold text-acento-claro">↓ Pasan {f.cuposAvance} Equipos ↓</span>
                     </div>
                   )}
                 </React.Fragment>
@@ -691,14 +691,14 @@ export default function NuevoTorneoPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Settings2 className="text-cyan-400" size={18} />
+                <Settings2 className="text-tinta-2" size={18} />
                 Ajustar o Personalizar cada Etapa
               </h2>
 
               <button
                 type="button"
                 onClick={handleAddFase}
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all"
+                className="px-3.5 py-1.5 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all"
               >
                 <Plus size={14} /> Añadir Siguiente Etapa
               </button>
@@ -706,17 +706,17 @@ export default function NuevoTorneoPage() {
 
             {/* Fases List Cards */}
             {fases.map((fase, index) => (
-              <div key={fase.id} className="bg-[#0e101d] rounded-2xl p-6 border border-slate-800 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div key={fase.id} className="bg-superficie rounded-[6px] p-6 border border-borde space-y-4">
+                <div className="flex items-center justify-between border-b border-borde pb-3">
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="w-6 h-6 rounded-lg bg-purple-950 border border-purple-500/40 text-purple-300 font-black text-xs flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-[4px] bg-purple-950 border border-borde text-acento-claro font-black text-xs flex items-center justify-center">
                       {index + 1}
                     </span>
                     <input
                       type="text"
                       value={fase.nombre}
                       onChange={(e) => updateFase(index, { nombre: e.target.value })}
-                      className="bg-transparent text-white font-bold text-sm focus:outline-none border-b border-transparent focus:border-purple-500 w-full"
+                      className="bg-transparent text-white font-bold text-sm focus:outline-none border-b border-transparent focus:border-acento w-full"
                     />
                   </div>
 
@@ -724,7 +724,7 @@ export default function NuevoTorneoPage() {
                     <button
                       type="button"
                       onClick={() => handleRemoveFase(index)}
-                      className="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-950/30 transition-colors ml-2"
+                      className="text-tinta-4 hover:text-vivo p-1.5 rounded-[4px] hover:bg-rose-950/30 transition-colors ml-2"
                       title="Eliminar esta etapa"
                     >
                       <Trash2 size={15} />
@@ -735,11 +735,11 @@ export default function NuevoTorneoPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                   {/* Formato */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">Formato de esta Etapa</label>
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">Formato de esta Etapa</label>
                     <select
                       value={fase.formato}
                       onChange={(e) => updateFase(index, { formato: e.target.value as any })}
-                      className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-white font-semibold focus:border-purple-500 focus:outline-none"
+                      className="w-full p-2.5 rounded-[4px] bg-fondo border border-borde text-white font-semibold focus:border-acento focus:outline-none"
                     >
                       <option value="eliminacion_simple">🏆 Eliminación Simple (Brackets directos)</option>
                       <option value="eliminacion_doble">⚔️ Eliminación Doble (Upper / Lower)</option>
@@ -750,15 +750,15 @@ export default function NuevoTorneoPage() {
 
                   {/* Equipos que entran */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">Equipos en esta Etapa</label>
-                    <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-cyan-300 font-mono font-bold">
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">Equipos en esta Etapa</label>
+                    <div className="p-2.5 rounded-[4px] bg-fondo border border-borde text-tinta-2 font-mono font-bold">
                       {fase.equiposEntran} Escuadras {index > 0 ? '(Recibidos de la fase anterior)' : ''}
                     </div>
                   </div>
 
                   {/* Cupos que avanzan */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">
                       {index === fases.length - 1 ? 'Ganador Final' : '¿Cuántos clasifican a la siguiente etapa?'}
                     </label>
                     <input
@@ -767,23 +767,23 @@ export default function NuevoTorneoPage() {
                       max={fase.equiposEntran}
                       value={fase.cuposAvance}
                       onChange={(e) => updateFase(index, { cuposAvance: Number(e.target.value) })}
-                      className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-emerald-400 font-mono font-bold focus:border-purple-500 focus:outline-none"
+                      className="w-full p-2.5 rounded-[4px] bg-fondo border border-borde text-ok font-mono font-bold focus:border-acento focus:outline-none"
                     />
                   </div>
 
                   {/* Formato de Series (Best-Of) */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">Formato de Series (Best-Of)</label>
+                    <label className="block text-[11px] font-semibold text-tinta-3 mb-1">Formato de Series (Best-Of)</label>
                     <div className="flex gap-1.5">
                       {([1, 3, 5] as const).map(bo => (
                         <button
                           key={bo}
                           type="button"
                           onClick={() => updateFase(index, { bo })}
-                          className={`flex-1 py-2.5 rounded-lg text-xs font-bold border transition-all ${
+                          className={`flex-1 py-2.5 rounded-[4px] text-xs font-bold border transition-all ${
                             fase.bo === bo
-                              ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
-                              : 'border-slate-800 bg-slate-950 text-slate-500 hover:border-slate-700'
+                              ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                              : 'border-borde bg-fondo text-tinta-4 hover:border-borde-fuerte'
                           }`}
                         >
                           BO{bo}
@@ -797,9 +797,9 @@ export default function NuevoTorneoPage() {
                 {(fase.formato === 'eliminacion_simple' || fase.formato === 'eliminacion_doble') && (() => {
                   const rondasTotales = totalRondas(fase.formato, fase.equiposEntran);
                   return (
-                  <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
+                  <div className="bg-fondo p-4 rounded-[6px] border border-borde space-y-3 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-300">
+                      <span className="font-semibold text-tinta-2">
                         Escalar el Best-Of por ronda (opcional) — cualquier cantidad de tramos
                       </span>
                       <button
@@ -811,21 +811,21 @@ export default function NuevoTorneoPage() {
                           updateFase(index, { tramosBo: [...tramos, { ronda: siguienteRonda, bo: 3 }] });
                         }}
                         disabled={(fase.tramosBo?.length ?? 0) >= rondasTotales}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/30 text-purple-300 text-[11px] font-semibold rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-acento/20 hover:bg-acento/40 border border-borde text-acento-claro text-[11px] font-semibold rounded-[4px] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Plus size={12} /> Agregar tramo
                       </button>
                     </div>
 
                     {(!fase.tramosBo || fase.tramosBo.length === 0) && (
-                      <p className="text-slate-500">Todas las rondas se juegan a BO{fase.bo}.</p>
+                      <p className="text-tinta-4">Todas las rondas se juegan a BO{fase.bo}.</p>
                     )}
 
                     {fase.tramosBo && fase.tramosBo.length > 0 && (
                       <div className="space-y-2">
                         {fase.tramosBo.map((tramo, tIdx) => (
-                          <div key={tIdx} className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-2.5">
-                            <span className="text-slate-500 whitespace-nowrap">Desde ronda</span>
+                          <div key={tIdx} className="flex items-center gap-2 bg-superficie border border-borde rounded-[4px] p-2.5">
+                            <span className="text-tinta-4 whitespace-nowrap">Desde ronda</span>
                             <input
                               type="number" min={1} max={rondasTotales} value={tramo.ronda}
                               onChange={(e) => {
@@ -834,9 +834,9 @@ export default function NuevoTorneoPage() {
                                 tramos[tIdx] = { ...tramos[tIdx], ronda: valor };
                                 updateFase(index, { tramosBo: tramos });
                               }}
-                              className="w-16 bg-slate-950 border border-slate-800 text-white rounded-lg px-2 py-1.5 text-center font-mono font-bold"
+                              className="w-16 bg-fondo border border-borde text-white rounded-[4px] px-2 py-1.5 text-center font-mono font-bold"
                             />
-                            <span className="text-slate-500">→</span>
+                            <span className="text-tinta-4">→</span>
                             <div className="flex gap-1.5 flex-1">
                               {([1, 3, 5] as const).map(bo => (
                                 <button
@@ -847,10 +847,10 @@ export default function NuevoTorneoPage() {
                                     tramos[tIdx] = { ...tramos[tIdx], bo };
                                     updateFase(index, { tramosBo: tramos });
                                   }}
-                                  className={`flex-1 py-1.5 rounded-lg font-bold border transition-all ${
+                                  className={`flex-1 py-1.5 rounded-[4px] font-bold border transition-all ${
                                     tramo.bo === bo
-                                      ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
-                                      : 'border-slate-800 bg-slate-950 text-slate-500 hover:border-slate-700'
+                                      ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                                      : 'border-borde bg-fondo text-tinta-4 hover:border-borde-fuerte'
                                   }`}
                                 >
                                   BO{bo}
@@ -860,13 +860,13 @@ export default function NuevoTorneoPage() {
                             <button
                               type="button"
                               onClick={() => updateFase(index, { tramosBo: (fase.tramosBo || []).filter((_, i) => i !== tIdx) })}
-                              className="text-slate-600 hover:text-rose-400 p-1"
+                              className="text-tinta-4 hover:text-vivo p-1"
                             >
                               <X size={14} />
                             </button>
                           </div>
                         ))}
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-[10px] text-tinta-4">
                           {fase.formato === 'eliminacion_doble'
                             ? `Esta llave doble de ${fase.equiposEntran} equipos tiene ${rondasTotales} rondas en total (ronda 1 = primera de la llave alta; la gran final es la ronda ${rondasTotales}, contando las rondas de la llave baja intercaladas).`
                             : `Este cuadro de ${fase.equiposEntran} equipos tiene ${rondasTotales} rondas en total (ronda ${rondasTotales} = final).`}
@@ -879,35 +879,35 @@ export default function NuevoTorneoPage() {
 
                 {/* Si es grupos, sub-opciones */}
                 {fase.formato === 'round_robin' && (
-                  <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div className="bg-fondo p-4 rounded-[6px] border border-borde grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1 font-semibold">Cantidad de Grupos</label>
+                      <label className="block text-[11px] text-tinta-3 mb-1 font-semibold">Cantidad de Grupos</label>
                       <input
                         type="number"
                         min={2}
                         max={16}
                         value={fase.numGrupos || 8}
                         onChange={(e) => updateFase(index, { numGrupos: Number(e.target.value) })}
-                        className="w-full p-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono font-bold"
+                        className="w-full p-2 rounded-[4px] bg-superficie border border-borde text-white font-mono font-bold"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1 font-semibold">Equipos por Grupo</label>
-                      <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-purple-300 font-mono font-bold">
+                      <label className="block text-[11px] text-tinta-3 mb-1 font-semibold">Equipos por Grupo</label>
+                      <div className="p-2 rounded-[4px] bg-superficie border border-borde text-acento-claro font-mono font-bold">
                         {Math.floor(fase.equiposEntran / (fase.numGrupos || 8))} Equipos / grupo
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1 font-semibold">Clasifican por Grupo (Top X)</label>
+                      <label className="block text-[11px] text-tinta-3 mb-1 font-semibold">Clasifican por Grupo (Top X)</label>
                       <input
                         type="number"
                         min={1}
                         max={4}
                         value={fase.clasificadosPorGrupo || 2}
                         onChange={(e) => updateFase(index, { clasificadosPorGrupo: Number(e.target.value) })}
-                        className="w-full p-2 rounded-lg bg-slate-900 border border-slate-800 text-emerald-400 font-mono font-bold"
+                        className="w-full p-2 rounded-[4px] bg-superficie border border-borde text-ok font-mono font-bold"
                       />
                     </div>
                   </div>
@@ -917,12 +917,12 @@ export default function NuevoTorneoPage() {
                 {(fase.formato === 'eliminacion_simple' || fase.formato === 'eliminacion_doble') &&
                   fase.equiposEntran > 1 &&
                   (fase.equiposEntran & (fase.equiposEntran - 1)) !== 0 && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-500/40 text-[11px] text-cyan-300">
-                    <span className="text-cyan-400">✨</span>
+                  <div className="flex items-center gap-2 p-2.5 rounded-[4px] bg-cyan-950/30 border border-cyan-500/40 text-[11px] text-tinta-2">
+                    <span className="text-tinta-2">✨</span>
                     <span>
                       <span>
                         <strong>{fase.equiposEntran} equipos</strong> no es potencia de 2.
-                        El sistema completará automáticamente con <strong className="text-cyan-300">{Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran))) - fase.equiposEntran} BYE{Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran))) - fase.equiposEntran !== 1 ? 's' : ''}</strong> hasta {Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran)))} slots.
+                        El sistema completará automáticamente con <strong className="text-tinta-2">{Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran))) - fase.equiposEntran} BYE{Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran))) - fase.equiposEntran !== 1 ? 's' : ''}</strong> hasta {Math.pow(2, Math.ceil(Math.log2(fase.equiposEntran)))} slots.
                         Los top seeds recibirán pase directo (BYE) a la Ronda 2.
                       </span>
                     </span>
@@ -932,11 +932,11 @@ export default function NuevoTorneoPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-slate-800">
+          <div className="flex items-center justify-between pt-6 border-t border-borde">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-2"
+              className="px-4 py-2.5 rounded-[6px] bg-superficie hover:bg-elevada text-tinta-2 text-xs font-semibold flex items-center gap-2"
             >
               <ArrowLeft size={14} /> Volver al Paso 1
             </button>
@@ -944,7 +944,7 @@ export default function NuevoTorneoPage() {
             <button
               type="button"
               onClick={() => setStep(3)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all"
+              className="px-6 py-3 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all"
             >
               <span>Continuar al Paso 3 (Premios y Publicar)</span>
               <ChevronRight size={16} />
@@ -957,90 +957,90 @@ export default function NuevoTorneoPage() {
       {/* PASO 3: FECHAS, PREMIOS Y PUBLICACIÓN                    */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {step === 3 && (
-        <form onSubmit={handleCrearTorneo} className="bg-[#0e101d] rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-6">
+        <form onSubmit={handleCrearTorneo} className="bg-superficie rounded-[6px] p-6 sm:p-8 border border-borde space-y-6">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Calendar className="text-amber-400" size={18} />
+              <Calendar className="text-atencion" size={18} />
               Fechas y Bolsa de Premios
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Configura la fecha de inicio y la recompensa del torneo.</p>
+            <p className="text-xs text-tinta-3 mt-0.5">Configura la fecha de inicio y la recompensa del torneo.</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-xs">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-300 mb-1">Fecha de Inicio</label>
+                <label className="block text-[11px] font-semibold text-tinta-2 mb-1">Fecha de Inicio</label>
                 <input
                   type="date"
                   value={fechaInicio}
                   onChange={(e) => setFechaInicio(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold focus:border-purple-500 focus:outline-none"
+                  className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-white font-bold focus:border-acento focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-300 mb-1">Bolsa de Premios (Prize Pool)</label>
+                <label className="block text-[11px] font-semibold text-tinta-2 mb-1">Bolsa de Premios (Prize Pool)</label>
                 <input
                   type="text"
                   placeholder="Ej: $1,500 USD o 5,000 Diamantes"
                   value={bolsaPremios}
                   onChange={(e) => setBolsaPremios(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-amber-300 font-bold focus:border-purple-500 focus:outline-none"
+                  className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-atencion font-bold focus:border-acento focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Resumen Final de la Estructura */}
-          <div className="p-5 rounded-xl bg-gradient-to-br from-purple-950/40 to-slate-950 border border-purple-500/30 space-y-3">
+          <div className="p-5 rounded-[6px] bg-elevada border border-borde space-y-3">
             <h3 className="font-bold text-sm text-white flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-purple-400" />
+              <CheckCircle2 size={16} className="text-acento-claro" />
               Resumen Final del Torneo
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase block">Torneo</span>
+              <div className="p-3 bg-fondo rounded-[4px] border border-borde">
+                <span className="text-[10px] text-tinta-4 uppercase block">Torneo</span>
                 <p className="font-bold text-white truncate">{nombreTorneo}</p>
               </div>
 
-              <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase block">Participantes</span>
-                <p className="font-bold text-cyan-300 font-mono">{totalEquipos} Equipos</p>
+              <div className="p-3 bg-fondo rounded-[4px] border border-borde">
+                <span className="text-[10px] text-tinta-4 uppercase block">Participantes</span>
+                <p className="font-bold text-tinta-2 font-mono">{totalEquipos} Equipos</p>
               </div>
 
-              <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase block">Etapas</span>
-                <p className="font-bold text-purple-300">{fases.length} Fases Encadenadas</p>
+              <div className="p-3 bg-fondo rounded-[4px] border border-borde">
+                <span className="text-[10px] text-tinta-4 uppercase block">Etapas</span>
+                <p className="font-bold text-acento-claro">{fases.length} Fases Encadenadas</p>
               </div>
 
-              <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase block">Premios</span>
-                <p className="font-bold text-amber-300 font-mono">{bolsaPremios}</p>
+              <div className="p-3 bg-fondo rounded-[4px] border border-borde">
+                <span className="text-[10px] text-tinta-4 uppercase block">Premios</span>
+                <p className="font-bold text-atencion font-mono">{bolsaPremios}</p>
               </div>
             </div>
 
-            <div className="mt-2 p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-slate-300 space-y-1">
-              <p className="font-bold text-purple-400 uppercase text-[10px]">Ruta de Clasificación Encadenada:</p>
+            <div className="mt-2 p-3 bg-fondo rounded-[4px] border border-borde text-[11px] text-tinta-2 space-y-1">
+              <p className="font-bold text-acento-claro uppercase text-[10px]">Ruta de Clasificación Encadenada:</p>
               {fases.map((f, i) => (
                 <p key={f.id} className="flex items-center gap-2">
-                  <span className="text-slate-500 font-mono">Paso {i + 1}:</span>
+                  <span className="text-tinta-4 font-mono">Paso {i + 1}:</span>
                   <strong className="text-white">{f.nombre}</strong>
-                  <span className="text-slate-400">({f.equiposEntran} equipos ➔ clasifican {f.cuposAvance})</span>
+                  <span className="text-tinta-3">({f.equiposEntran} equipos ➔ clasifican {f.cuposAvance})</span>
                 </p>
               ))}
             </div>
           </div>
 
           {errorSubmit && (
-            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
               <AlertCircle size={15} /> <span>{errorSubmit}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-between pt-4 border-t border-borde">
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-2"
+              className="px-4 py-2.5 rounded-[6px] bg-superficie hover:bg-elevada text-tinta-2 text-xs font-semibold flex items-center gap-2"
             >
               <ArrowLeft size={14} /> Volver a Fases
             </button>
@@ -1048,12 +1048,12 @@ export default function NuevoTorneoPage() {
             <button
               type="submit"
               disabled={isSubmitting || creadoExitoso}
-              className={`px-8 py-3.5 rounded-xl text-white font-extrabold text-sm flex items-center gap-2 shadow-xl transition-all cursor-pointer ${
+              className={`px-8 py-3.5 rounded-[6px] text-white font-extrabold text-sm flex items-center gap-2 shadow-xl transition-all cursor-pointer ${
                 creadoExitoso
-                  ? 'bg-emerald-600 shadow-emerald-600/30'
+                  ? 'bg-emerald-600'
                   : isSubmitting
                   ? 'bg-purple-700 opacity-90'
-                  : 'bg-gradient-to-r from-emerald-600 via-purple-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 shadow-purple-600/30'
+                  : 'bg-acento hover:from-emerald-500 hover:to-cyan-500'
               }`}
             >
               <Sparkles size={16} />

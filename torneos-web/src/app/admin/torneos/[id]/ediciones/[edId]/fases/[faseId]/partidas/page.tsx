@@ -211,7 +211,7 @@ export default function FasePartidasAdminPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-6xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando partidas...
       </div>
     );
@@ -223,52 +223,52 @@ export default function FasePartidasAdminPage() {
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       {successToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-green-500/90 text-white px-5 py-3 rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-2 text-sm font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-green-500/90 text-white px-5 py-3 rounded-[6px] shadow-xl backdrop-blur-md flex items-center gap-2 text-sm font-semibold">
           <CheckCircle2 size={18} /> {successToast}
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-xs text-white/30">
+      <div className="flex items-center gap-2 text-xs text-tinta-4">
         <Link href="/admin/torneos" className="hover:text-white transition-colors">Torneos</Link>
         <span>/</span>
         <Link href={`/admin/torneos/${torneoId}`} className="hover:text-white transition-colors">{torneo?.nombre}</Link>
         <span>/</span>
         <Link href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases`} className="hover:text-white transition-colors">Fases</Link>
         <span>/</span>
-        <span className="text-white/60">{fase?.nombre}</span>
+        <span className="text-tinta-2">{fase?.nombre}</span>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="text-xs text-white/40">{edicion?.nombre}</span>
+          <span className="text-xs text-tinta-3">{edicion?.nombre}</span>
           <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <Swords className="text-violet-400" /> {fase?.nombre} - Administrador de Partidas
+            <Swords className="text-acento-claro" /> {fase?.nombre} - Administrador de Partidas
           </h1>
         </div>
         <Link
           href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/${faseId}/tabla`}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-semibold rounded-xl transition-all w-fit"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-borde text-white text-xs font-semibold rounded-[6px] transition-all w-fit"
         >
-          <Trophy size={14} className="text-amber-400" /> Ver Tabla de Posiciones
+          <Trophy size={14} className="text-atencion" /> Ver Tabla de Posiciones
         </Link>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+        <div className="p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
           <AlertCircle size={15} /> <span>{error}</span>
         </div>
       )}
 
       {isMultiEquipo ? (
-        <div className="bg-[#13131f] border border-white/8 rounded-2xl p-6 space-y-4">
+        <div className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
           <div>
             <h2 className="text-lg font-bold text-white">Tabla de Posiciones (Multi-Equipo)</h2>
-            <p className="text-xs text-white/40">La carga de resultados por caída para formatos battle royale todavía no está disponible desde este panel — usá el endpoint de la API directamente por ahora.</p>
+            <p className="text-xs text-tinta-3">La carga de resultados por caída para formatos battle royale todavía no está disponible desde este panel — usá el endpoint de la API directamente por ahora.</p>
           </div>
           <GroupStageView grupos={tabla} />
         </div>
       ) : partidas.length === 0 ? (
-        <div className="bg-[#13131f] border border-white/8 rounded-2xl p-12 text-center text-white/30">
+        <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
           <Swords size={36} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Esta fase todavía no tiene partidas — sorteala desde la lista de fases.</p>
         </div>
@@ -297,14 +297,14 @@ export default function FasePartidasAdminPage() {
             />
           )}
 
-          <div className="flex items-center justify-between gap-4 bg-[#13131f] border border-white/8 rounded-2xl p-4 flex-wrap">
+          <div className="flex items-center justify-between gap-4 bg-superficie border border-borde rounded-[6px] p-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <Filter size={15} className="text-violet-400" />
-              <span className="text-xs font-semibold text-white/60">Filtrar por Ronda:</span>
+              <Filter size={15} className="text-acento-claro" />
+              <span className="text-xs font-semibold text-tinta-2">Filtrar por Ronda:</span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setSelectedRonda('todas')}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${selectedRonda === 'todas' ? 'bg-violet-600 text-white font-bold' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-[4px] text-xs font-medium transition-all ${selectedRonda === 'todas' ? 'bg-acento text-white font-bold' : 'bg-white/5 text-tinta-3 hover:text-white'}`}
                 >
                   Todas ({partidas.length})
                 </button>
@@ -312,7 +312,7 @@ export default function FasePartidasAdminPage() {
                   <button
                     key={r}
                     onClick={() => setSelectedRonda(r)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${selectedRonda === r ? 'bg-violet-600 text-white font-bold' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                    className={`px-3 py-1 rounded-[4px] text-xs font-medium transition-all ${selectedRonda === r ? 'bg-acento text-white font-bold' : 'bg-white/5 text-tinta-3 hover:text-white'}`}
                   >
                     Ronda {r}
                   </button>
@@ -327,18 +327,18 @@ export default function FasePartidasAdminPage() {
                       type="datetime-local"
                       value={horarioRondaValor}
                       onChange={(e) => setHorarioRondaValor(e.target.value)}
-                      className="bg-[#0e0e1a] border border-violet-500 rounded-lg px-2 py-1.5 text-xs text-white"
+                      className="bg-fondo border border-acento rounded-[4px] px-2 py-1.5 text-xs text-white"
                     />
                     <button
                       onClick={() => setProgramandoRonda(false)}
-                      className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 rounded-lg text-xs font-semibold"
+                      className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-tinta-2 rounded-[4px] text-xs font-semibold"
                     >
                       <X size={12} />
                     </button>
                     <button
                       onClick={handleGuardarHorarioRonda}
                       disabled={guardandoRonda || !horarioRondaValor}
-                      className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+                      className="px-3 py-1.5 bg-acento hover:bg-acento text-white rounded-[4px] text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                     >
                       {guardandoRonda ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Guardar
                     </button>
@@ -347,14 +347,14 @@ export default function FasePartidasAdminPage() {
                   <button
                     onClick={() => { setProgramandoRonda(true); setHorarioRondaValor(''); }}
                     title="Aplica el mismo horario a todas las partidas 'programada' de esta ronda de una sola vez."
-                    className="px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/40 border border-violet-500/30 text-violet-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
+                    className="px-3 py-1.5 bg-acento/20 hover:bg-acento/40 border border-borde text-acento-claro rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all"
                   >
                     <CalendarClock size={12} /> Programar Ronda {selectedRonda}
                   </button>
                 )
               )}
-              <div className="text-xs text-white/40">
-                Formato: <span className="text-white/80 font-semibold uppercase">{fase?.formato.replace('_', ' ')}</span>
+              <div className="text-xs text-tinta-3">
+                Formato: <span className="text-tinta-2 font-semibold uppercase">{fase?.formato.replace('_', ' ')}</span>
               </div>
             </div>
           </div>
@@ -372,28 +372,28 @@ export default function FasePartidasAdminPage() {
                 <div
                   key={partida.id}
                   ref={(el) => { if (el) cardRefs.current.set(partida.id, el); else cardRefs.current.delete(partida.id); }}
-                  className={`bg-[#13131f] border rounded-2xl p-5 transition-all relative group ${
-                    isDispute ? 'border-red-500/40 shadow-lg shadow-red-500/10' : editingPartidaId === partida.id ? 'border-violet-500/60 ring-1 ring-violet-500/40' : 'border-white/8 hover:border-white/20'
+                  className={`bg-superficie border rounded-[6px] p-5 transition-all relative group ${
+                    isDispute ? 'border-red-500/40' : editingPartidaId === partida.id ? 'border-acento/60 ring-1 ring-violet-500/40' : 'border-borde hover:border-white/20'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs mb-4 pb-3 border-b border-white/5">
-                    <span className="px-2 py-0.5 rounded-md bg-white/5 font-mono text-[11px] text-white/40">Ronda {partida.ronda ?? '—'}</span>
+                  <div className="flex items-center justify-between text-xs mb-4 pb-3 border-b border-borde-sutil">
+                    <span className="px-2 py-0.5 rounded-md bg-white/5 font-mono text-[11px] text-tinta-3">Ronda {partida.ronda ?? '—'}</span>
                     <div>
                       {isConfirmed && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ok bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
                           <CheckCircle2 size={11} /> Confirmada
                         </span>
                       )}
                       {isDispute && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-vivo bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                           <ShieldAlert size={11} /> Disputa Abierta
                         </span>
                       )}
                       {isBye && (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">BYE</span>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-tinta-2 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">BYE</span>
                       )}
                       {partida.estado === 'programada' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-tinta-3 bg-white/5 px-2 py-0.5 rounded-full border border-borde">
                           <Clock size={11} />
                           {partida.programada_para
                             ? `Check-in auto a las ${new Date(new Date(partida.programada_para).getTime() - 15 * 60000).toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
@@ -401,13 +401,13 @@ export default function FasePartidasAdminPage() {
                         </span>
                       )}
                       {partida.estado === 'check_in' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-atencion bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                           <LogIn size={11} /> Check-in abierto
                           {partida.checkin_cierra_at && ` · cierra ${new Date(partida.checkin_cierra_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`}
                         </span>
                       )}
                       {partida.estado === 'en_curso' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-tinta-2 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
                           <Play size={11} /> En curso
                         </span>
                       )}
@@ -420,17 +420,17 @@ export default function FasePartidasAdminPage() {
                   </div>
 
                   {!eqB ? (
-                    <div className="p-3 text-xs text-white/40 text-center">Falta el rival — se completa cuando avance la ronda anterior.</div>
+                    <div className="p-3 text-xs text-tinta-3 text-center">Falta el rival — se completa cuando avance la ronda anterior.</div>
                   ) : (
                     <>
                       <div className="space-y-2.5 mb-4">
                         {[eqA, eqB].map((p, idx) => (
                           <div
                             key={idx}
-                            className={`flex items-center justify-between p-3 rounded-xl transition-all ${p?.es_ganador ? 'bg-green-500/10 border border-green-500/30' : 'bg-white/[0.02] border border-white/5'}`}
+                            className={`flex items-center justify-between p-3 rounded-[6px] transition-all ${p?.es_ganador ? 'bg-green-500/10 border border-green-500/30' : 'bg-white/[0.02] border border-borde-sutil'}`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-lg ${idx === 0 ? 'bg-violet-600/30 border-violet-500/30' : 'bg-cyan-600/30 border-cyan-500/30'} border flex items-center justify-center font-bold text-xs text-white`}>
+                              <div className={`w-8 h-8 rounded-[4px] ${idx === 0 ? 'bg-acento/30 border-borde' : 'bg-cyan-600/30 border-cyan-500/30'} border flex items-center justify-center font-bold text-xs text-white`}>
                                 {(p?.equipo.tag || p?.equipo.nombre || '??').slice(0, 3)}
                               </div>
                               <p className={`text-sm font-bold leading-tight ${p?.es_ganador ? 'text-green-300' : 'text-white'}`}>{p?.equipo.nombre}</p>
@@ -440,10 +440,10 @@ export default function FasePartidasAdminPage() {
                                 type="number" min={0} max={5}
                                 value={idx === 0 ? scoreTeamA : scoreTeamB}
                                 onChange={(e) => idx === 0 ? setScoreTeamA(Number(e.target.value)) : setScoreTeamB(Number(e.target.value))}
-                                className="w-12 bg-[#0e0e1a] border border-violet-500 rounded-lg text-center font-mono font-bold text-white text-base py-1"
+                                className="w-12 bg-fondo border border-acento rounded-[4px] text-center font-mono font-bold text-white text-base py-1"
                               />
                             ) : (
-                              <span className={`text-xl font-black font-mono px-2.5 py-0.5 rounded-lg ${p?.es_ganador ? 'text-green-400 bg-green-500/20' : 'text-white/60 bg-white/5'}`}>
+                              <span className={`text-xl font-black font-mono px-2.5 py-0.5 rounded-[4px] ${p?.es_ganador ? 'text-ok bg-green-500/20' : 'text-tinta-2 bg-white/5'}`}>
                                 {p?.mapas_ganados ?? 0}
                               </span>
                             )}
@@ -458,18 +458,18 @@ export default function FasePartidasAdminPage() {
                               type="datetime-local"
                               value={horarioValor}
                               onChange={(e) => setHorarioValor(e.target.value)}
-                              className="bg-[#0e0e1a] border border-violet-500 rounded-lg px-2 py-1.5 text-xs text-white"
+                              className="bg-fondo border border-acento rounded-[4px] px-2 py-1.5 text-xs text-white"
                             />
                             <button
                               onClick={() => setProgramandoPartidaId(null)}
-                              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 rounded-lg text-xs font-semibold"
+                              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-tinta-2 rounded-[4px] text-xs font-semibold"
                             >
                               <X size={12} />
                             </button>
                             <button
                               onClick={() => handleGuardarHorario(partida.id)}
                               disabled={guardandoHorario || !horarioValor}
-                              className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+                              className="px-3 py-1.5 bg-acento hover:bg-acento text-white rounded-[4px] text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                             >
                               {guardandoHorario ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Guardar
                             </button>
@@ -479,7 +479,7 @@ export default function FasePartidasAdminPage() {
                             <button
                               onClick={() => { setProgramandoPartidaId(partida.id); setHorarioValor(''); }}
                               title="El check-in se va a abrir solo 15 minutos antes de este horario."
-                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
+                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-borde text-tinta-2 hover:text-white rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all"
                             >
                               <CalendarClock size={12} /> {partida.programada_para ? 'Reprogramar' : 'Programar Horario'}
                             </button>
@@ -487,7 +487,7 @@ export default function FasePartidasAdminPage() {
                               onClick={() => handleAbrirCheckin(partida.id)}
                               disabled={abriendoCheckin === partida.id}
                               title="Abre el check-in ahora mismo (15 min), sin esperar el horario programado."
-                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
+                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
                             >
                               {abriendoCheckin === partida.id ? <Loader2 size={12} className="animate-spin" /> : <LogIn size={12} />} Abrir Ya
                             </button>
@@ -502,7 +502,7 @@ export default function FasePartidasAdminPage() {
                               onClick={() => handleResolverCheckin(partida.id)}
                               disabled={resolviendoCheckin === partida.id || (!!partida.checkin_cierra_at && new Date(partida.checkin_cierra_at) > new Date())}
                               title="Cierra la ventana de check-in vencida — aplica walkover si algún equipo no confirmó."
-                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               {resolviendoCheckin === partida.id ? <Loader2 size={12} className="animate-spin" /> : <TimerOff size={12} />} Resolver Check-in
                             </button>
@@ -512,7 +512,7 @@ export default function FasePartidasAdminPage() {
                               onClick={() => handleResolverReporteVencido(partida.id)}
                               disabled={resolviendoReporte === partida.id}
                               title="Ya se resuelve solo al vencer el plazo (si tiene evidencia) con solo recargar esta página — este botón es para forzarlo ahora mismo."
-                              className="px-3 py-1.5 bg-fuchsia-600/20 hover:bg-fuchsia-600/40 border border-fuchsia-500/30 text-fuchsia-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
+                              className="px-3 py-1.5 bg-fuchsia-600/20 hover:bg-fuchsia-600/40 border border-fuchsia-500/30 text-fuchsia-300 rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
                             >
                               {resolviendoReporte === partida.id ? <Loader2 size={12} className="animate-spin" /> : <Gavel size={12} />} Forzar Resolución
                             </button>
@@ -525,14 +525,14 @@ export default function FasePartidasAdminPage() {
                           <>
                             <button
                               onClick={() => setEditingPartidaId(null)}
-                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1"
+                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-tinta-2 hover:text-white rounded-[4px] text-xs font-semibold flex items-center gap-1"
                             >
                               <X size={12} /> Cancelar
                             </button>
                             <button
                               onClick={() => handleSaveScore(partida)}
                               disabled={guardando}
-                              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-md shadow-green-600/20 disabled:opacity-50"
+                              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-[4px] text-xs font-bold flex items-center gap-1 shadow-md shadow-green-600/20 disabled:opacity-50"
                             >
                               {guardando ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Guardar Resultado
                             </button>
@@ -544,7 +544,7 @@ export default function FasePartidasAdminPage() {
                               setScoreTeamA(eqA?.mapas_ganados ?? 0);
                               setScoreTeamB(eqB?.mapas_ganados ?? 0);
                             }}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-tinta-2 hover:text-white rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all"
                           >
                             <Edit3 size={12} /> Editar Score
                           </button>

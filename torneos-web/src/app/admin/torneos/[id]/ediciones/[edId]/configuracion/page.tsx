@@ -81,7 +81,7 @@ export default function ConfiguracionEdicionPage() {
 
   if (cargando) {
     return (
-      <div className="flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={16} /> Cargando configuración...
       </div>
     );
@@ -89,7 +89,7 @@ export default function ConfiguracionEdicionPage() {
 
   if (!edicion) {
     return (
-      <div className="p-6 text-sm text-rose-300">
+      <div className="p-6 text-sm text-vivo">
         {error ?? 'La edición no existe.'}
       </div>
     );
@@ -102,33 +102,33 @@ export default function ConfiguracionEdicionPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-3">
-        <Link href={`/admin/torneos/${torneoId}`} className="text-white/40 hover:text-white transition-colors">
+        <Link href={`/admin/torneos/${torneoId}`} className="text-tinta-3 hover:text-white transition-colors">
           <ArrowLeft size={18} />
         </Link>
         <div>
           <h1 className="text-xl font-bold text-white">Configuración</h1>
-          <p className="text-xs text-white/40">{edicion.nombre}</p>
+          <p className="text-xs text-tinta-3">{edicion.nombre}</p>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2">
+        <div className="p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-start gap-2">
           <AlertTriangle size={15} className="shrink-0 mt-0.5" /> <span>{error}</span>
         </div>
       )}
       {exito && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+        <div className="p-3 rounded-[6px] bg-emerald-950/60 border border-emerald-500/40 text-ok text-xs flex items-center gap-2">
           <CheckCircle2 size={15} /> <span>{exito}</span>
         </div>
       )}
 
       {/* NOTIFICACIONES */}
-      <section className="bg-[#13131f] border border-white/8 rounded-2xl p-6 space-y-4">
+      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Bell size={16} className="text-violet-400" />
+          <Bell size={16} className="text-acento-claro" />
           <h2 className="text-base font-bold text-white">Avisos por Discord</h2>
         </div>
-        <p className="text-xs text-white/40 leading-relaxed">
+        <p className="text-xs text-tinta-3 leading-relaxed">
           Los avisos de este torneo (inscripción aprobada o rechazada, horario de partida
           confirmado, check-in abierto) se publican en el canal de Discord que elijas, mencionando
           a los jugadores involucrados. Dejalo vacío para no publicar en Discord: las
@@ -136,7 +136,7 @@ export default function ConfiguracionEdicionPage() {
         </p>
 
         <div>
-          <label className="block text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
             URL del webhook
           </label>
           <input
@@ -144,9 +144,9 @@ export default function ConfiguracionEdicionPage() {
             value={webhook}
             onChange={e => setWebhook(e.target.value)}
             placeholder="https://discord.com/api/webhooks/..."
-            className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 placeholder:text-white/20"
+            className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento placeholder:text-tinta-4"
           />
-          <p className="text-[11px] text-white/30 mt-2">
+          <p className="text-[11px] text-tinta-4 mt-2">
             En Discord: Configuración del canal → Integraciones → Webhooks → Copiar URL.
           </p>
         </div>
@@ -161,7 +161,7 @@ export default function ConfiguracionEdicionPage() {
                 ? 'Configurá un webhook primero'
                 : undefined
           }
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/25 text-white/70 hover:text-white text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 rounded-[6px] bg-white/5 hover:bg-white/10 border border-borde hover:border-white/25 text-tinta-2 hover:text-white text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {probando ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
           Enviar mensaje de prueba
@@ -169,13 +169,13 @@ export default function ConfiguracionEdicionPage() {
       </section>
 
       {/* INSCRIPCIONES */}
-      <section className="bg-[#13131f] border border-white/8 rounded-2xl p-6 space-y-4">
+      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <DoorOpen size={16} className="text-cyan-400" />
+          <DoorOpen size={16} className="text-tinta-2" />
           <h2 className="text-base font-bold text-white">Inscripciones</h2>
         </div>
 
-        <label className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-cyan-500/40 transition-all">
+        <label className="flex items-start gap-3 p-4 rounded-[6px] bg-white/5 border border-borde cursor-pointer hover:border-cyan-500/40 transition-all">
           <input
             type="checkbox"
             checked={!requiereAprobacion}
@@ -184,7 +184,7 @@ export default function ConfiguracionEdicionPage() {
           />
           <span>
             <span className="block text-sm font-semibold text-white">Torneo abierto</span>
-            <span className="block text-xs text-white/40 mt-1 leading-relaxed">
+            <span className="block text-xs text-tinta-3 mt-1 leading-relaxed">
               Cualquier equipo que se inscriba queda aprobado al instante, sin que tengas que
               revisar uno por uno. Se siguen validando el cupo máximo, el plazo de inscripción, el
               roster completo y que ningún jugador esté ya en otro equipo — &quot;abierto&quot; es
@@ -193,7 +193,7 @@ export default function ConfiguracionEdicionPage() {
           </span>
         </label>
 
-        <label className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-violet-500/40 transition-all">
+        <label className="flex items-start gap-3 p-4 rounded-[6px] bg-white/5 border border-borde cursor-pointer hover:border-borde transition-all">
           <input
             type="checkbox"
             checked={requiereEquipoPermanente}
@@ -202,7 +202,7 @@ export default function ConfiguracionEdicionPage() {
           />
           <span>
             <span className="block text-sm font-semibold text-white">Exigir equipo permanente</span>
-            <span className="block text-xs text-white/40 mt-1 leading-relaxed">
+            <span className="block text-xs text-tinta-3 mt-1 leading-relaxed">
               Para anotarse hay que iniciar sesión y elegir un equipo ya creado, así este torneo
               suma al historial de ese equipo. Prendelo si querés que los perfiles acumulen
               récord entre temporadas. Apagado —el default— cualquiera se inscribe sin cuenta,
@@ -212,7 +212,7 @@ export default function ConfiguracionEdicionPage() {
         </label>
 
         <div>
-          <label className="block text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
             Cupo máximo de equipos
           </label>
           <input
@@ -221,17 +221,17 @@ export default function ConfiguracionEdicionPage() {
             value={maxEquipos}
             onChange={e => setMaxEquipos(e.target.value)}
             placeholder="Sin límite"
-            className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 placeholder:text-white/20"
+            className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento placeholder:text-tinta-4"
           />
         </div>
       </section>
 
       {/* DATOS DEL TORNEO */}
-      <section className="bg-[#13131f] border border-white/8 rounded-2xl p-6 space-y-4">
+      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
         <h2 className="text-base font-bold text-white">Datos públicos</h2>
 
         <div>
-          <label className="block text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
             Bolsa de premios
           </label>
           <input
@@ -239,12 +239,12 @@ export default function ConfiguracionEdicionPage() {
             value={bolsaPremios}
             onChange={e => setBolsaPremios(e.target.value)}
             placeholder="Bs 5.000"
-            className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 placeholder:text-white/20"
+            className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento placeholder:text-tinta-4"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">
             Link del reglamento
           </label>
           <input
@@ -252,7 +252,7 @@ export default function ConfiguracionEdicionPage() {
             value={reglamentoUrl}
             onChange={e => setReglamentoUrl(e.target.value)}
             placeholder="https://..."
-            className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 placeholder:text-white/20"
+            className="w-full bg-white/5 border border-borde text-white rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento placeholder:text-tinta-4"
           />
         </div>
       </section>
@@ -260,7 +260,7 @@ export default function ConfiguracionEdicionPage() {
       <button
         onClick={guardar}
         disabled={guardando}
-        className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-5 py-3 rounded-[6px] bg-acento hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs transition-all disabled:opacity-50"
       >
         {guardando ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
         Guardar cambios

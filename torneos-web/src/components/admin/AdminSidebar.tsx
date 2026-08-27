@@ -70,20 +70,20 @@ export default function AdminSidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-borde">
         <Link href="/admin" className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-[4px] bg-acento flex items-center justify-center flex-shrink-0">
             <Crown size={16} className="text-white" />
           </div>
           {!collapsed && (
             <span className="font-bold text-white text-sm leading-tight">
-              Torneo<br /><span className="text-violet-400 text-xs font-normal">Admin Panel</span>
+              Torneo<br /><span className="text-acento-claro text-xs font-normal">Admin Panel</span>
             </span>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto text-white/40 hover:text-white transition-colors hidden lg:block"
+          className="ml-auto text-tinta-3 hover:text-white transition-colors hidden lg:block"
         >
           <Menu size={16} />
         </button>
@@ -92,14 +92,14 @@ export default function AdminSidebar() {
       <div className="px-2 pt-3 pb-1">
         <Link
           href="/"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all group ${collapsed ? 'justify-center px-2' : ''}`}
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-[4px] text-xs font-medium text-tinta-2 hover:text-white bg-white/5 hover:bg-white/10 border border-borde hover:border-white/20 transition-all group ${collapsed ? 'justify-center px-2' : ''}`}
           title="Volver a la página principal"
         >
-          <ArrowLeft size={14} className="text-purple-400 group-hover:-translate-x-1 transition-transform flex-shrink-0" />
+          <ArrowLeft size={14} className="text-acento-claro group-hover:-translate-x-1 transition-transform flex-shrink-0" />
           {!collapsed && (
             <div className="flex items-center justify-between w-full">
               <span>Volver a la Web</span>
-              <ExternalLink size={12} className="text-slate-500 group-hover:text-slate-300 transition-colors" />
+              <ExternalLink size={12} className="text-tinta-4 group-hover:text-tinta-2 transition-colors" />
             </div>
           )}
         </Link>
@@ -110,8 +110,8 @@ export default function AdminSidebar() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative group ${
-              isActive(item.href) && pathname === item.href ? 'bg-violet-600 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-[4px] text-sm font-medium transition-all relative group ${
+              isActive(item.href) && pathname === item.href ? 'bg-acento text-white' : 'text-tinta-2 hover:text-white hover:bg-white/10'
             }`}
           >
             <span className="flex-shrink-0">{item.icon}</span>
@@ -122,11 +122,11 @@ export default function AdminSidebar() {
         <div className="mt-4">
           <div className="flex items-center justify-between px-3 mb-2">
             {!collapsed && (
-              <span className="text-xs font-semibold text-white/30 uppercase tracking-wider">Mis Torneos</span>
+              <span className="text-xs font-semibold text-tinta-4 uppercase tracking-wider">Mis Torneos</span>
             )}
             <Link
               href="/admin/torneos/nuevo"
-              className="p-1 text-violet-400 hover:text-violet-300 hover:bg-violet-500/20 rounded transition-all"
+              className="p-1 text-acento-claro hover:text-acento-claro hover:bg-acento/20 rounded transition-all"
               title="Crear torneo"
             >
               <Plus size={14} />
@@ -135,8 +135,8 @@ export default function AdminSidebar() {
 
           <Link
             href="/admin/torneos"
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-1 ${
-              pathname === '/admin/torneos' ? 'bg-violet-600 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'
+            className={`flex items-center gap-3 px-3 py-2 rounded-[4px] text-sm font-medium transition-all mb-1 ${
+              pathname === '/admin/torneos' ? 'bg-acento text-white' : 'text-tinta-2 hover:text-white hover:bg-white/10'
             }`}
           >
             <Trophy size={18} className="flex-shrink-0" />
@@ -152,8 +152,8 @@ export default function AdminSidebar() {
               <div key={torneo.id} className="mb-1">
                 <button
                   onClick={() => toggleTorneo(torneo.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
-                    torneoActive ? 'text-white bg-white/10' : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[4px] text-sm transition-all ${
+                    torneoActive ? 'text-white bg-white/10' : 'text-tinta-3 hover:text-tinta-2 hover:bg-white/5'
                   }`}
                 >
                   <span className="truncate flex-1 text-left">{torneo.nombre}</span>
@@ -164,8 +164,8 @@ export default function AdminSidebar() {
                   <div className="ml-4 mt-1 space-y-0.5">
                     <Link
                       href={`/admin/torneos/${torneo.id}`}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all ${
-                        pathname === `/admin/torneos/${torneo.id}` ? 'text-violet-300 bg-violet-500/20' : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-[4px] text-xs transition-all ${
+                        pathname === `/admin/torneos/${torneo.id}` ? 'text-acento-claro bg-acento/20' : 'text-tinta-3 hover:text-tinta-2 hover:bg-white/5'
                       }`}
                     >
                       <Settings size={12} />
@@ -173,8 +173,8 @@ export default function AdminSidebar() {
                     </Link>
                     <Link
                       href={`/admin/torneos/${torneo.id}/staff`}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all ${
-                        isActive(`/admin/torneos/${torneo.id}/staff`) ? 'text-violet-300 bg-violet-500/20' : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-[4px] text-xs transition-all ${
+                        isActive(`/admin/torneos/${torneo.id}/staff`) ? 'text-acento-claro bg-acento/20' : 'text-tinta-3 hover:text-tinta-2 hover:bg-white/5'
                       }`}
                     >
                       <UserPlus size={12} />
@@ -182,19 +182,19 @@ export default function AdminSidebar() {
                     </Link>
 
                     <div className="mt-1">
-                      <span className="px-3 text-xs text-white/20 font-semibold uppercase tracking-wider">Ediciones</span>
+                      <span className="px-3 text-xs text-tinta-4 font-semibold uppercase tracking-wider">Ediciones</span>
                       {ediciones.length === 0 && (
                         <p className="px-3 py-1 text-[11px] text-white/25">Sin ediciones todavía</p>
                       )}
                       {ediciones.map((ed) => (
                         <div key={ed.id} className="mt-0.5 ml-2 space-y-0.5">
-                          <span className="px-2 text-[11px] text-white/40 truncate block">{ed.nombre}</span>
+                          <span className="px-2 text-[11px] text-tinta-3 truncate block">{ed.nombre}</span>
                           {edicionLinks(torneo.id, ed.id).map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
-                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all ${
-                                isActive(link.href) ? 'text-cyan-400 bg-cyan-500/10' : 'text-white/35 hover:text-white/65 hover:bg-white/5'
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded-[4px] text-xs transition-all ${
+                                isActive(link.href) ? 'text-tinta-2 bg-cyan-500/10' : 'text-white/35 hover:text-white/65 hover:bg-white/5'
                               }`}
                             >
                               {link.icon}
@@ -212,20 +212,20 @@ export default function AdminSidebar() {
         </div>
       </nav>
 
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t border-borde p-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-violet-950 border border-violet-500/40 flex items-center justify-center flex-shrink-0">
-            <Crown size={14} className="text-violet-300" />
+          <div className="w-8 h-8 rounded-full bg-elevada border border-borde flex items-center justify-center flex-shrink-0">
+            <Crown size={14} className="text-acento-claro" />
           </div>
           {!collapsed && usuario && (
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-white truncate">{usuario.nombre}</p>
-              <p className="text-xs text-violet-400 capitalize">{usuario.rol}</p>
+              <p className="text-xs text-acento-claro capitalize">{usuario.rol}</p>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="text-white/40 hover:text-red-400 transition-colors p-1 rounded hover:bg-white/5"
+            className="text-tinta-3 hover:text-vivo transition-colors p-1 rounded hover:bg-white/5"
             title="Cerrar sesión y salir"
           >
             <LogOut size={16} />
@@ -239,7 +239,7 @@ export default function AdminSidebar() {
     <>
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 bg-[#0e0e1a] border border-white/10 rounded-lg text-white lg:hidden"
+        className="fixed top-4 left-4 z-50 p-2 bg-fondo border border-borde rounded-[4px] text-white lg:hidden"
       >
         <Menu size={20} />
       </button>
@@ -247,8 +247,8 @@ export default function AdminSidebar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-72 h-full bg-[#0e0e1a] border-r border-white/10">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-white/50 hover:text-white">
+          <div className="relative w-72 h-full bg-fondo border-r border-borde">
+            <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-tinta-3 hover:text-white">
               <X size={20} />
             </button>
             {sidebarContent}
@@ -257,7 +257,7 @@ export default function AdminSidebar() {
       )}
 
       <aside
-        className={`hidden lg:flex flex-col h-screen sticky top-0 bg-[#0e0e1a] border-r border-white/10 transition-all duration-300 flex-shrink-0 ${collapsed ? 'w-16' : 'w-64'}`}
+        className={`hidden lg:flex flex-col h-screen sticky top-0 bg-fondo border-r border-borde transition-all duration-300 flex-shrink-0 ${collapsed ? 'w-16' : 'w-64'}`}
       >
         {sidebarContent}
       </aside>

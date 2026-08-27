@@ -55,7 +55,7 @@ export default function FaseTablaAdminPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-5xl mx-auto flex items-center justify-center gap-2 text-white/40 text-sm py-24">
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto flex items-center justify-center gap-2 text-tinta-3 text-sm py-24">
         <Loader2 className="animate-spin" size={18} /> Cargando tabla...
       </div>
     );
@@ -63,34 +63,34 @@ export default function FaseTablaAdminPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center gap-2 text-xs text-white/30">
+      <div className="flex items-center gap-2 text-xs text-tinta-4">
         <Link href="/admin/torneos" className="hover:text-white transition-colors">Torneos</Link>
         <span>/</span>
         <Link href={`/admin/torneos/${torneoId}`} className="hover:text-white transition-colors">{torneo?.nombre}</Link>
         <span>/</span>
         <Link href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases`} className="hover:text-white transition-colors">Fases</Link>
         <span>/</span>
-        <span className="text-white/60">Tabla de Posiciones</span>
+        <span className="text-tinta-2">Tabla de Posiciones</span>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="text-xs text-white/40">{edicion?.nombre}</span>
+          <span className="text-xs text-tinta-3">{edicion?.nombre}</span>
           <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <Trophy className="text-amber-400" /> Tabla de Posiciones ({fase?.nombre})
+            <Trophy className="text-atencion" /> Tabla de Posiciones ({fase?.nombre})
           </h1>
         </div>
         <button
           onClick={handleExportCSV}
           disabled={tabla.length === 0}
-          className="flex items-center gap-2 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-semibold rounded-xl transition-all disabled:opacity-40 w-fit"
+          className="flex items-center gap-2 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-borde text-white text-xs font-semibold rounded-[6px] transition-all disabled:opacity-40 w-fit"
         >
           <Download size={14} /> Exportar CSV
         </button>
       </div>
 
-      <div className="flex items-center gap-2 text-xs font-semibold text-white/50">
-        <Shield size={14} className="text-cyan-400" />
+      <div className="flex items-center gap-2 text-xs font-semibold text-tinta-3">
+        <Shield size={14} className="text-tinta-2" />
         Criterios: Puntos → Diferencia de Mapas
       </div>
 
