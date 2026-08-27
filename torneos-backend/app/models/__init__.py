@@ -3,6 +3,7 @@ from app.models.notificaciones import Notificacion
 from app.models.participantes import (
     CambioDeRoster,
     Equipo,
+    IdentidadDeJuego,
     Inscripcion,
     InvitacionAEquipo,
     Jugador,
@@ -21,6 +22,7 @@ __all__ = [
     "Inscripcion",
     "Jugador",
     "MiembroEquipo",
+    "IdentidadDeJuego",
     "InvitacionAEquipo",
     "CambioDeRoster",
     "Partida",

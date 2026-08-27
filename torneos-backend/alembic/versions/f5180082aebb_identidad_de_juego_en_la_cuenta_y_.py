@@ -1,26 +1,30 @@
-"""miembros permanentes de equipo e invitaciones
+"""identidad de juego en la cuenta, y roster permanente
 
-Hasta ahora un jugador era texto que tipeaba el capitan dentro de UNA
-inscripcion: no tenia cuenta, no podia editar sus propios datos y no podia
-irse del equipo si el capitan no queria sacarlo.
+Hasta ahora la identidad de juego se tipeaba de nuevo en cada inscripcion, y
+la tipeaba el capitan. De ahi salian dos problemas: IDs mal copiados que
+nadie podia corregir sin pedirselo al capitan, y que salirse de un equipo
+dependiera de que el capitan quisiera sacarte.
 
-`miembros_equipo` es la gente del equipo entre torneos, con cuenta
-obligatoria (`usuario_id` NOT NULL). Va por juego porque `clave_identidad`
-se deriva de los campos que cada juego declara como clave: la identidad de
-MLBB no es la de otro juego.
+identidades_de_juego mueve el ID a la cuenta de la persona: se carga una vez
+por juego y sirve para siempre. El UNIQUE global por (juego, clave) tapa algo
+que antes era invisible — la misma cuenta de MLBB declarada por dos usuarios
+distintos de la plataforma.
 
-`invitaciones_equipo` es el unico camino para entrar a un equipo, ahora que
-el capitan no puede cargar a nadie a mano. En tabla y no en memoria como
-app/core/tickets.py: un ticket de stream dura un minuto, una invitacion
-tiene que seguir viva si el jugador la abre manana.
+miembros_equipo es el roster permanente, y solo guarda el vinculo: sin
+identidad adentro, corregir tu ID lo arregla en todos tus equipos de una vez.
+Entrar no requiere aceptar (el capitan suma directo, con notificacion al
+sumado) pero salir no requiere permiso de nadie.
 
-Ninguna de las dos toca datos existentes: los equipos y rosters actuales
-siguen exactamente como estan.
+invitaciones_equipo NO es el camino normal: cubre al que todavia no tiene
+cuenta. En tabla y no en memoria como app/core/tickets.py porque tiene que
+seguir viva si el jugador abre el link manana.
+
+Ninguna toca datos existentes: los equipos y rosters actuales siguen igual.
 
 
-Revision ID: 1cf89ee90970
+Revision ID: f5180082aebb
 Revises: 398edc0fea5d
-Create Date: 2026-08-27 13:39:34.579121
+Create Date: 2026-08-27 13:54:50.139837
 
 """
 from typing import Sequence, Union
@@ -33,7 +37,7 @@ from app.db.migraciones import tabla_existe
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1cf89ee90970'
+revision: str = 'f5180082aebb'
 down_revision: Union[str, Sequence[str], None] = '398edc0fea5d'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -44,6 +48,25 @@ def upgrade() -> None:
     # En desarrollo `create_all` pudo crearlas antes; ver app/db/migraciones.py
     if tabla_existe("miembros_equipo"):
         return
+
+    op.create_table('identidades_de_juego',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('usuario_id', sa.Integer(), nullable=False),
+    sa.Column('juego_id', sa.Integer(), nullable=False),
+    sa.Column('identidad', sa.JSON(), nullable=False),
+    sa.Column('clave_identidad', sa.String(length=200), nullable=False),
+    sa.Column('created_at', app.db.database.DateTimeUTC(timezone=True), nullable=False),
+    sa.Column('actualizada_at', app.db.database.DateTimeUTC(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['juego_id'], ['juegos.id'], ),
+    sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('juego_id', 'clave_identidad', name='uq_identidad_por_juego'),
+    sa.UniqueConstraint('usuario_id', 'juego_id', name='uq_identidad_usuario_juego')
+    )
+    with op.batch_alter_table('identidades_de_juego', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_identidades_de_juego_clave_identidad'), ['clave_identidad'], unique=False)
+        batch_op.create_index(batch_op.f('ix_identidades_de_juego_juego_id'), ['juego_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_identidades_de_juego_usuario_id'), ['usuario_id'], unique=False)
 
     op.create_table('invitaciones_equipo',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -76,20 +99,19 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('equipo_id', sa.Integer(), nullable=False),
     sa.Column('juego_id', sa.Integer(), nullable=False),
-    sa.Column('identidad', sa.JSON(), nullable=False),
-    sa.Column('clave_identidad', sa.String(length=200), nullable=False),
     sa.Column('usuario_id', sa.Integer(), nullable=False),
+    sa.Column('agregado_por_usuario_id', sa.Integer(), nullable=True),
     sa.Column('esta_activo', sa.Boolean(), server_default='1', nullable=False),
+    sa.Column('salio_at', app.db.database.DateTimeUTC(timezone=True), nullable=True),
     sa.Column('created_at', app.db.database.DateTimeUTC(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['agregado_por_usuario_id'], ['usuarios.id'], ),
     sa.ForeignKeyConstraint(['equipo_id'], ['equipos.id'], ),
     sa.ForeignKeyConstraint(['juego_id'], ['juegos.id'], ),
     sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('equipo_id', 'juego_id', 'clave_identidad', name='uq_miembro_equipo_identidad'),
     sa.UniqueConstraint('equipo_id', 'juego_id', 'usuario_id', name='uq_miembro_equipo_usuario')
     )
     with op.batch_alter_table('miembros_equipo', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_miembros_equipo_clave_identidad'), ['clave_identidad'], unique=False)
         batch_op.create_index(batch_op.f('ix_miembros_equipo_equipo_id'), ['equipo_id'], unique=False)
         batch_op.create_index(batch_op.f('ix_miembros_equipo_juego_id'), ['juego_id'], unique=False)
         batch_op.create_index(batch_op.f('ix_miembros_equipo_usuario_id'), ['usuario_id'], unique=False)
@@ -104,7 +126,6 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_miembros_equipo_usuario_id'))
         batch_op.drop_index(batch_op.f('ix_miembros_equipo_juego_id'))
         batch_op.drop_index(batch_op.f('ix_miembros_equipo_equipo_id'))
-        batch_op.drop_index(batch_op.f('ix_miembros_equipo_clave_identidad'))
 
     op.drop_table('miembros_equipo')
     with op.batch_alter_table('invitaciones_equipo', schema=None) as batch_op:
@@ -116,4 +137,10 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_invitaciones_equipo_creada_por_usuario_id'))
 
     op.drop_table('invitaciones_equipo')
+    with op.batch_alter_table('identidades_de_juego', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_identidades_de_juego_usuario_id'))
+        batch_op.drop_index(batch_op.f('ix_identidades_de_juego_juego_id'))
+        batch_op.drop_index(batch_op.f('ix_identidades_de_juego_clave_identidad'))
+
+    op.drop_table('identidades_de_juego')
     # ### end Alembic commands ###

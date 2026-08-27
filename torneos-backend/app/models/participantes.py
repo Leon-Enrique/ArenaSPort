@@ -76,6 +76,46 @@ class Equipo(Base):
     miembros: Mapped[list["MiembroEquipo"]] = relationship(back_populates="equipo")
 
 
+class IdentidadDeJuego(Base):
+    """El ID de juego de una persona, en su cuenta y no en un equipo.
+
+    Es el corazón del rediseño. Antes la identidad se tipeaba de nuevo en
+    cada inscripción, y la tipeaba el capitán: de ahí salían los IDs mal
+    copiados, y que nadie fuera dueño de sus propios datos.
+
+    Acá se carga UNA vez por juego y sirve para siempre. El capitán que te
+    suma a su equipo no tiene que saber tu ID —lo toma de tu cuenta— y vos
+    lo corregís sin pedirle permiso a nadie.
+
+    El UNIQUE sobre (juego_id, clave_identidad) es global a propósito, y
+    tapa algo que antes no se podía ver: la misma cuenta de MLBB declarada
+    por dos usuarios distintos de la plataforma. Con la identidad viviendo
+    dentro de cada inscripción, esas dos filas nunca se cruzaban.
+    """
+
+    __tablename__ = "identidades_de_juego"
+    __table_args__ = (
+        UniqueConstraint("usuario_id", "juego_id", name="uq_identidad_usuario_juego"),
+        UniqueConstraint("juego_id", "clave_identidad", name="uq_identidad_por_juego"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), index=True)
+    juego_id: Mapped[int] = mapped_column(ForeignKey("juegos.id"), index=True)
+
+    # Mismo formato que `Jugador.identidad`: {"nick": ..., "id_juego": ...}
+    identidad: Mapped[dict] = mapped_column(JSON)
+    # Derivada de los campos que el juego declara clave (`Juego.campos_clave`).
+    clave_identidad: Mapped[str] = mapped_column(String(200), index=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone()
+    )
+    actualizada_at: Mapped[datetime] = mapped_column(
+        DateTimeUTC, default=lambda: datetime.now().astimezone()
+    )
+
+
 class MiembroEquipo(Base):
     """Un jugador que pertenece al equipo ENTRE torneos.
 
@@ -84,40 +124,26 @@ class MiembroEquipo(Base):
     obligaba a retipear todo: el capitán inscribe su equipo en el torneo
     siguiente y el roster ya viene cargado.
 
-    Va por juego a propósito. `clave_identidad` se deriva de los campos que
-    cada juego declara como clave (`Juego.campos_clave`), así que la
-    identidad de MLBB —id + server— no es la misma que la de otro juego. Un
-    equipo que juega dos cosas tiene dos rosters permanentes, no uno
-    mezclado.
+    No guarda identidad de juego: esa vive en `IdentidadDeJuego`, en la
+    cuenta de la persona. Acá solo está el vínculo. Es lo que permite que
+    el capitán sume gente sin tipear los datos de nadie, y que corregir tu
+    ID lo arregle en todos tus equipos de una vez.
 
-    `usuario_id` NO es opcional, y esa es la decisión de fondo: cada
-    miembro es una persona con cuenta, no un texto que tipeó el capitán.
-    Se llega acá aceptando una invitación, nunca por carga de terceros. El
-    jugador es dueño de su propia fila —la edita él, y se va del equipo
-    solo— que era justamente el problema a resolver: antes, salirse
-    dependía de que el capitán quisiera sacarte.
+    Va por juego igual, porque pertenecer al roster de MLBB de un equipo no
+    dice nada sobre otro juego.
 
-    El precio de esto es que se terminó la inscripción anónima: si todo
-    jugador necesita cuenta, el capitán también.
-
-    Ojo con lo que NO cambia: la elegibilidad ("¿este jugador ya está en
-    otro equipo de esta edición?") se sigue decidiendo por
-    `Jugador.clave_identidad` y su índice único parcial. La cuenta se suma
-    como segunda restricción, no como reemplazo — y de paso tapa un hueco
-    que antes no se veía: dos cuentas de la plataforma declarando el mismo
-    ID de juego chocan igual contra la clave de identidad.
+    **Entrar no requiere aceptar; salir no requiere permiso.** El capitán
+    suma directo —armar el equipo no puede depender de que cinco personas
+    contesten— pero al sumado le llega una notificación y se va solo cuando
+    quiera. Esa asimetría es deliberada: la fricción se saca de entrar, que
+    es lo que frena al capitán, y no de salir, que es lo que protege al
+    jugador.
     """
 
     __tablename__ = "miembros_equipo"
     __table_args__ = (
-        UniqueConstraint(
-            "equipo_id",
-            "juego_id",
-            "clave_identidad",
-            name="uq_miembro_equipo_identidad",
-        ),
         # Dos filas para la misma persona en el mismo equipo no significan
-        # nada, y romperían "el jugador edita SU fila" al no haber una sola.
+        # nada, y romperían "el jugador se va de SU fila" al no haber una.
         UniqueConstraint(
             "equipo_id", "juego_id", "usuario_id", name="uq_miembro_equipo_usuario"
         ),
@@ -126,18 +152,20 @@ class MiembroEquipo(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     equipo_id: Mapped[int] = mapped_column(ForeignKey("equipos.id"), index=True)
     juego_id: Mapped[int] = mapped_column(ForeignKey("juegos.id"), index=True)
-
-    # Mismo formato que `Jugador.identidad`: {"nick": ..., "id_juego": ...}
-    identidad: Mapped[dict] = mapped_column(JSON)
-    clave_identidad: Mapped[str] = mapped_column(String(200), index=True)
-
     usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), index=True)
+
+    # Quién lo sumó. Con alta directa esto deja de ser un detalle: es la
+    # respuesta a "¿quién me metió acá?" que la notificación tiene que dar.
+    agregado_por_usuario_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id")
+    )
 
     # Baja sin borrar: quién estuvo en el equipo es historia, y borrar la
     # fila haría que un jugador que se fue y volvió pierda el rastro.
     esta_activo: Mapped[bool] = mapped_column(
         Boolean, default=True, server_default="1", nullable=False
     )
+    salio_at: Mapped[datetime | None] = mapped_column(DateTimeUTC)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTimeUTC, default=lambda: datetime.now().astimezone()
@@ -149,12 +177,14 @@ class MiembroEquipo(Base):
 class InvitacionAEquipo(Base):
     """Una invitación a sumarse al roster permanente de un equipo.
 
-    Con la cuenta obligatoria, esto deja de ser una comodidad y pasa a ser
-    el ÚNICO camino para que alguien entre a un equipo: el capitán ya no
-    puede tipear a nadie. Por eso vive en una tabla y no en memoria como
-    `app/core/tickets.py` — un ticket de stream dura un minuto y se puede
-    perder al reiniciar, una invitación tiene que sobrevivir a que el
-    jugador la abra mañana.
+    NO es el camino normal: al que ya tiene cuenta el capitán lo suma
+    directo y listo. Esto es para el caso que eso no cubre — el amigo que
+    todavía no se registró. El link lo trae, se crea la cuenta, y queda en
+    el equipo sin que el capitán tenga que volver a buscarlo.
+
+    Vive en una tabla y no en memoria como `app/core/tickets.py` porque un
+    ticket de stream dura un minuto y se puede perder al reiniciar, y esto
+    tiene que seguir vivo si el jugador abre el link mañana.
 
     Dos formas, misma tabla:
       - `usuario_destino_id` nulo: link abierto, lo acepta el primero que
