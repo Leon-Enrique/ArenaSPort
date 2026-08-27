@@ -454,7 +454,13 @@ class ApiClient {
     contacto_whatsapp?: string;
     contacto_discord?: string;
     capitan_declarado?: string;
-    jugadores: { identidad: Record<string, string>; es_suplente?: boolean; es_capitan?: boolean; discord_id?: string }[];
+    /**
+     * Opcional: sin esto el backend arma el roster desde el plantel
+     * permanente del equipo (`equipo_id`), usando la identidad de juego que
+     * cargó cada jugador en su cuenta. Es el sentido de tener un equipo
+     * permanente — no volver a tipear a la misma gente en cada torneo.
+     */
+    jugadores?: { identidad: Record<string, string>; es_suplente?: boolean; es_capitan?: boolean; discord_id?: string }[];
   }): Promise<ApiInscripcionCreada> {
     return this.request<ApiInscripcionCreada>(`/ediciones/${edicionId}/inscripciones`, {
       method: 'POST',

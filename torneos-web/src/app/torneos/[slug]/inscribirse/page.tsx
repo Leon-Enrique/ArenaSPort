@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { api, ApiError, mapResumenAEdicion } from '@/lib/api';
-import { ApiInscripcionCreada, ApiMiEquipo, ApiResumenEdicion } from '@/lib/api-types';
+import { ApiInscripcionCreada, ApiMiembroEquipo, ApiMiEquipo, ApiResumenEdicion } from '@/lib/api-types';
 import { Edicion, Usuario } from '@/types';
 import {
   Trophy, Users, CheckCircle2, ArrowLeft, Crown,
@@ -76,17 +76,46 @@ export default function InscribirseTorneoPage() {
       .catch(() => {});
   }, []);
 
+  // El plantel permanente del equipo elegido. Es el punto de tener uno:
+  // si ya está armado, inscribirse no debería pedir tipear a nadie.
+  const [plantel, setPlantel] = useState<ApiMiembroEquipo[]>([]);
+  const [cargandoPlantel, setCargandoPlantel] = useState(false);
+  const [usarPlantel, setUsarPlantel] = useState(false);
+
   // Al elegir un equipo se copian su nombre y tag al formulario: son
   // editables, porque un equipo puede cambiar de nombre entre temporadas
   // sin dejar de ser el mismo.
-  const elegirEquipo = (id: number | null) => {
+  const elegirEquipo = async (id: number | null) => {
     setEquipoElegidoId(id);
     const equipo = misEquipos.find(e => e.id === id);
     if (equipo) {
       setNombreEquipo(equipo.nombre);
       setTag(equipo.tag || '');
     }
+
+    if (id === null) {
+      setPlantel([]);
+      setUsarPlantel(false);
+      return;
+    }
+
+    setCargandoPlantel(true);
+    try {
+      const miembros = await api.getMiembrosEquipo(id);
+      setPlantel(miembros);
+      // Si el equipo ya tiene gente, usar su plantel es lo que la persona
+      // quiere el 99% de las veces. Tipear a mano queda como escape.
+      setUsarPlantel(miembros.length > 0);
+    } catch {
+      setPlantel([]);
+      setUsarPlantel(false);
+    } finally {
+      setCargandoPlantel(false);
+    }
   };
+
+  const plantelListo = plantel.filter(m => m.identidad);
+  const plantelSinId = plantel.filter(m => !m.identidad);
 
   useEffect(() => {
     if (!edicion) return;
@@ -182,11 +211,16 @@ export default function InscribirseTorneoPage() {
         // la fila del capitán y a ninguna otra. Antes se mandaba desde acá y
         // le pegaba TU cuenta a quien estuviera marcado capitán, fuera quien
         // fuera — vos reportabas en su nombre y él no podía hacer nada.
-        jugadores: jugadores.map(j => ({
-          identidad: j.identidad,
-          es_suplente: j.esSuplente,
-          es_capitan: j.esCapitan,
-        })),
+        // Sin `jugadores`, el backend arma el roster desde el plantel
+        // permanente del equipo, con la identidad que cargó cada uno en su
+        // cuenta. Es el sentido de tener un equipo permanente.
+        jugadores: usarPlantel
+          ? undefined
+          : jugadores.map(j => ({
+            identidad: j.identidad,
+            es_suplente: j.esSuplente,
+            es_capitan: j.esCapitan,
+          })),
       });
       setResultado(data);
     } catch (err) {
@@ -355,7 +389,115 @@ export default function InscribirseTorneoPage() {
                 </div>
               </div>
 
-              {/* Roster */}
+              {/* Roster desde el plantel permanente: el camino corto. */}
+              {equipoElegidoId !== null && (cargandoPlantel || plantel.length > 0) && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                      <Users size={15} className="text-violet-400" /> Alineación
+                    </h4>
+                    {plantel.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setUsarPlantel(v => !v)}
+                        className="text-[11px] font-semibold text-violet-300 hover:text-violet-200 transition-colors"
+                      >
+                        {usarPlantel ? 'Cargar otro roster a mano' : 'Usar el plantel de mi equipo'}
+                      </button>
+                    )}
+                  </div>
+
+                  {cargandoPlantel && (
+                    <div className="flex items-center gap-2 p-4 rounded-2xl bg-white/[0.02] border border-white/8 text-xs text-white/40">
+                      <Loader2 size={13} className="animate-spin" /> Buscando tu plantel…
+                    </div>
+                  )}
+
+                  {!cargandoPlantel && usarPlantel && (
+                    <div className="rounded-2xl border border-violet-500/25 bg-violet-950/20 p-4 space-y-3">
+                      <p className="text-[11px] text-white/45 leading-relaxed">
+                        Se inscribe tu plantel tal como está, con el ID de juego que
+                        cargó cada uno. No hace falta que escribas nada.
+                      </p>
+
+                      <ul className="space-y-1.5">
+                        {plantel.map(m => (
+                          <li
+                            key={m.id}
+                            className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-xs ${
+                              m.identidad
+                                ? 'border-white/8 bg-white/[0.02]'
+                                : 'border-amber-500/30 bg-amber-500/8'
+                            }`}
+                          >
+                            <div className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-bold ${
+                              m.identidad
+                                ? 'bg-violet-600/25 text-white/70'
+                                : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                              {(m.identidad?.nick ?? m.usuario_nombre ?? '?').charAt(0).toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-white truncate">
+                              {m.identidad?.nick ?? m.usuario_nombre}
+                            </span>
+                            {m.identidad ? (
+                              <span className="ml-auto font-mono text-[10px] text-white/30 shrink-0">
+                                {m.identidad.id_juego}
+                              </span>
+                            ) : (
+                              <span className="ml-auto text-[10px] text-amber-400 shrink-0">
+                                sin ID cargado
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+
+                      {plantelSinId.length > 0 && (
+                        <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2.5">
+                          <AlertCircle size={13} className="mt-0.5 shrink-0 text-amber-400" />
+                          <p className="text-[11px] leading-relaxed text-amber-200/90">
+                            {plantelSinId.length === 1
+                              ? 'Un jugador todavía no cargó su ID de juego'
+                              : `${plantelSinId.length} jugadores todavía no cargaron su ID de juego`}
+                            , así que no entran en esta inscripción. Solo ellos pueden
+                            cargarlo — les va a llegar el aviso.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between border-t border-white/8 pt-3 text-xs font-mono font-bold">
+                        <span className="text-white/40 font-sans font-normal">
+                          Entran a la inscripción
+                        </span>
+                        <span className={plantelListo.length >= requeridos ? 'text-green-400' : 'text-amber-400'}>
+                          {plantelListo.length}/{requeridos}
+                        </span>
+                      </div>
+
+                      {plantelListo.length < requeridos && (
+                        <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                          Faltan jugadores con ID cargado: el torneo pide {requeridos} y
+                          no se puede entrar incompleto.{' '}
+                          <Link
+                            href={`/equipos/${equipoElegidoId}/roster`}
+                            className="underline hover:text-amber-200"
+                          >
+                            Ir al plantel
+                          </Link>
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Roster tipeado a mano: el camino de siempre.
+                  Se DESMONTA, no se esconde con CSS. Ocultándolo, sus inputs
+                  seguían en el DOM con `required` y el navegador bloqueaba el
+                  envío del formulario sin decir nada: el botón no hacía nada
+                  y no había forma de darse cuenta por qué. */}
+              {!usarPlantel && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
@@ -435,6 +577,7 @@ export default function InscribirseTorneoPage() {
                   </button>
                 )}
               </div>
+              )}
 
               {/* Contact */}
               <div className="pt-4 border-t border-white/5 space-y-4">
