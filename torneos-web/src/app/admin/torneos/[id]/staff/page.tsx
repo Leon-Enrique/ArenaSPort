@@ -203,7 +203,7 @@ export default function StaffDeTorneoPage() {
                   )}
                   <span className="text-sm text-tinta-2 truncate">{u.discord_username}</span>
                   {u.es_organizador && (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-atencion border border-amber-500/30 flex-shrink-0">
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-atencion/15 text-atencion border border-atencion/30 flex-shrink-0">
                       <Crown size={10} /> Organizador global
                     </span>
                   )}

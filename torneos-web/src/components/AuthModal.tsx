@@ -71,7 +71,7 @@ export default function AuthModal({ isOpen, onClose, onLoggedIn }: AuthModalProp
         </button>
 
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevada/80 border border-purple-800 text-acento-claro text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevada/80 border border-acento/30 text-acento-claro text-xs font-semibold mb-2">
             <Sparkles size={12} />
             <span>Acceso al Sistema</span>
           </div>

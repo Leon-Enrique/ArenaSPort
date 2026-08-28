@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
@@ -192,7 +192,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
         <div className="p-5 space-y-2">
           {partida.participaciones.map((p) => (
-            <div key={p.id} className={`flex items-center justify-between p-3 rounded-[6px] border text-sm ${p.esGanador ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-fondo border-borde'}`}>
+            <div key={p.id} className={`flex items-center justify-between p-3 rounded-[6px] border text-sm ${p.esGanador ? 'bg-ok/10 border-ok/40' : 'bg-fondo border-borde'}`}>
               <span className={p.esGanador ? 'text-white font-bold' : 'text-tinta-2'}>{p.equipo?.nombre || 'Por definir'}</span>
               <span className="font-mono font-black text-white">{p.mapasGanados ?? '—'}</span>
             </div>
@@ -201,7 +201,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
         <div className="px-5 pb-5 space-y-3">
           {success && (
-            <div className="p-3 rounded-[6px] bg-emerald-950/40 border border-emerald-500/40 text-ok text-xs flex items-center gap-2">
+            <div className="p-3 rounded-[6px] bg-ok/15 border border-ok/40 text-ok text-xs flex items-center gap-2">
               <CheckCircle2 size={14} /> {success}
             </div>
           )}
@@ -261,10 +261,10 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                 <div className="space-y-2">
                   <p className="text-xs text-tinta-3">El rival reportó un marcador. Confirmalo si es correcto, o abrí una disputa.</p>
                   <div className="flex gap-2">
-                    <button onClick={handleConfirmar} disabled={loading} className="flex-1 py-2.5 rounded-[6px] bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+                    <button onClick={handleConfirmar} disabled={loading} className="flex-1 py-2.5 rounded-[6px] bg-ok hover:opacity-90 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
                       {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Confirmar
                     </button>
-                    <button onClick={() => setShowDisputa(true)} className="flex-1 py-2.5 rounded-[6px] bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion text-xs font-bold flex items-center justify-center gap-2">
+                    <button onClick={() => setShowDisputa(true)} className="flex-1 py-2.5 rounded-[6px] bg-atencion/20 hover:bg-atencion/40 border border-atencion/30 text-atencion text-xs font-bold flex items-center justify-center gap-2">
                       <AlertTriangle size={14} /> Disputar
                     </button>
                   </div>
@@ -276,12 +276,12 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                   <textarea
                     value={motivoDisputa} onChange={e => setMotivoDisputa(e.target.value)}
                     placeholder="Explicá por qué el marcador reportado está mal..."
-                    className="w-full bg-fondo border border-amber-500/30 rounded-[4px] px-3 py-2 text-xs text-white h-20 resize-none"
+                    className="w-full bg-fondo border border-atencion/30 rounded-[4px] px-3 py-2 text-xs text-white h-20 resize-none"
                     required
                   />
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setShowDisputa(false)} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-tinta-2 text-xs rounded-[6px]">Cancelar</button>
-                    <button type="submit" disabled={loading} className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs rounded-[6px] disabled:opacity-50">
+                    <button type="submit" disabled={loading} className="flex-1 py-2 bg-atencion hover:brightness-110 text-black font-bold text-xs rounded-[6px] disabled:opacity-50">
                       {loading ? 'Enviando...' : 'Enviar Disputa'}
                     </button>
                   </div>
@@ -311,7 +311,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                     if (m.equipo_id === null) {
                       return (
                         <div key={m.id} className="flex justify-center">
-                          <div className="max-w-[90%] rounded-[4px] px-2.5 py-1.5 text-xs bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                          <div className="max-w-[90%] rounded-[4px] px-2.5 py-1.5 text-xs bg-atencion/10 border border-atencion/20 text-atencion">
                             <p className="text-[10px] font-semibold opacity-70 mb-0.5">{m.autor_nombre}</p>
                             <p className="break-words">{m.texto}</p>
                           </div>

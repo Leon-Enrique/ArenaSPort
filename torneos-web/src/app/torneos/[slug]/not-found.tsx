@@ -5,7 +5,7 @@ import { Trophy } from 'lucide-react';
 
 export default function TorneoNoEncontrado() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0e17] text-tinta">
+    <div className="min-h-screen flex flex-col bg-fondo text-tinta">
       <Navbar />
       <main className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4 py-24">
         <Trophy className="w-10 h-10 text-tinta-4" />

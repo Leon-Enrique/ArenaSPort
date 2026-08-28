@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
               )}
               {edicionesEnCurso.map((ed) => (
                 <div key={ed.id} className="flex items-center gap-4 p-4 rounded-[6px] bg-white/5 border border-borde-sutil">
-                  <div className={`w-2 h-12 rounded-full flex-shrink-0 ${ed.estado === 'en_curso' ? 'bg-amber-500' : 'bg-acento'}`} />
+                  <div className={`w-2 h-12 rounded-full flex-shrink-0 ${ed.estado === 'en_curso' ? 'bg-atencion' : 'bg-acento'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{ed.nombre}</p>
                     <div className="flex items-center gap-3 mt-2">

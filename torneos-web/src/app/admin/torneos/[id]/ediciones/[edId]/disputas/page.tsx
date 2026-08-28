@@ -171,7 +171,7 @@ export default function EdicionDisputasAdminPage() {
                     <CheckCircle2 size={13} /> Caso Cerrado
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-xs font-bold text-atencion bg-amber-500/15 border border-amber-500/30 px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-1 text-xs font-bold text-atencion bg-atencion/15 border border-atencion/30 px-3 py-1 rounded-full">
                     <AlertCircle size={13} /> Dictamen Pendiente
                   </div>
                 )}

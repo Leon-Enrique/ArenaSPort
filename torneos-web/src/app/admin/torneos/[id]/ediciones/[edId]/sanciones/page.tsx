@@ -44,8 +44,8 @@ interface Sancion {
 
 const TIPO_BADGE = {
   advertencia: { label: 'Advertencia Oficial', color: 'bg-yellow-500/15 text-atencion border-yellow-500/30', icon: <AlertTriangle size={13} /> },
-  deduccion_puntos: { label: 'Deducción de Puntos', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Flag size={13} /> },
-  default_loss: { label: 'Derrota por W.O.', color: 'bg-orange-500/15 text-orange-400 border-orange-500/30', icon: <ShieldX size={13} /> },
+  deduccion_puntos: { label: 'Deducción de Puntos', color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <Flag size={13} /> },
+  default_loss: { label: 'Derrota por W.O.', color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <ShieldX size={13} /> },
   descalificacion: { label: 'Descalificación del Torneo', color: 'bg-red-500/15 text-vivo border-red-500/30', icon: <Ban size={13} /> },
   ban_jugador: { label: 'Suspensión de Jugador', color: 'bg-rose-500/15 text-vivo border-rose-500/30', icon: <UserX size={13} /> },
 };
@@ -205,7 +205,7 @@ export default function EdicionSancionesAdminPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-tinta-3 pt-1">
-                  <span className="font-mono text-atencion/80 bg-amber-500/10 px-2 py-0.5 rounded">
+                  <span className="font-mono text-atencion/80 bg-atencion/10 px-2 py-0.5 rounded">
                     {s.articuloReglamento}
                   </span>
                   <span className="capitalize text-tinta-4">

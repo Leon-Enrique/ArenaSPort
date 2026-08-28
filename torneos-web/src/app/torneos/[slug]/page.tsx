@@ -38,7 +38,7 @@ export default async function TorneoDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0e17] text-tinta selection:bg-acento selection:text-white">
+    <div className="min-h-screen flex flex-col bg-fondo text-tinta selection:bg-acento selection:text-white">
       <Navbar />
       <main className="flex-1">
         <TorneoDetailClient resumenInicial={resumen} />

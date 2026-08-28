@@ -117,7 +117,7 @@ export default function ConfiguracionEdicionPage() {
         </div>
       )}
       {exito && (
-        <div className="p-3 rounded-[6px] bg-emerald-950/60 border border-emerald-500/40 text-ok text-xs flex items-center gap-2">
+        <div className="p-3 rounded-[6px] bg-ok/15 border border-ok/40 text-ok text-xs flex items-center gap-2">
           <CheckCircle2 size={15} /> <span>{exito}</span>
         </div>
       )}
@@ -180,7 +180,7 @@ export default function ConfiguracionEdicionPage() {
             type="checkbox"
             checked={!requiereAprobacion}
             onChange={e => setRequiereAprobacion(!e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-cyan-500"
+            className="mt-0.5 w-4 h-4 accent-acento"
           />
           <span>
             <span className="block text-sm font-semibold text-white">Torneo abierto</span>
@@ -198,7 +198,7 @@ export default function ConfiguracionEdicionPage() {
             type="checkbox"
             checked={requiereEquipoPermanente}
             onChange={e => setRequiereEquipoPermanente(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-violet-500"
+            className="mt-0.5 w-4 h-4 accent-acento"
           />
           <span>
             <span className="block text-sm font-semibold text-white">Exigir equipo permanente</span>

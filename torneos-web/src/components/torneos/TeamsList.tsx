@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -46,7 +46,7 @@ export default function TeamsList({ edicionId, maxEquipos, equiposCount }: Teams
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Buscar equipo..."
-            className="pl-8 pr-3 py-2 bg-[#0e101d] border border-borde rounded-[6px] text-xs text-white focus:outline-none focus:border-borde-fuerte w-full sm:w-56"
+            className="pl-8 pr-3 py-2 bg-hundida border border-borde rounded-[6px] text-xs text-white focus:outline-none focus:border-borde-fuerte w-full sm:w-56"
           />
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function TeamsList({ edicionId, maxEquipos, equiposCount }: Teams
           <Loader2 className="animate-spin" size={16} /> Cargando equipos...
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
+        <div className="bg-hundida border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
           {inscripciones.length === 0 ? 'Todavía no hay equipos aprobados en este torneo.' : 'Ningún equipo coincide con la búsqueda.'}
         </div>
       ) : (
@@ -67,7 +67,7 @@ export default function TeamsList({ edicionId, maxEquipos, equiposCount }: Teams
               <Link
                 key={insc.id}
                 href={`/equipos/${insc.equipo.id}`}
-                className="block bg-[#0e101d] border border-borde rounded-[6px] p-4 space-y-3 hover:border-borde transition-all group"
+                className="block bg-hundida border border-borde rounded-[6px] p-4 space-y-3 hover:border-borde transition-all group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-[6px] bg-acento flex items-center justify-center font-black text-white text-sm shrink-0">

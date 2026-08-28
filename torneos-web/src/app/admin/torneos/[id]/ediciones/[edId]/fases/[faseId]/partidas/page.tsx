@@ -373,7 +373,7 @@ export default function FasePartidasAdminPage() {
                   key={partida.id}
                   ref={(el) => { if (el) cardRefs.current.set(partida.id, el); else cardRefs.current.delete(partida.id); }}
                   className={`bg-superficie border rounded-[6px] p-5 transition-all relative group ${
-                    isDispute ? 'border-red-500/40' : editingPartidaId === partida.id ? 'border-acento/60 ring-1 ring-violet-500/40' : 'border-borde hover:border-white/20'
+                    isDispute ? 'border-red-500/40' : editingPartidaId === partida.id ? 'border-acento/60 ring-1 ring-acento/40' : 'border-borde hover:border-borde-fuerte'
                   }`}
                 >
                   <div className="flex items-center justify-between text-xs mb-4 pb-3 border-b border-borde-sutil">
@@ -401,7 +401,7 @@ export default function FasePartidasAdminPage() {
                         </span>
                       )}
                       {partida.estado === 'check_in' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-atencion bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-atencion bg-atencion/10 px-2 py-0.5 rounded-full border border-atencion/20">
                           <LogIn size={11} /> Check-in abierto
                           {partida.checkin_cierra_at && ` · cierra ${new Date(partida.checkin_cierra_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`}
                         </span>
@@ -487,7 +487,7 @@ export default function FasePartidasAdminPage() {
                               onClick={() => handleAbrirCheckin(partida.id)}
                               disabled={abriendoCheckin === partida.id}
                               title="Abre el check-in ahora mismo (15 min), sin esperar el horario programado."
-                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
+                              className="px-3 py-1.5 bg-atencion/20 hover:bg-atencion/40 border border-atencion/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-50"
                             >
                               {abriendoCheckin === partida.id ? <Loader2 size={12} className="animate-spin" /> : <LogIn size={12} />} Abrir Ya
                             </button>
@@ -502,7 +502,7 @@ export default function FasePartidasAdminPage() {
                               onClick={() => handleResolverCheckin(partida.id)}
                               disabled={resolviendoCheckin === partida.id || (!!partida.checkin_cierra_at && new Date(partida.checkin_cierra_at) > new Date())}
                               title="Cierra la ventana de check-in vencida — aplica walkover si algún equipo no confirmó."
-                              className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="px-3 py-1.5 bg-atencion/20 hover:bg-atencion/40 border border-atencion/30 text-atencion rounded-[4px] text-xs font-semibold flex items-center gap-1 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               {resolviendoCheckin === partida.id ? <Loader2 size={12} className="animate-spin" /> : <TimerOff size={12} />} Resolver Check-in
                             </button>

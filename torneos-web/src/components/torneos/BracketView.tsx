@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Partida, Fase } from '@/types';
@@ -170,16 +170,16 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                         : 'bg-superficie hover:bg-elevada border border-borde hover:border-borde-fuerte rounded-[4px]'
                     }`}
                   >
-                    <div className="px-3 py-1 bg-fondo/90 border-b border-[#222438] flex items-center justify-between text-[10px] text-tinta-3 font-mono">
+                    <div className="px-3 py-1 bg-fondo/90 border-b border-borde-sutil flex items-center justify-between text-[10px] text-tinta-3 font-mono">
                       <span>{partida.nombreGrupo || `Match #${mIdx + 1}`}</span>
                       <span className="text-acento-claro font-bold">BO{partida.formatoBo || 3}</span>
                     </div>
                     {/* Team A */}
-                    <div className={`px-3 py-2 flex items-center justify-between border-b border-[#202235] text-xs ${partA?.esGanador ? 'bg-elevada' : ''}`}>
+                    <div className={`px-3 py-2 flex items-center justify-between border-b border-borde-sutil text-xs ${partA?.esGanador ? 'bg-elevada' : ''}`}>
                       <span className={`font-semibold truncate text-[11px] ${partA?.esGanador ? 'text-white font-bold' : partA?.equipo ? 'text-tinta-2' : 'text-tinta-4 italic'}`}>
                         {partA?.equipo?.nombre || 'Por Definir'}
                       </span>
-                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partA?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-superficie text-tinta-3'}`}>
+                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partA?.esGanador ? 'bg-ok text-white' : 'bg-superficie text-tinta-3'}`}>
                         {partA?.mapasGanados ?? 0}
                       </span>
                     </div>
@@ -188,7 +188,7 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                       <span className={`font-semibold truncate text-[11px] ${partB?.esGanador ? 'text-white font-bold' : partB?.equipo ? 'text-tinta-2' : 'text-tinta-4 italic'}`}>
                         {partB?.equipo?.nombre || 'Por Definir'}
                       </span>
-                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partB?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-superficie text-tinta-3'}`}>
+                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partB?.esGanador ? 'bg-ok text-white' : 'bg-superficie text-tinta-3'}`}>
                         {partB?.mapasGanados ?? 0}
                       </span>
                     </div>
@@ -324,7 +324,7 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                         const midX = CONNECTOR_W / 2;
 
                         return (
-                          <g key={pairIdx} stroke="#475569" strokeWidth="1.75" fill="none">
+                          <g key={pairIdx} stroke="var(--color-tinta-4)" strokeWidth="1.75" fill="none">
                             {/* Brazo superior saliendo de Match Superior */}
                             <path d={`M 0 ${upperCenterY} L ${midX} ${upperCenterY}`} />
                             

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Partida } from '@/types';
@@ -59,10 +59,10 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
         {/* Stepper Status Bar */}
         <div className="bg-superficie/90 px-6 py-3 border-b border-borde flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${partida.estado === 'confirmada' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+            <span className={`w-2.5 h-2.5 rounded-full ${partida.estado === 'confirmada' ? 'bg-ok' : 'bg-atencion animate-pulse'}`} />
             <span className="font-semibold text-tinta capitalize">Estado: {partida.estado.replace('_', ' ')}</span>
           </div>
-          <span className="text-[11px] text-acento-claro font-mono bg-elevada/60 px-2 py-0.5 rounded border border-purple-800/40">
+          <span className="text-[11px] text-acento-claro font-mono bg-elevada/60 px-2 py-0.5 rounded border border-acento/25">
             Doble Confirmación de Capitanes
           </span>
         </div>
@@ -72,7 +72,7 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
 
           {reportedSuccess ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-ok flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full bg-ok/15 border border-ok/40 text-ok flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
               <h4 className="font-extrabold text-base text-white">¡Resultado Reportado Exitosamente!</h4>
@@ -88,7 +88,7 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
             </div>
           ) : showDisputeForm ? (
             <div className="space-y-4">
-              <div className="p-3 bg-amber-950/30 border border-amber-500/40 rounded-[6px] flex items-start gap-3">
+              <div className="p-3 bg-atencion/10 border border-atencion/40 rounded-[6px] flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-atencion shrink-0 mt-0.5" />
                 <div className="text-xs">
                   <h5 className="font-bold text-atencion">Abrir Disputa de Partida</h5>
@@ -103,7 +103,7 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
                   value={motivoDisputa}
                   onChange={(e) => setMotivoDisputa(e.target.value)}
                   placeholder="Ej. El equipo rival usó un jugador no registrado en el roster o no asistió a la hora programada..."
-                  className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-xs text-tinta focus:outline-none focus:border-amber-500 transition-colors"
+                  className="w-full p-3 rounded-[6px] bg-fondo border border-borde text-xs text-tinta focus:outline-none focus:border-atencion transition-colors"
                 />
               </div>
 
@@ -116,7 +116,7 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
                 </button>
                 <button
                   onClick={() => { alert('Disputa enviada al Staff'); onClose(); }}
-                  className="px-4 py-2 rounded-[6px] bg-amber-600 hover:bg-amber-500 text-fondo font-bold text-xs shadow-lg shadow-amber-600/20"
+                  className="px-4 py-2 rounded-[6px] bg-atencion hover:brightness-110 text-fondo font-bold text-xs shadow-lg shadow-atencion/20"
                 >
                   Enviar Reclamo a Staff
                 </button>
@@ -232,7 +232,7 @@ export default function ReportModal({ partida, onClose }: ReportModalProps) {
                     disabled={isSubmitting || !evidencia}
                     className={`px-5 py-2.5 rounded-[6px] font-bold text-xs transition-all shadow-lg flex items-center gap-2 ${
                       evidencia
-                        ? 'bg-acento text-white shadow-purple-600/25'
+                        ? 'bg-acento text-white shadow-lg shadow-acento/20'
                         : 'bg-elevada text-tinta-4 cursor-not-allowed'
                     }`}
                   >

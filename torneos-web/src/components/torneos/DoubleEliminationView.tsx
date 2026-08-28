@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Partida } from '@/types';
@@ -19,18 +19,18 @@ function MatchCard({ partida, onClick, isGF = false }: { partida: Partida; onCli
       onClick={onClick}
       className={`w-[220px] rounded-[6px] overflow-hidden cursor-pointer transition-all shadow-xl group border shrink-0 ${
         isGF
-          ? 'border-amber-500/80 bg-elevada hover:border-amber-400 shadow-amber-500/20'
-          : 'border-[#2a2d48] bg-[#161726] hover:border-acento hover:bg-[#1e2034]'
+          ? 'border-atencion/60 bg-elevada hover:border-atencion shadow-lg shadow-atencion/15'
+          : 'border-borde bg-superficie hover:border-acento hover:bg-elevada'
       }`}
     >
-      <div className="px-2.5 py-1 bg-fondo/90 border-b border-[#222438] flex items-center justify-between text-[10px] text-tinta-3 font-mono">
+      <div className="px-2.5 py-1 bg-fondo/90 border-b border-borde-sutil flex items-center justify-between text-[10px] text-tinta-3 font-mono">
         <span className="truncate max-w-[135px]">{partida.nombreGrupo}</span>
         <span className={`font-bold ${isGF ? 'text-atencion' : 'text-acento-claro'}`}>BO{partida.formatoBo || 3}</span>
       </div>
       {[partA, partB].map((part, idx) => (
         <div
           key={idx}
-          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-[#202235]' : ''} ${part?.esGanador ? (isGF ? 'bg-amber-900/30' : 'bg-elevada') : ''}`}
+          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-borde-sutil' : ''} ${part?.esGanador ? (isGF ? 'bg-atencion/15' : 'bg-elevada') : ''}`}
         >
           <span className={`truncate max-w-[160px] text-[11px] ${
             part?.esGanador ? 'text-white font-black' : part?.equipo ? 'text-tinta-2 font-medium' : 'text-tinta-4 italic'
@@ -39,7 +39,7 @@ function MatchCard({ partida, onClick, isGF = false }: { partida: Partida; onCli
           </span>
           <span className={`font-mono text-xs font-bold px-1.5 rounded min-w-[20px] text-center ${
             part?.esGanador
-              ? (isGF ? 'bg-amber-500 text-fondo font-black' : 'bg-emerald-500 text-fondo font-black')
+              ? (isGF ? 'bg-atencion text-fondo font-black' : 'bg-ok text-fondo font-black')
               : isDone ? 'text-tinta-3 bg-superficie' : 'text-tinta-4 bg-superficie/30'
           }`}>
             {part?.mapasGanados ?? 0}
@@ -63,7 +63,7 @@ function FlowArrow({ label, color = 'text-tinta-4' }: { label?: string; color?: 
 // Flecha hacia abajo indicando caída al LB
 function DropArrow({ label }: { label?: string }) {
   return (
-    <div className="flex items-center gap-1 text-orange-400/60 text-[10px] font-mono">
+    <div className="flex items-center gap-1 text-atencion/60 text-[10px] font-mono">
       <ChevronDown size={12} />
       {label && <span>{label}</span>}
     </div>
@@ -172,9 +172,9 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
     <div className="space-y-5">
       {/* CAMPEÓN BANNER */}
       {champion && (
-        <div className="bg-elevada border border-amber-500/50 rounded-[6px] p-5 flex items-center gap-4 shadow-2xl shadow-amber-500/10">
-          <div className="w-14 h-14 rounded-full bg-elevada flex items-center justify-center shadow-lg shadow-amber-500/30 shrink-0">
-            <Crown size={28} className="text-slate-900" />
+        <div className="bg-elevada border border-atencion/40 rounded-[6px] p-5 flex items-center gap-4 elevacion">
+          <div className="w-14 h-14 rounded-full bg-atencion/20 border border-atencion/30 flex items-center justify-center shrink-0">
+            <Crown size={28} className="text-atencion" />
           </div>
           <div>
             <span className="text-xs font-bold text-atencion uppercase tracking-widest block mb-0.5 font-mono">🏆 Campeón del Torneo</span>
@@ -185,7 +185,7 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
       )}
 
       {/* TABS */}
-      <div className="flex items-center gap-2 bg-[#0e101d] p-2 rounded-[6px] border border-borde overflow-x-auto">
+      <div className="flex items-center gap-2 bg-hundida p-2 rounded-[6px] border border-borde overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -216,13 +216,13 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
 
       {/* FLUJO UPPER → LOWER */}
       {(activeView === 'all') && ubRounds.length > 0 && lbRounds.length > 0 && (
-        <div className="flex items-center gap-3 px-4 text-[11px] text-orange-400/70 font-mono">
-          <div className="flex-1 border-t border-dashed border-orange-500/20" />
-          <span className="flex items-center gap-1.5 bg-orange-950/30 border border-orange-500/30 rounded-[4px] px-3 py-1.5 shrink-0">
+        <div className="flex items-center gap-3 px-4 text-[11px] text-tinta-3 font-mono">
+          <div className="flex-1 border-t border-dashed border-borde" />
+          <span className="flex items-center gap-1.5 bg-elevada border border-borde-fuerte rounded-[4px] px-3 py-1.5 shrink-0">
             <ChevronDown size={13} />
             Los perdedores del Upper Bracket caen al Lower Bracket
           </span>
-          <div className="flex-1 border-t border-dashed border-orange-500/20" />
+          <div className="flex-1 border-t border-dashed border-borde" />
         </div>
       )}
 
@@ -230,9 +230,9 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
       {(activeView === 'all' || activeView === 'lower') && lbRounds.length > 0 && (
         <BracketLane
           label="Lower Bracket — Losers"
-          icon={<Flame size={16} className="text-orange-400" />}
-          headerColor="bg-orange-950/40"
-          borderColor="border-orange-500/40"
+          icon={<Flame size={16} className="text-tinta-2" />}
+          headerColor="bg-elevada"
+          borderColor="border-borde-fuerte"
           rounds={lbRounds}
           onSelectPartida={onSelectPartida}
           dropLabels={['avanza', 'avanza', 'avanza']}
@@ -242,22 +242,22 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
       {/* FLUJO LOWER → GF */}
       {(activeView === 'all') && lbRounds.length > 0 && gfMatches.length > 0 && (
         <div className="flex items-center gap-3 px-4 text-[11px] text-atencion/70 font-mono">
-          <div className="flex-1 border-t border-dashed border-amber-500/20" />
-          <span className="flex items-center gap-1.5 bg-amber-950/30 border border-amber-500/30 rounded-[4px] px-3 py-1.5 shrink-0">
+          <div className="flex-1 border-t border-dashed border-atencion/25" />
+          <span className="flex items-center gap-1.5 bg-atencion/10 border border-atencion/30 rounded-[4px] px-3 py-1.5 shrink-0">
             <ArrowRight size={13} />
             Ganador LB Final vs Campeón UB → Gran Final BO5
           </span>
-          <div className="flex-1 border-t border-dashed border-amber-500/20" />
+          <div className="flex-1 border-t border-dashed border-atencion/25" />
         </div>
       )}
 
       {/* GRAN FINAL */}
       {(activeView === 'all' || activeView === 'gf') && gfMatches.length > 0 && (
-        <div className="rounded-[6px] border border-amber-500/50 bg-amber-950/20 overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-amber-500/30 bg-amber-900/20 flex items-center gap-2">
+        <div className="rounded-[6px] border border-atencion/40 bg-atencion/10 overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-atencion/30 bg-atencion/15 flex items-center gap-2">
             <Trophy size={16} className="text-atencion" />
             <span className="text-sm font-black uppercase tracking-wider text-atencion">Gran Final — Best of 5</span>
-            <span className="text-xs text-amber-500/60 font-mono ml-2">UB Champion vs LB Champion</span>
+            <span className="text-xs text-atencion/70 font-mono ml-2">UB Champion vs LB Champion</span>
           </div>
           <div className="p-6 flex justify-center">
             <div className="flex flex-col items-center gap-3">
@@ -283,7 +283,7 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
       {/* LEYENDA */}
       <div className="flex flex-wrap items-center gap-4 text-[11px] text-tinta-4 px-1 pt-1">
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-emerald-500 shrink-0" />
+          <span className="w-3 h-3 rounded bg-ok shrink-0" />
           <span>Score (Ganador)</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -291,11 +291,11 @@ export default function DoubleEliminationView({ partidas, onSelectPartida }: Dou
           <span>Upper Bracket — ganar o caer al Lower</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded border border-orange-500/60 shrink-0" />
+          <span className="w-3 h-3 rounded border border-borde-fuerte shrink-0" />
           <span>Lower Bracket — una vida más, pierde = eliminado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-amber-600/60 shrink-0" />
+          <span className="w-3 h-3 rounded bg-atencion/60 shrink-0" />
           <span>Gran Final BO5 — UB Campeón vs LB Campeón</span>
         </div>
       </div>

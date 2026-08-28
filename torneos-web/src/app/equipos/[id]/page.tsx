@@ -106,7 +106,7 @@ export default function PerfilEquipoPage() {
               </div>
             </div>
             {perfil.titulos > 0 && (
-              <span className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-amber-500/15 border border-amber-500/40 text-atencion text-xs font-black shrink-0">
+              <span className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-atencion/15 border border-atencion/40 text-atencion text-xs font-black shrink-0">
                 <Trophy size={13} /> {perfil.titulos} {perfil.titulos === 1 ? 'título' : 'títulos'}
               </span>
             )}
@@ -164,7 +164,7 @@ export default function PerfilEquipoPage() {
                   </div>
 
                   {h.campeon && (
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-atencion text-xs font-black shrink-0">
+                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-atencion/15 border border-atencion/40 text-atencion text-xs font-black shrink-0">
                       <Award size={12} /> CAMPEÓN
                     </span>
                   )}

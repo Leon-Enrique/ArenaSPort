@@ -379,14 +379,14 @@ function ListaDeMiembros({
               key={m.id}
               className={`group flex items-center gap-4 rounded-[6px] border px-5 py-3.5 transition-colors ${
                 falta
-                  ? 'border-atencion/25 bg-amber-500/5'
+                  ? 'border-atencion/25 bg-atencion/5'
                   : 'border-borde bg-superficie hover:border-borde-fuerte'
               }`}
             >
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] text-sm font-bold ${
                   falta
-                    ? 'bg-amber-500/15 text-atencion'
+                    ? 'bg-atencion/15 text-atencion'
                     : 'bg-borde text-tinta-2'
                 }`}
               >
@@ -401,7 +401,7 @@ function ListaDeMiembros({
                   {esDuenio && (
                     <span
                       title="Dueño del equipo — es el capitán en cada inscripción"
-                      className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-atencion"
+                      className="inline-flex shrink-0 items-center gap-1 rounded-md border border-atencion/30 bg-atencion/10 px-1.5 py-0.5 text-[10px] font-semibold text-atencion"
                     >
                       <Crown size={9} /> Capitán
                     </span>

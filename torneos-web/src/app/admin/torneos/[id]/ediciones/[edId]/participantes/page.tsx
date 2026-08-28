@@ -12,7 +12,7 @@ import { ApiEdicion, ApiInscripcion } from '@/lib/api-types';
 
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   aprobada: { label: 'Aprobada', color: 'bg-green-500/15 text-ok border-green-500/30', icon: <CheckCircle size={11} /> },
-  pendiente: { label: 'Pendiente', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Clock size={11} /> },
+  pendiente: { label: 'Pendiente', color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <Clock size={11} /> },
   rechazada: { label: 'Rechazada', color: 'bg-red-500/15 text-vivo border-red-500/30', icon: <XCircle size={11} /> },
 };
 
@@ -151,7 +151,7 @@ export default function ParticipantesPage() {
 
           return (
             <div key={ins.id} className={`bg-superficie border rounded-[6px] overflow-hidden transition-all ${
-              ins.estado === 'pendiente' ? 'border-amber-500/20' : ins.estado === 'rechazada' ? 'border-red-500/10' : 'border-borde'
+              ins.estado === 'pendiente' ? 'border-atencion/20' : ins.estado === 'rechazada' ? 'border-red-500/10' : 'border-borde'
             }`}>
               <div className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/3 transition-all" onClick={() => setExpandedId(isExpanded ? null : ins.id)}>
                 <div className="w-8 text-center">
@@ -202,7 +202,7 @@ export default function ParticipantesPage() {
                               <td className="py-2.5 pr-4 text-tinta-3">{j.discord_id || '—'}</td>
                               <td className="py-2.5">
                                 {j.es_capitan ? (
-                                  <span className="px-1.5 py-0.5 bg-amber-500/20 text-atencion rounded-md">Capitán</span>
+                                  <span className="px-1.5 py-0.5 bg-atencion/20 text-atencion rounded-md">Capitán</span>
                                 ) : j.es_suplente ? (
                                   <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-md">Suplente</span>
                                 ) : (

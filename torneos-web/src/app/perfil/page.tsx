@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ const ESTADO_PARTIDA_BADGE: Record<string, { label: (p: ApiMiPartida) => string;
     label: (p) => p.checkin_cierra_at
       ? `Check-in abierto — cierra ${new Date(p.checkin_cierra_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`
       : 'Check-in abierto',
-    color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <LogIn size={11} />,
+    color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <LogIn size={11} />,
   },
   reportada: { label: () => 'Esperando que el rival confirme', color: 'bg-fuchsia-500/15 text-fuchsia-400 border-fuchsia-500/30', icon: <Clock size={11} /> },
   programada: {
@@ -34,7 +34,7 @@ const TOKEN_KEY = 'torneos_auth_token';
 
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   aprobada: { label: 'Aprobada', color: 'bg-green-500/15 text-ok border-green-500/30', icon: <CheckCircle2 size={11} /> },
-  pendiente: { label: 'Pendiente', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Clock size={11} /> },
+  pendiente: { label: 'Pendiente', color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <Clock size={11} /> },
   rechazada: { label: 'Rechazada', color: 'bg-red-500/15 text-vivo border-red-500/30', icon: <XCircle size={11} /> },
 };
 
@@ -252,7 +252,7 @@ export default function PerfilPage() {
                       es para mirar historial. Por eso este va primero. */}
                   <Link
                     href={`/equipos/${eq.id}/roster`}
-                    className="px-3 py-1.5 rounded-[4px] bg-acento/15 hover:bg-acento/25 border border-acento/30 text-acento-claro hover:text-purple-200 text-[11px] font-semibold transition-all flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-[4px] bg-acento/15 hover:bg-acento/25 border border-acento/30 text-acento-claro hover:text-tinta text-[11px] font-semibold transition-all flex items-center gap-1.5"
                   >
                     <Users size={11} /> Plantel
                   </Link>

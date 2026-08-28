@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Trophy, Shield, Loader2 } from 'lucide-react';
@@ -21,7 +21,7 @@ export default function GroupStageView({ grupos, clasificadosPorGrupo = 1, loadi
 
   if (grupos.length === 0) {
     return (
-      <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
+      <div className="bg-hundida border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
         Todavía no hay resultados cargados para esta fase.
       </div>
     );
@@ -30,7 +30,7 @@ export default function GroupStageView({ grupos, clasificadosPorGrupo = 1, loadi
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {grupos.map((grupo) => (
-        <div key={grupo.grupo ?? 'general'} className="bg-[#0e101d] rounded-[6px] border border-borde shadow-xl overflow-hidden">
+        <div key={grupo.grupo ?? 'general'} className="bg-hundida rounded-[6px] border border-borde shadow-xl overflow-hidden">
           <div className="px-5 py-3.5 border-b border-borde flex items-center gap-2 bg-fondo/60">
             <Shield size={15} className="text-acento-claro" />
             <span className="text-sm font-black text-white">
@@ -56,7 +56,7 @@ export default function GroupStageView({ grupos, clasificadosPorGrupo = 1, loadi
                   <tr
                     key={fila.equipo_id}
                     className={`border-b border-slate-900 last:border-0 ${
-                      fila.posicion <= clasificadosPorGrupo ? 'bg-emerald-950/20' : ''
+                      fila.posicion <= clasificadosPorGrupo ? 'bg-ok/10' : ''
                     }`}
                   >
                     <td className="px-4 py-2.5 font-mono text-tinta-3">{fila.posicion}</td>

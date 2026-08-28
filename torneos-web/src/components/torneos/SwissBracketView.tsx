@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Partida } from '@/types';
@@ -78,17 +78,17 @@ function MatchCard({ partida, onClick }: { partida: Partida; onClick?: () => voi
   return (
     <div
       onClick={onClick}
-      className="w-[210px] rounded-[6px] overflow-hidden border border-[#2a2d48] bg-[#161726] hover:border-acento transition-all cursor-pointer shrink-0"
+      className="w-[210px] rounded-[6px] overflow-hidden border border-borde bg-superficie hover:border-acento transition-all cursor-pointer shrink-0"
     >
       {[a, b].map((p, idx) => (
         <div
           key={idx}
-          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-[#202235]' : ''} ${p?.esGanador ? 'bg-elevada' : ''}`}
+          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-borde-sutil' : ''} ${p?.esGanador ? 'bg-elevada' : ''}`}
         >
           <span className={`truncate max-w-[150px] text-[11px] ${p?.esGanador ? 'text-white font-black' : p?.equipo ? 'text-tinta-2 font-medium' : 'text-tinta-4 italic'}`}>
             {p?.equipo?.nombre || 'Por definir'}
           </span>
-          <span className={`font-mono text-xs font-bold px-1.5 rounded min-w-[18px] text-center ${p?.esGanador ? 'bg-emerald-500 text-fondo' : 'text-tinta-4 bg-superficie/60'}`}>
+          <span className={`font-mono text-xs font-bold px-1.5 rounded min-w-[18px] text-center ${p?.esGanador ? 'bg-ok text-fondo' : 'text-tinta-4 bg-superficie/60'}`}>
             {p?.mapasGanados ?? '—'}
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
 
   if (columnas.length === 0) {
     return (
-      <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
+      <div className="bg-hundida border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
         Todavía no hay rondas sorteadas para esta fase.
       </div>
     );
@@ -114,7 +114,7 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[11px] text-tinta-3 bg-[#0e101d] border border-borde rounded-[6px] px-4 py-2.5 w-fit">
+      <div className="flex items-center gap-2 text-[11px] text-tinta-3 bg-hundida border border-borde rounded-[6px] px-4 py-2.5 w-fit">
         <Trophy size={13} className="text-ok" /> Clasifica con {metaVictorias} victorias
         <span className="text-slate-700">•</span>
         <XCircle size={13} className="text-vivo" /> Elimina con {metaDerrotas} derrotas
@@ -122,13 +122,13 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
 
       {todosResueltos && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-[6px] border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
+          <div className="rounded-[6px] border border-ok/30 bg-ok/10 p-4 space-y-2">
             <span className="text-xs font-black uppercase text-ok flex items-center gap-1.5">
               <Crown size={13} /> Clasificados ({clasificados.length})
             </span>
             <div className="flex flex-wrap gap-1.5">
               {clasificados.map(([id, r]) => (
-                <span key={id} className="px-2 py-1 rounded-[4px] bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-200 font-semibold">
+                <span key={id} className="px-2 py-1 rounded-[4px] bg-ok/15 border border-ok/25 text-[11px] text-ok font-semibold">
                   {nombrePorEquipo.get(id) || id} <span className="text-ok/60 font-mono">{r.w}-{r.l}</span>
                 </span>
               ))}

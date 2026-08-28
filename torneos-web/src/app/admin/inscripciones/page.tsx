@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -188,7 +188,7 @@ export default function AdminGlobalInscripcionesPage() {
 
                   <div className="flex items-center gap-3 flex-wrap">
                     {ins.estado === 'pendiente' && (
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-atencion bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-atencion bg-atencion/15 border border-atencion/30 px-2.5 py-1 rounded-full">
                         <Clock size={12} /> Pendiente
                       </span>
                     )}
@@ -251,7 +251,7 @@ export default function AdminGlobalInscripcionesPage() {
                             <div>
                               <div className="flex items-center gap-1.5">
                                 <span className="font-bold text-white">{player.identidad.nick || player.identidad.nombre || `Jugador #${player.orden}`}</span>
-                                {player.es_capitan && <span className="px-1.5 py-0.2 rounded bg-amber-400/20 text-atencion font-bold text-[9px] uppercase">Capitán</span>}
+                                {player.es_capitan && <span className="px-1.5 py-0.2 rounded bg-atencion/20 text-atencion font-bold text-[9px] uppercase">Capitán</span>}
                                 {player.es_suplente && <span className="px-1.5 py-0.2 rounded bg-white/10 text-tinta-3 text-[9px] uppercase">Suplente</span>}
                               </div>
                               <div className="text-[11px] text-tinta-3 font-mono mt-0.5">

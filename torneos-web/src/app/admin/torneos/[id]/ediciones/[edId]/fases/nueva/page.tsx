@@ -120,7 +120,7 @@ export default function NuevaFasePage() {
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               placeholder="Ej. Playoffs Upper Bracket, Fase de Grupos A..."
-              className="w-full bg-white/5 border border-borde text-white placeholder-white/25 rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento focus:ring-2 focus:ring-violet-500/20 transition-all"
+              className="w-full bg-white/5 border border-borde text-white placeholder-white/25 rounded-[6px] px-4 py-3 text-sm focus:outline-none focus:border-acento focus:ring-2 focus:ring-acento/25 transition-all"
             />
           </div>
           <div>
@@ -158,7 +158,7 @@ export default function NuevaFasePage() {
                   name="formato"
                   checked={formato === f.id}
                   onChange={() => setFormato(f.id as any)}
-                  className="mt-1 accent-violet-600"
+                  className="mt-1 accent-acento"
                 />
                 <div>
                   <p className="text-sm font-semibold text-white">{f.nombre}</p>

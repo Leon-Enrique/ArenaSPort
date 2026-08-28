@@ -116,7 +116,7 @@ export default function NotificacionesBell() {
                   >
                     <span
                       className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
-                        n.leida_at ? 'bg-transparent' : 'bg-purple-400'
+                        n.leida_at ? 'bg-transparent' : 'bg-acento'
                       }`}
                     />
                     <span className="min-w-0 flex-1">

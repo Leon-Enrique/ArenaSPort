@@ -108,7 +108,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
             <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-elevada/90 border border-acento text-acento-claro">
               {edicion.juego.nombre}
             </span>
-            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-950/90 border border-emerald-500 text-ok">
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-ok/15 border border-ok/40 text-ok">
               {ESTADO_LABEL[edicion.estado] || edicion.estado}
             </span>
             {activeFase && (
@@ -188,7 +188,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
         {activeTab === 'brackets' && (
           <div className="space-y-6">
             {fases.length === 0 ? (
-              <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
+              <div className="bg-hundida border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
                 {edicion.estado === 'inscripciones_abiertas'
                   ? 'Las llaves se van a sortear cuando cierren las inscripciones.'
                   : 'Este torneo todavía no tiene fases configuradas.'}
@@ -196,7 +196,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
             ) : (
               <div className="space-y-6">
                 {fases.length > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto bg-[#0e101d] p-3 rounded-[6px] border border-acento/30 shadow-lg">
+                  <div className="flex items-center gap-2 overflow-x-auto bg-hundida p-3 rounded-[6px] border border-acento/30 shadow-lg">
                     <span className="text-xs font-black uppercase text-acento-claro px-2 flex items-center gap-1.5 shrink-0 font-mono">
                       <Layers size={15} /> Etapas ({fases.length}):
                     </span>
@@ -206,7 +206,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
                         onClick={() => setActiveFaseId(f.id)}
                         className={`px-4 py-2 rounded-[6px] text-xs font-bold shrink-0 transition-all ${
                           (activeFaseId ?? fases[0].id) === f.id
-                            ? 'bg-acento text-white ring-1 ring-purple-400'
+                            ? 'bg-acento text-white ring-1 ring-acento/50'
                             : 'bg-superficie text-tinta-3 hover:text-white hover:bg-elevada'
                         }`}
                       >
@@ -217,7 +217,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
                 )}
 
                 {esFaseSuiza && !loadingFaseData && (
-                  <div className="flex items-center gap-2 bg-[#0e101d] p-1.5 rounded-[6px] border border-borde w-fit">
+                  <div className="flex items-center gap-2 bg-hundida p-1.5 rounded-[6px] border border-borde w-fit">
                     <button
                       onClick={() => setVistaSuizo('cruces')}
                       className={`px-3.5 py-1.5 rounded-[4px] text-xs font-bold transition-all ${vistaSuizo === 'cruces' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white'}`}

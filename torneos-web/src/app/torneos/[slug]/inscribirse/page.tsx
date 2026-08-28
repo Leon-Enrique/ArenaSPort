@@ -293,7 +293,7 @@ export default function InscribirseTorneoPage() {
             </div>
 
             {resultado.avisos.length > 0 && (
-              <div className="p-4 bg-amber-950/30 border border-amber-500/30 rounded-[6px] max-w-md mx-auto text-xs text-left text-amber-200 space-y-1">
+              <div className="p-4 bg-atencion/10 border border-atencion/30 rounded-[6px] max-w-md mx-auto text-xs text-left text-atencion space-y-1">
                 {resultado.avisos.map((a, i) => <p key={i}>⚠️ {a}</p>)}
               </div>
             )}
@@ -342,7 +342,7 @@ export default function InscribirseTorneoPage() {
                           onClick={() => elegirEquipo(eq.id)}
                           className={`px-3.5 py-2 rounded-[6px] text-xs font-bold border transition-all ${
                             equipoElegidoId === eq.id
-                              ? 'bg-acento border-violet-400 text-white'
+                              ? 'bg-acento border-acento text-white'
                               : 'bg-fondo border-borde text-tinta-2 hover:text-white hover:border-borde'
                           }`}
                         >
@@ -427,13 +427,13 @@ export default function InscribirseTorneoPage() {
                             className={`flex items-center gap-2.5 rounded-[6px] border px-3 py-2 text-xs ${
                               m.identidad
                                 ? 'border-borde bg-white/[0.02]'
-                                : 'border-amber-500/30 bg-amber-500/8'
+                                : 'border-atencion/30 bg-atencion/8'
                             }`}
                           >
                             <div className={`w-6 h-6 rounded-[4px] shrink-0 flex items-center justify-center text-[10px] font-bold ${
                               m.identidad
                                 ? 'bg-acento/25 text-tinta-2'
-                                : 'bg-amber-500/20 text-atencion'
+                                : 'bg-atencion/20 text-atencion'
                             }`}>
                               {(m.identidad?.nick ?? m.usuario_nombre ?? '?').charAt(0).toUpperCase()}
                             </div>
@@ -454,9 +454,9 @@ export default function InscribirseTorneoPage() {
                       </ul>
 
                       {plantelSinId.length > 0 && (
-                        <div className="flex items-start gap-2 rounded-[6px] border border-amber-500/25 bg-amber-500/8 px-3 py-2.5">
+                        <div className="flex items-start gap-2 rounded-[6px] border border-atencion/25 bg-atencion/8 px-3 py-2.5">
                           <AlertCircle size={13} className="mt-0.5 shrink-0 text-atencion" />
-                          <p className="text-[11px] leading-relaxed text-amber-200/90">
+                          <p className="text-[11px] leading-relaxed text-atencion/90">
                             {plantelSinId.length === 1
                               ? 'Un jugador todavía no cargó su ID de juego'
                               : `${plantelSinId.length} jugadores todavía no cargaron su ID de juego`}
@@ -481,7 +481,7 @@ export default function InscribirseTorneoPage() {
                           no se puede entrar incompleto.{' '}
                           <Link
                             href={`/equipos/${equipoElegidoId}/roster`}
-                            className="underline hover:text-amber-200"
+                            className="underline hover:text-atencion"
                           >
                             Ir al plantel
                           </Link>
@@ -530,7 +530,7 @@ export default function InscribirseTorneoPage() {
                               title={usuario
                                 ? 'Esta fila queda asociada a tu cuenta: vas a ser vos quien reporte los resultados de este equipo.'
                                 : 'Sin iniciar sesión, nadie queda habilitado para reportar resultados.'}
-                              className="px-1.5 py-0.2 rounded bg-amber-400/20 text-atencion font-bold text-[9px] uppercase flex items-center gap-1"
+                              className="px-1.5 py-0.2 rounded bg-atencion/20 text-atencion font-bold text-[9px] uppercase flex items-center gap-1"
                             >
                               <Crown size={9} /> Capitán{usuario ? ' (vos)' : ''}
                             </span>
@@ -629,7 +629,7 @@ export default function InscribirseTorneoPage() {
                 <label className="flex items-start gap-3 text-xs text-tinta-2 cursor-pointer">
                   <input
                     type="checkbox" checked={acceptRules} onChange={e => setAcceptRules(e.target.checked)}
-                    className="mt-0.5 rounded bg-fondo border-white/20 text-violet-600 focus:ring-0"
+                    className="mt-0.5 rounded bg-fondo border-borde text-acento accent-acento focus:ring-0"
                   />
                   <span>
                     He leído y acepto el <strong>Reglamento Oficial de {edicion.nombre}</strong>, me comprometo a respetar los horarios de sala y el código de conducta deportiva.
@@ -646,7 +646,7 @@ export default function InscribirseTorneoPage() {
                   disabled={isSubmitting || !acceptRules}
                   className={`px-7 py-3 rounded-[6px] text-xs font-bold transition-all shadow-xl flex items-center gap-2 ${
                     acceptRules
-                      ? 'bg-elevada text-white shadow-violet-600/30'
+                      ? 'bg-elevada text-white shadow-lg shadow-acento/20'
                       : 'bg-white/10 text-tinta-4 cursor-not-allowed'
                   }`}
                 >

@@ -434,7 +434,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => setJuegoCodigo('mlbb')}
                 className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'mlbb'
-                    ? 'bg-elevada/50 border-acento ring-1 ring-purple-500'
+                    ? 'bg-elevada/50 border-acento ring-1 ring-acento/40'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -451,7 +451,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => setJuegoCodigo('free_fire')}
                 className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'free_fire'
-                    ? 'bg-amber-950/50 border-amber-500 shadow-lg shadow-amber-500/20 ring-1 ring-amber-500'
+                    ? 'bg-atencion/10 border-atencion ring-1 ring-atencion/40'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -468,7 +468,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => setJuegoCodigo('codm')}
                 className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'codm'
-                    ? 'bg-elevada/50 border-borde-fuerte ring-1 ring-cyan-500'
+                    ? 'bg-elevada/50 border-acento ring-1 ring-acento/40'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -1050,9 +1050,9 @@ export default function NuevoTorneoPage() {
               disabled={isSubmitting || creadoExitoso}
               className={`px-8 py-3.5 rounded-[6px] text-white font-extrabold text-sm flex items-center gap-2 shadow-xl transition-all cursor-pointer ${
                 creadoExitoso
-                  ? 'bg-emerald-600'
+                  ? 'bg-ok'
                   : isSubmitting
-                  ? 'bg-purple-700 opacity-90'
+                  ? 'bg-acento-hover opacity-90'
                   : 'bg-acento'
               }`}
             >

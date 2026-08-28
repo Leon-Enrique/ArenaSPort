@@ -23,7 +23,7 @@ const ESTADO_CONFIG: Record<string, { label: string; color: string }> = {
   borrador: { label: 'Borrador', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
   inscripciones_abiertas: { label: 'Inscripciones Abiertas', color: 'bg-elevada text-tinta-2 border-borde' },
   inscripciones_cerradas: { label: 'Inscripciones Cerradas', color: 'bg-slate-500/20 text-tinta-2 border-slate-500/30' },
-  en_curso: { label: 'En Curso', color: 'bg-amber-500/20 text-atencion border-amber-500/30' },
+  en_curso: { label: 'En Curso', color: 'bg-atencion/20 text-atencion border-atencion/30' },
   finalizada: { label: 'Finalizada', color: 'bg-green-500/20 text-ok border-green-500/30' },
   cancelada: { label: 'Cancelada', color: 'bg-rose-500/20 text-vivo border-rose-500/30' },
 };

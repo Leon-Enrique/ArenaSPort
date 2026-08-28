@@ -19,7 +19,7 @@ const FORMATO_LABELS: Record<string, string> = {
 
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   cerrada: { label: 'Cerrada', color: 'bg-green-500/15 text-ok border-green-500/30', icon: <CheckCircle2 size={12} /> },
-  en_curso: { label: 'En Curso', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Play size={12} /> },
+  en_curso: { label: 'En Curso', color: 'bg-atencion/15 text-atencion border-atencion/30', icon: <Play size={12} /> },
   sorteada: { label: 'Sorteada', color: 'bg-elevada text-tinta-2 border-borde', icon: <Play size={12} /> },
   pendiente: { label: 'Pendiente de sorteo', color: 'bg-white/10 text-tinta-3 border-borde', icon: <Clock size={12} /> },
 };
@@ -253,7 +253,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleSortear(fase.id)}
                       disabled={sorteando === fase.id}
                       title="Arma la fase con TODOS los equipos inscritos y aprobados en la edición."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-ok text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-ok/15 hover:bg-ok/25 border border-ok/30 text-ok text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {sorteando === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
                       Sortear (todos los inscritos)
@@ -309,7 +309,7 @@ export default function FasesAdminPage() {
                       onClick={() => handleCerrar(fase.id)}
                       disabled={cerrando === fase.id}
                       title="Marca la fase como terminada y habilita sacar sus clasificados para la siguiente fase."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-acento/15 hover:bg-acento/25 border border-acento/30 text-acento-claro text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {cerrando === fase.id ? <Loader2 size={13} className="animate-spin" /> : <Lock size={13} />}
                       Cerrar Fase

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 /**
  * Tu ID de juego, en tu cuenta.
@@ -101,10 +101,10 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
           : 'glass-card'
       }`}
     >
-      {/* Halo de color: ámbar cuando falta algo, cyan cuando está resuelto. */}
+      {/* Halo de color: atención cuando falta algo, elevada cuando está resuelto. */}
       <div
         className={`pointer-events-none absolute -top-24 -right-16 h-48 w-48 rounded-full blur-3xl ${
-          falta ? 'bg-amber-500/20' : 'bg-elevada'
+          falta ? 'bg-atencion/20' : 'bg-elevada'
         }`}
       />
 
@@ -114,7 +114,7 @@ export default function IdentidadDeJuegoPanel({ onCambio }: Props) {
             <div
               className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] ${
                 falta
-                  ? 'bg-amber-500/15 text-atencion'
+                  ? 'bg-atencion/15 text-atencion'
                   : 'bg-elevada text-tinta-2'
               }`}
             >
