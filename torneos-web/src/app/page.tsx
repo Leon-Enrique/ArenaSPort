@@ -16,6 +16,133 @@ const ESTADO_LABEL: Record<string, string> = {
   finalizada: 'Finalizado',
 };
 
+/**
+ * La tarjeta de un torneo.
+ *
+ * La primera versión de este rediseño se pasó de sobria: quitar los
+ * gradientes dejó una tarjeta con dos datos y mucho aire, que se lee
+ * barata por vacía. Lo que hace que una plataforma se vea seria no es la
+ * falta de adorno, es la DENSIDAD: cuánta información útil entra sin que
+ * se vuelva ruido.
+ *
+ * Así que cada estado muestra lo que de verdad importa en ese momento:
+ *
+ *   - Inscripciones abiertas → cuántos cupos quedan, con barra. Es el dato
+ *     que decide si te anotás hoy o mañana.
+ *   - En vivo → que está pasando ahora, en rojo y sin animación de borde.
+ *   - Terminado → el premio y el tamaño, que es lo que queda de historia.
+ */
+function mostrarTorneo(edicion: Edicion): boolean {
+  const torneo = (edicion.torneoNombre || '').trim();
+  const nombre = (edicion.nombre || '').trim();
+  if (!torneo || torneo === nombre) return false;
+  const a = torneo.toLowerCase();
+  const b = nombre.toLowerCase();
+  return !a.includes(b) && !b.includes(a);
+}
+
+function TarjetaTorneo({ edicion }: { edicion: Edicion }) {
+  const enVivo = edicion.estado === 'en_curso';
+  const abierto = edicion.estado === 'inscripciones_abiertas';
+
+  const cupos = edicion.maxEquipos || 0;
+  const inscritos = edicion.equiposInscritosCount;
+  const llenado = cupos > 0 ? Math.min(100, Math.round((inscritos / cupos) * 100)) : 0;
+
+  const acento = enVivo ? 'bg-vivo' : abierto ? 'bg-ok' : 'bg-borde-fuerte';
+
+  return (
+    <Link
+      href={`/torneos/${edicion.slug}`}
+      className="group glass-card overflow-hidden flex flex-col hover:-translate-y-px"
+    >
+      <div className={`h-[3px] ${acento}`} />
+
+      <div className="p-5 flex flex-col gap-4 flex-1">
+        {/* Identidad: la marca del juego como ancla visual. Un cuadrado
+            de 34px con la sigla pesa más que un banner vacío de 128px. */}
+        <div className="flex items-start gap-3">
+          <div className="w-[34px] h-[34px] rounded-[5px] bg-elevada border border-borde flex items-center justify-center shrink-0 filo">
+            <span className="font-mono text-[10px] font-semibold text-tinta-2 tracking-tight">
+              {edicion.juego.codigo.slice(0, 4).toUpperCase()}
+            </span>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] mb-1">
+              {enVivo ? (
+                <span className="flex items-center gap-1.5 text-vivo">
+                  <span className="w-[5px] h-[5px] rounded-full bg-vivo punto-vivo" />
+                  En vivo
+                </span>
+              ) : (
+                <span className={abierto ? 'text-ok' : 'text-tinta-4'}>
+                  {abierto ? 'Inscripciones abiertas' : 'Terminado'}
+                </span>
+              )}
+            </div>
+            <h3 className="font-semibold text-[16.5px] tracking-[-0.02em] text-tinta leading-[1.25] group-hover:text-white transition-colors">
+              {edicion.nombre}
+            </h3>
+            {/* El nombre del torneo solo si aporta jerarquía real
+                ("2da Edición" ← "Copa Santa Cruz"). Cuando uno contiene al
+                otro es la misma cosa escrita dos veces, y repetirla es el
+                relleno que hace que una tarjeta se vea generada. */}
+            {mostrarTorneo(edicion) && (
+              <p className="text-[12px] text-tinta-4 mt-0.5 truncate">{edicion.torneoNombre}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Cupos con barra: sirve para los tres estados, pero solo en
+            "abierto" es una decisión — ahí se dice cuánto falta. */}
+        <div className="mt-auto">
+          <div className="flex items-baseline justify-between mb-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-tinta-3">
+              Equipos
+            </span>
+            <span className="font-mono tabular text-[13px] text-tinta">
+              {inscritos}
+              {cupos > 0 && <span className="text-tinta-4">/{cupos}</span>}
+            </span>
+          </div>
+          <div className="h-[3px] rounded-full bg-borde-sutil overflow-hidden">
+            <div
+              className={`h-full rounded-full ${abierto ? 'bg-ok' : enVivo ? 'bg-vivo' : 'bg-borde-fuerte'}`}
+              style={{ width: `${llenado}%` }}
+            />
+          </div>
+          {abierto && cupos > 0 && (
+            <p className="text-[11.5px] text-tinta-3 mt-1.5">
+              {cupos - inscritos > 0
+                ? `Quedan ${cupos - inscritos} cupos`
+                : 'Cupos llenos'}
+            </p>
+          )}
+        </div>
+
+        {/* Pie: premio a la izquierda con peso real, acción a la derecha. */}
+        <div className="flex items-end justify-between gap-3 pt-3.5 border-t border-borde-sutil">
+          <div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3 mb-0.5">
+              {edicion.bolsaPremios ? 'Premio' : 'Inicio'}
+            </div>
+            <div className="font-mono tabular text-[15px] font-semibold text-tinta leading-none">
+              {edicion.bolsaPremios ||
+                (edicion.fechaInicio
+                  ? new Date(edicion.fechaInicio).toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit' })
+                  : '—')}
+            </div>
+          </div>
+          <span className="text-[12.5px] font-semibold text-acento-claro flex items-center gap-0.5 group-hover:gap-1.5 transition-all">
+            Ver torneo <ChevronRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Home() {
   const [selectedJuego, setSelectedJuego] = useState<string>('todos');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'en_curso' | 'inscripciones_abiertas'>('todos');
@@ -40,6 +167,7 @@ export default function Home() {
     return matchJuego && matchStatus;
   });
 
+  const enVivo = ediciones.find(e => e.estado === 'en_curso');
   const torneosActivos = ediciones.filter(e => e.estado === 'en_curso' || e.estado === 'inscripciones_abiertas').length;
   const equiposTotales = ediciones.reduce((acc, e) => acc + e.equiposInscritosCount, 0);
 
@@ -79,6 +207,43 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* Si hay algo jugándose ahora, esa es la noticia — y ocupa el
+                espacio que antes era una franja negra vacía. */}
+            {enVivo && (
+              <Link
+                href={`/torneos/${enVivo.slug}`}
+                className="glass-card estado-vivo mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 group"
+              >
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="w-[6px] h-[6px] rounded-full bg-vivo punto-vivo" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-vivo">
+                    Jugándose ahora
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-[16px] tracking-[-0.02em] text-tinta truncate">
+                    {enVivo.nombre}
+                  </div>
+                  <div className="text-[12.5px] text-tinta-3 mt-0.5">
+                    {enVivo.equiposInscritosCount} equipos · {enVivo.juego.nombre}
+                  </div>
+                </div>
+                {enVivo.bolsaPremios && (
+                  <div className="text-right shrink-0">
+                    <div className="font-mono tabular text-[17px] font-semibold text-tinta leading-none">
+                      {enVivo.bolsaPremios}
+                    </div>
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3 mt-1">
+                      Premio
+                    </div>
+                  </div>
+                )}
+                <span className="text-[12.5px] font-semibold text-acento-claro flex items-center gap-0.5 group-hover:gap-1.5 transition-all shrink-0">
+                  Ver cuadro <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+            )}
           </div>
         </section>
 
@@ -165,75 +330,7 @@ export default function Home() {
                    con un ícono al 10% de opacidad, o sea 128px que no
                    decían nada. Ahora el estado vive en 3px de franja y
                    esos pixeles son datos. */
-                <Link
-                  key={edicion.id}
-                  href={`/torneos/${edicion.slug}`}
-                  className="group glass-card overflow-hidden flex flex-col hover:-translate-y-px"
-                >
-                  <div className={`h-[3px] ${
-                    edicion.estado === 'en_curso' ? 'bg-vivo'
-                      : edicion.estado === 'inscripciones_abiertas' ? 'bg-ok'
-                      : 'bg-borde'
-                  }`} />
-
-                  <div className="p-[18px] flex flex-col gap-3.5 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex flex-col gap-1.5">
-                        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          {edicion.estado === 'en_curso' ? (
-                            <span className="flex items-center gap-1.5 text-vivo">
-                              <span className="w-[5px] h-[5px] rounded-full bg-vivo punto-vivo" />
-                              En vivo
-                            </span>
-                          ) : (
-                            <span className={edicion.estado === 'inscripciones_abiertas' ? 'text-ok' : 'text-tinta-3'}>
-                              {ESTADO_LABEL[edicion.estado] ?? 'Terminado'}
-                            </span>
-                          )}
-                          <span className="text-tinta-4">·</span>
-                          <span className="text-tinta-3">{edicion.juego.nombre}</span>
-                        </div>
-                        <h3 className="font-semibold text-[15.5px] tracking-[-0.015em] text-tinta leading-tight">
-                          {edicion.nombre}
-                        </h3>
-                      </div>
-
-                      {edicion.bolsaPremios && (
-                        <div className="text-right shrink-0">
-                          <div className="font-mono tabular text-[14px] font-semibold text-tinta">{edicion.bolsaPremios}</div>
-                          <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3 mt-0.5">Premio</div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Los datos como tabla y no como lista de "Etiqueta:
-                        valor" repetida: se comparan de una tarjeta a otra
-                        porque están en la misma posición. */}
-                    <div className="grid grid-cols-2 gap-px bg-borde-sutil border border-borde-sutil rounded-[5px] overflow-hidden mt-auto">
-                      <div className="bg-hundida px-2.5 py-2">
-                        <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Equipos</div>
-                        <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
-                          {edicion.equiposInscritosCount}
-                          {edicion.maxEquipos && <span className="text-tinta-4">/{edicion.maxEquipos}</span>}
-                        </div>
-                      </div>
-                      <div className="bg-hundida px-2.5 py-2">
-                        <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-tinta-3">Inicio</div>
-                        <div className="font-mono tabular text-[13px] text-tinta mt-0.5">
-                          {edicion.fechaInicio
-                            ? new Date(edicion.fechaInicio).toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit' })
-                            : '—'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-end">
-                      <span className="text-[12.5px] font-semibold text-acento-claro flex items-center gap-1">
-                        Ver torneo <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                <TarjetaTorneo key={edicion.id} edicion={edicion} />
               ))}
             </div>
           )}

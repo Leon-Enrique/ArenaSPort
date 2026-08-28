@@ -130,11 +130,16 @@
    El gradiente vertical de acá abajo es de un 2% sobre el mismo tono —
    no es decorativo, es cómo cae la luz en una superficie. Es otra cosa
    que un `from-violet-600 to-cyan-600`. */
+/* Opaca, y a propósito.
+   Estaba al 88% con blur, y el contenido se leía A TRAVÉS de la barra al
+   hacer scroll: no quedaba translúcido, quedaba roto. Al verificarlo, el
+   `backdrop-filter` ni siquiera se estaba computando (devolvía `none`), o
+   sea que la transparencia no tenía nada que la disimule.
+   Una barra sólida con una sombra que la despega del contenido hace el
+   mismo trabajo y no depende de que el blur funcione. */
 .glass-panel {
-  background: color-mix(in srgb, var(--color-fondo) 88%, transparent);
-  border: 1px solid var(--color-borde-sutil);
-  backdrop-filter: saturate(140%) blur(12px);
-  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  background: var(--color-fondo);
+  box-shadow: 0 1px 0 var(--color-borde-sutil), 0 4px 16px -8px rgba(0, 0, 0, 0.8);
 }
 
 .glass-card {
