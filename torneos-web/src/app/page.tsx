@@ -251,7 +251,7 @@ export default function Home() {
               {[
                 { step: '01', title: 'Inscríbete', desc: 'Registra a tu equipo con sus Game IDs oficiales en el torneo que quieras.', icon: <Users className="text-tinta-2" size={20} /> },
                 { step: '02', title: 'Espera tu Cuadro', desc: 'Cuando cierran las inscripciones, el organizador sortea las llaves.', icon: <CheckCircle2 className="text-tinta-2" size={20} /> },
-                { step: '03', title: 'Compite y Gana', desc: 'Jugá tus partidas siguiendo el bracket y sumá puntos para el premio.', icon: <Trophy className="text-green-400" size={20} /> },
+                { step: '03', title: 'Compite y Gana', desc: 'Jugá tus partidas siguiendo el bracket y sumá puntos para el premio.', icon: <Trophy className="text-ok" size={20} /> },
               ].map((item, idx) => (
                 <div key={idx} className="p-6 rounded-[6px] bg-hundida border border-borde-sutil space-y-3 relative group hover:border-borde transition-colors">
                   <div className="flex items-center justify-between">

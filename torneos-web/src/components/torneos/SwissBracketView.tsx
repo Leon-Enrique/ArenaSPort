@@ -78,17 +78,17 @@ function MatchCard({ partida, onClick }: { partida: Partida; onClick?: () => voi
   return (
     <div
       onClick={onClick}
-      className="w-[210px] rounded-xl overflow-hidden border border-[#2a2d48] bg-[#161726] hover:border-purple-500 transition-all cursor-pointer shrink-0"
+      className="w-[210px] rounded-[6px] overflow-hidden border border-[#2a2d48] bg-[#161726] hover:border-acento transition-all cursor-pointer shrink-0"
     >
       {[a, b].map((p, idx) => (
         <div
           key={idx}
-          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-[#202235]' : ''} ${p?.esGanador ? 'bg-purple-950/40' : ''}`}
+          className={`px-2.5 h-[30px] flex items-center justify-between text-xs ${idx === 0 ? 'border-b border-[#202235]' : ''} ${p?.esGanador ? 'bg-elevada' : ''}`}
         >
-          <span className={`truncate max-w-[150px] text-[11px] ${p?.esGanador ? 'text-white font-black' : p?.equipo ? 'text-slate-300 font-medium' : 'text-slate-500 italic'}`}>
+          <span className={`truncate max-w-[150px] text-[11px] ${p?.esGanador ? 'text-white font-black' : p?.equipo ? 'text-tinta-2 font-medium' : 'text-tinta-4 italic'}`}>
             {p?.equipo?.nombre || 'Por definir'}
           </span>
-          <span className={`font-mono text-xs font-bold px-1.5 rounded min-w-[18px] text-center ${p?.esGanador ? 'bg-emerald-500 text-slate-950' : 'text-slate-500 bg-slate-900/60'}`}>
+          <span className={`font-mono text-xs font-bold px-1.5 rounded min-w-[18px] text-center ${p?.esGanador ? 'bg-emerald-500 text-fondo' : 'text-tinta-4 bg-superficie/60'}`}>
             {p?.mapasGanados ?? '—'}
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
 
   if (columnas.length === 0) {
     return (
-      <div className="bg-[#0e101d] border border-slate-800 rounded-2xl p-10 text-center text-xs text-white/40">
+      <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
         Todavía no hay rondas sorteadas para esta fase.
       </div>
     );
@@ -114,34 +114,34 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[11px] text-slate-400 bg-[#0e101d] border border-slate-800 rounded-xl px-4 py-2.5 w-fit">
-        <Trophy size={13} className="text-emerald-400" /> Clasifica con {metaVictorias} victorias
+      <div className="flex items-center gap-2 text-[11px] text-tinta-3 bg-[#0e101d] border border-borde rounded-[6px] px-4 py-2.5 w-fit">
+        <Trophy size={13} className="text-ok" /> Clasifica con {metaVictorias} victorias
         <span className="text-slate-700">•</span>
-        <XCircle size={13} className="text-rose-400" /> Elimina con {metaDerrotas} derrotas
+        <XCircle size={13} className="text-vivo" /> Elimina con {metaDerrotas} derrotas
       </div>
 
       {todosResueltos && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
-            <span className="text-xs font-black uppercase text-emerald-400 flex items-center gap-1.5">
+          <div className="rounded-[6px] border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
+            <span className="text-xs font-black uppercase text-ok flex items-center gap-1.5">
               <Crown size={13} /> Clasificados ({clasificados.length})
             </span>
             <div className="flex flex-wrap gap-1.5">
               {clasificados.map(([id, r]) => (
-                <span key={id} className="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-200 font-semibold">
-                  {nombrePorEquipo.get(id) || id} <span className="text-emerald-400/60 font-mono">{r.w}-{r.l}</span>
+                <span key={id} className="px-2 py-1 rounded-[4px] bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-200 font-semibold">
+                  {nombrePorEquipo.get(id) || id} <span className="text-ok/60 font-mono">{r.w}-{r.l}</span>
                 </span>
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-4 space-y-2">
-            <span className="text-xs font-black uppercase text-rose-400 flex items-center gap-1.5">
+          <div className="rounded-[6px] border border-rose-500/30 bg-rose-950/20 p-4 space-y-2">
+            <span className="text-xs font-black uppercase text-vivo flex items-center gap-1.5">
               <Skull size={13} /> Eliminados ({eliminados.length})
             </span>
             <div className="flex flex-wrap gap-1.5">
               {eliminados.map(([id, r]) => (
-                <span key={id} className="px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-200 font-semibold">
-                  {nombrePorEquipo.get(id) || id} <span className="text-rose-400/60 font-mono">{r.w}-{r.l}</span>
+                <span key={id} className="px-2 py-1 rounded-[4px] bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-200 font-semibold">
+                  {nombrePorEquipo.get(id) || id} <span className="text-vivo/60 font-mono">{r.w}-{r.l}</span>
                 </span>
               ))}
             </div>
@@ -153,15 +153,15 @@ export default function SwissBracketView({ partidas, onSelectPartida, metaVictor
         {columnas.map((col) => (
           <div key={col.ronda} className="shrink-0 space-y-3">
             <div className="text-center">
-              <span className="text-[11px] font-black uppercase tracking-wider text-purple-400 font-mono">
+              <span className="text-[11px] font-black uppercase tracking-wider text-acento-claro font-mono">
                 Ronda {col.ronda}
               </span>
             </div>
             <div className="space-y-4">
               {col.buckets.map((bucket) => (
-                <div key={bucket.label} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-3 space-y-2">
+                <div key={bucket.label} className="rounded-[6px] border border-borde bg-fondo/40 p-3 space-y-2">
                   <div className="flex justify-center">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black font-mono bg-cyan-950/80 border border-cyan-500/40 text-cyan-300">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black font-mono bg-elevada/80 border border-borde text-tinta-2">
                       {bucket.label}
                     </span>
                   </div>

@@ -166,29 +166,29 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                     onClick={() => onSelectPartida && onSelectPartida(partida)}
                     className={`w-full overflow-hidden cursor-pointer transition-all shadow-lg ${
                       (partida as any).isBye
-                        ? 'bg-slate-900/40 border border-slate-700/40 rounded-xl opacity-80 hover:opacity-100'
+                        ? 'bg-superficie/40 border border-borde-fuerte/40 rounded-[6px] opacity-80 hover:opacity-100'
                         : 'bg-superficie hover:bg-elevada border border-borde hover:border-borde-fuerte rounded-[4px]'
                     }`}
                   >
-                    <div className="px-3 py-1 bg-slate-950/90 border-b border-[#222438] flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                    <div className="px-3 py-1 bg-fondo/90 border-b border-[#222438] flex items-center justify-between text-[10px] text-tinta-3 font-mono">
                       <span>{partida.nombreGrupo || `Match #${mIdx + 1}`}</span>
-                      <span className="text-purple-400 font-bold">BO{partida.formatoBo || 3}</span>
+                      <span className="text-acento-claro font-bold">BO{partida.formatoBo || 3}</span>
                     </div>
                     {/* Team A */}
-                    <div className={`px-3 py-2 flex items-center justify-between border-b border-[#202235] text-xs ${partA?.esGanador ? 'bg-purple-950/40' : ''}`}>
-                      <span className={`font-semibold truncate text-[11px] ${partA?.esGanador ? 'text-white font-bold' : partA?.equipo ? 'text-slate-300' : 'text-slate-500 italic'}`}>
+                    <div className={`px-3 py-2 flex items-center justify-between border-b border-[#202235] text-xs ${partA?.esGanador ? 'bg-elevada' : ''}`}>
+                      <span className={`font-semibold truncate text-[11px] ${partA?.esGanador ? 'text-white font-bold' : partA?.equipo ? 'text-tinta-2' : 'text-tinta-4 italic'}`}>
                         {partA?.equipo?.nombre || 'Por Definir'}
                       </span>
-                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partA?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-slate-900 text-slate-400'}`}>
+                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partA?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-superficie text-tinta-3'}`}>
                         {partA?.mapasGanados ?? 0}
                       </span>
                     </div>
                     {/* Team B */}
-                    <div className={`px-3 py-2 flex items-center justify-between text-xs ${partB?.esGanador ? 'bg-purple-950/40' : ''}`}>
-                      <span className={`font-semibold truncate text-[11px] ${partB?.esGanador ? 'text-white font-bold' : partB?.equipo ? 'text-slate-300' : 'text-slate-500 italic'}`}>
+                    <div className={`px-3 py-2 flex items-center justify-between text-xs ${partB?.esGanador ? 'bg-elevada' : ''}`}>
+                      <span className={`font-semibold truncate text-[11px] ${partB?.esGanador ? 'text-white font-bold' : partB?.equipo ? 'text-tinta-2' : 'text-tinta-4 italic'}`}>
                         {partB?.equipo?.nombre || 'Por Definir'}
                       </span>
-                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partB?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-slate-900 text-slate-400'}`}>
+                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${partB?.esGanador ? 'bg-emerald-600 text-white shadow' : 'bg-superficie text-tinta-3'}`}>
                         {partB?.mapasGanados ?? 0}
                       </span>
                     </div>
@@ -224,10 +224,10 @@ export default function BracketView({ fases, onSelectPartida }: BracketViewProps
                       width: `${CARD_W}px`
                     }}
                   >
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-300 block">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-tinta-2 block">
                       Round {rondaNum}
                     </span>
-                    <span className="text-[10px] text-purple-400 font-semibold font-mono">
+                    <span className="text-[10px] text-acento-claro font-semibold font-mono">
                       {getRoundLabel(rondaNum, totalRounds)}
                     </span>
                   </div>

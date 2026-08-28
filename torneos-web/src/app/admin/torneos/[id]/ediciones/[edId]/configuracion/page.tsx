@@ -123,7 +123,7 @@ export default function ConfiguracionEdicionPage() {
       )}
 
       {/* NOTIFICACIONES */}
-      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
+      <section className="glass-card p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Bell size={16} className="text-acento-claro" />
           <h2 className="text-base font-bold text-white">Avisos por Discord</h2>
@@ -169,13 +169,13 @@ export default function ConfiguracionEdicionPage() {
       </section>
 
       {/* INSCRIPCIONES */}
-      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
+      <section className="glass-card p-6 space-y-4">
         <div className="flex items-center gap-2">
           <DoorOpen size={16} className="text-tinta-2" />
           <h2 className="text-base font-bold text-white">Inscripciones</h2>
         </div>
 
-        <label className="flex items-start gap-3 p-4 rounded-[6px] bg-white/5 border border-borde cursor-pointer hover:border-cyan-500/40 transition-all">
+        <label className="flex items-start gap-3 p-4 rounded-[6px] bg-white/5 border border-borde cursor-pointer hover:border-borde transition-all">
           <input
             type="checkbox"
             checked={!requiereAprobacion}
@@ -227,7 +227,7 @@ export default function ConfiguracionEdicionPage() {
       </section>
 
       {/* DATOS DEL TORNEO */}
-      <section className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
+      <section className="glass-card p-6 space-y-4">
         <h2 className="text-base font-bold text-white">Datos públicos</h2>
 
         <div>
@@ -260,7 +260,7 @@ export default function ConfiguracionEdicionPage() {
       <button
         onClick={guardar}
         disabled={guardando}
-        className="flex items-center gap-2 px-5 py-3 rounded-[6px] bg-acento hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-5 py-3 rounded-[6px] bg-acento text-white font-bold text-xs transition-all disabled:opacity-50"
       >
         {guardando ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
         Guardar cambios

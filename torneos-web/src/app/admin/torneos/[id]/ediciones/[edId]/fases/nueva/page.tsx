@@ -107,7 +107,7 @@ export default function NuevaFasePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-superficie border border-borde rounded-[6px] p-6 sm:p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="glass-card p-6 sm:p-8 space-y-6">
         {/* Nombre & Orden */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="sm:col-span-3">
@@ -190,7 +190,7 @@ export default function NuevaFasePage() {
                       onClick={() => setBoDefault(bo)}
                       className={`flex-1 py-2 rounded-[6px] text-xs font-bold border transition-all ${
                         boDefault === bo
-                          ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                          ? 'border-borde-fuerte bg-elevada text-tinta-2'
                           : 'border-borde bg-white/5 text-tinta-3 hover:border-white/20'
                       }`}
                     >
@@ -268,7 +268,7 @@ export default function NuevaFasePage() {
                             onClick={() => updateTramoBo(idx, { bo })}
                             className={`flex-1 py-1.5 rounded-[4px] text-xs font-bold border transition-all ${
                               tramo.bo === bo
-                                ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                                ? 'border-borde-fuerte bg-elevada text-tinta-2'
                                 : 'border-borde bg-white/5 text-tinta-3 hover:border-white/20'
                             }`}
                           >

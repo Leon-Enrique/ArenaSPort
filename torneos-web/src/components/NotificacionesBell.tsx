@@ -70,9 +70,9 @@ export default function NotificacionesBell() {
       <button
         onClick={() => setAbierto(!abierto)}
         aria-label={noLeidas > 0 ? `Notificaciones (${noLeidas} sin leer)` : 'Notificaciones'}
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 transition-all"
+        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-superficie border border-borde hover:border-acento transition-all"
       >
-        <Bell className="w-4 h-4 text-slate-300" />
+        <Bell className="w-4 h-4 text-tinta-2" />
         {noLeidas > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-slate-950">
             {noLeidas > 9 ? '9+' : noLeidas}
@@ -81,15 +81,15 @@ export default function NotificacionesBell() {
       </button>
 
       {abierto && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[26rem] overflow-y-auto glass-card rounded-2xl shadow-2xl border border-slate-800 z-50 bg-[#0e101a]">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 sticky top-0 bg-[#0e101a]">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[26rem] overflow-y-auto glass-card rounded-[6px] shadow-2xl border border-borde z-50 bg-fondo">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-borde sticky top-0 bg-fondo">
             <span className="text-xs font-bold text-white">
               Notificaciones{noLeidas > 0 ? ` (${noLeidas})` : ''}
             </span>
             {noLeidas > 0 && (
               <button
                 onClick={marcarTodas}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
+                className="text-[11px] text-tinta-2 hover:text-tinta-2 font-semibold flex items-center gap-1"
               >
                 <CheckCheck className="w-3.5 h-3.5" /> Marcar todas
               </button>
@@ -97,11 +97,11 @@ export default function NotificacionesBell() {
           </div>
 
           {cargando ? (
-            <div className="flex items-center justify-center gap-2 text-white/40 text-xs py-10">
+            <div className="flex items-center justify-center gap-2 text-tinta-3 text-xs py-10">
               <Loader2 className="animate-spin" size={14} /> Cargando...
             </div>
           ) : items.length === 0 ? (
-            <p className="text-xs text-white/40 text-center py-10 px-6">
+            <p className="text-xs text-tinta-3 text-center py-10 px-6">
               No tenés notificaciones todavía. Acá te van a llegar los avisos de tus torneos.
             </p>
           ) : (
@@ -110,8 +110,8 @@ export default function NotificacionesBell() {
                 <li key={n.id}>
                   <button
                     onClick={() => abrirNotificacion(n)}
-                    className={`w-full text-left px-4 py-3 hover:bg-slate-800/50 transition-colors flex gap-3 ${
-                      n.leida_at ? '' : 'bg-purple-950/20'
+                    className={`w-full text-left px-4 py-3 hover:bg-elevada/50 transition-colors flex gap-3 ${
+                      n.leida_at ? '' : 'bg-elevada/20'
                     }`}
                   >
                     <span
@@ -120,13 +120,13 @@ export default function NotificacionesBell() {
                       }`}
                     />
                     <span className="min-w-0 flex-1">
-                      <span className={`block text-xs leading-snug ${n.leida_at ? 'text-slate-300' : 'text-white font-bold'}`}>
+                      <span className={`block text-xs leading-snug ${n.leida_at ? 'text-tinta-2' : 'text-white font-bold'}`}>
                         {n.titulo}
                       </span>
-                      <span className="block text-[11px] text-white/40 mt-0.5 whitespace-pre-line line-clamp-2">
+                      <span className="block text-[11px] text-tinta-3 mt-0.5 whitespace-pre-line line-clamp-2">
                         {n.cuerpo}
                       </span>
-                      <span className="block text-[10px] text-white/25 mt-1 font-mono">
+                      <span className="block text-[10px] text-tinta-4 mt-1 font-mono">
                         {haceCuanto(n.created_at)}
                       </span>
                     </span>

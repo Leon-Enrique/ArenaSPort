@@ -160,7 +160,7 @@ export default function EdicionSancionesAdminPage() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-vivo hover:from-red-500 hover:to-rose-500 text-white text-sm font-semibold rounded-[6px] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-vivo text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} />
           Aplicar Nueva Sanción
@@ -170,7 +170,7 @@ export default function EdicionSancionesAdminPage() {
       {/* Sanciones List */}
       <div className="space-y-3">
         {sancionesList.length === 0 ? (
-          <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+          <div className="glass-card p-12 text-center text-tinta-4">
             <CheckCircle2 size={36} className="mx-auto mb-2 text-ok opacity-60" />
             <p className="text-sm font-semibold text-tinta-2">No hay sanciones registradas</p>
             <p className="text-xs text-tinta-3 mt-1">Todos los equipos mantienen su conducta deportiva limpia.</p>
@@ -181,7 +181,7 @@ export default function EdicionSancionesAdminPage() {
             return (
               <div
                 key={s.id}
-                className="bg-superficie border border-borde rounded-[6px] p-5 hover:border-borde-fuerte transition-all"
+                className="glass-card p-5 hover:border-borde-fuerte transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-borde-sutil">
                   <div className="flex items-center gap-2 flex-wrap">

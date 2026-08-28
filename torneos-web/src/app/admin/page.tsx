@@ -27,7 +27,7 @@ function StatCard({
   const cifra = tono === 'atencion' ? 'text-atencion' : tono === 'vivo' ? 'text-vivo' : 'text-tinta';
 
   const content = (
-    <div className={`group h-full rounded-[6px] bg-superficie border border-borde ${borde} p-5 transition-colors hover:border-borde-fuerte ${href ? 'cursor-pointer' : ''}`}>
+    <div className={`group h-full glass-card ${borde} p-5 transition-colors hover:border-borde-fuerte ${href ? 'cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold text-tinta-3 uppercase tracking-[0.08em] mb-2.5">{label}</p>
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
         </div>
         <Link
           href="/admin/torneos/nuevo"
-          className="flex items-center gap-2 px-4 py-2.5 bg-acento hover:from-violet-500 hover:to-violet-400 text-white text-sm font-semibold rounded-[6px] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-acento text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} /> Crear Torneo
         </Link>
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-superficie border border-borde rounded-[6px] p-6">
+          <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-white">Mis Torneos</h2>
               <Link href="/admin/torneos" className="text-xs text-acento-claro hover:text-acento-claro flex items-center gap-1">
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-superficie border border-borde rounded-[6px] p-6">
+          <div className="glass-card p-6">
             <h2 className="text-base font-bold text-white mb-5">Ediciones en Curso</h2>
             <div className="space-y-3">
               {edicionesEnCurso.length === 0 && (
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
               )}
               {edicionesEnCurso.map((ed) => (
                 <div key={ed.id} className="flex items-center gap-4 p-4 rounded-[6px] bg-white/5 border border-borde-sutil">
-                  <div className={`w-2 h-12 rounded-full flex-shrink-0 ${ed.estado === 'en_curso' ? 'bg-amber-500' : 'bg-cyan-500'}`} />
+                  <div className={`w-2 h-12 rounded-full flex-shrink-0 ${ed.estado === 'en_curso' ? 'bg-amber-500' : 'bg-acento'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{ed.nombre}</p>
                     <div className="flex items-center gap-3 mt-2">
@@ -186,10 +186,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-superficie border border-borde rounded-[6px] p-6">
+          <div className="glass-card p-6">
             <h2 className="text-base font-bold text-white mb-4">Acciones Rápidas</h2>
             <div className="space-y-2">
-              <Link href="/admin/inscripciones" className="flex items-center gap-3 p-3 rounded-[6px] bg-white/5 border border-borde hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all">
+              <Link href="/admin/inscripciones" className="flex items-center gap-3 p-3 rounded-[6px] bg-white/5 border border-borde hover:bg-elevada hover:border-borde transition-all">
                 <span className="text-tinta-3"><ClipboardList size={15} /></span>
                 <span className="text-sm text-tinta-2 flex-1">Aprobar inscripciones</span>
                 {pendientesPorEdicion > 0 && (
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-superficie border border-borde rounded-[6px] p-6">
+          <div className="glass-card p-6">
             <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
               <ShieldAlert size={15} className="text-vivo" /> Disputas Abiertas
             </h2>

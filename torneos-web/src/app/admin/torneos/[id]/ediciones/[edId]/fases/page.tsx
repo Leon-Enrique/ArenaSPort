@@ -20,7 +20,7 @@ const FORMATO_LABELS: Record<string, string> = {
 const ESTADO_BADGE: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   cerrada: { label: 'Cerrada', color: 'bg-green-500/15 text-ok border-green-500/30', icon: <CheckCircle2 size={12} /> },
   en_curso: { label: 'En Curso', color: 'bg-amber-500/15 text-atencion border-amber-500/30', icon: <Play size={12} /> },
-  sorteada: { label: 'Sorteada', color: 'bg-cyan-500/15 text-tinta-2 border-cyan-500/30', icon: <Play size={12} /> },
+  sorteada: { label: 'Sorteada', color: 'bg-elevada text-tinta-2 border-borde', icon: <Play size={12} /> },
   pendiente: { label: 'Pendiente de sorteo', color: 'bg-white/10 text-tinta-3 border-borde', icon: <Clock size={12} /> },
 };
 
@@ -198,7 +198,7 @@ export default function FasesAdminPage() {
         </div>
         <Link
           href={`/admin/torneos/${torneoId}/ediciones/${edId}/fases/nueva`}
-          className="flex items-center gap-2 px-4 py-2.5 bg-acento hover:from-violet-500 hover:to-cyan-500 text-white text-sm font-semibold rounded-[6px] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-acento text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} /> Agregar Fase
         </Link>
@@ -212,7 +212,7 @@ export default function FasesAdminPage() {
 
       <div className="space-y-4">
         {fases.length === 0 && (
-          <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+          <div className="glass-card p-12 text-center text-tinta-4">
             <Layers size={40} className="mx-auto mb-3 opacity-30 text-acento-claro" />
             <p className="text-base font-semibold text-tinta-2">No hay fases configuradas aún</p>
             <Link
@@ -230,7 +230,7 @@ export default function FasesAdminPage() {
           const completadas = partidas.filter(p => p.estado === 'confirmada' || p.estado === 'walkover' || p.estado === 'bye').length;
 
           return (
-            <div key={fase.id} className="bg-superficie border border-borde rounded-[6px] p-6 hover:border-white/20 transition-all group">
+            <div key={fase.id} className="glass-card p-6 hover:border-white/20 transition-all group">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div className="flex items-start gap-3.5">
                   <div className="w-10 h-10 rounded-[6px] bg-acento/10 border border-borde flex items-center justify-center font-bold text-acento-claro text-sm flex-shrink-0">
@@ -267,7 +267,7 @@ export default function FasesAdminPage() {
                           : { faseId: fase.id, faseOrigenId: fases.find(f => f.orden < fase.orden)?.id ?? '', cuposPorGrupo: '', rondaOrigen: '' }
                       )}
                       title="Arma la fase solo con los equipos que clasificaron de otra fase ya jugada."
-                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-tinta-2 text-xs font-semibold rounded-[6px] transition-all"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-elevada hover:bg-elevada border border-borde text-tinta-2 text-xs font-semibold rounded-[6px] transition-all"
                     >
                       <ListFilter size={13} /> Con clasificados de otra fase
                     </button>
@@ -298,7 +298,7 @@ export default function FasesAdminPage() {
                     <button
                       onClick={() => handleSiguienteRonda(fase.id)}
                       disabled={generandoRonda === fase.id}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 text-tinta-2 text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-elevada hover:bg-elevada border border-borde text-tinta-2 text-xs font-semibold rounded-[6px] transition-all disabled:opacity-50"
                     >
                       {generandoRonda === fase.id ? <Loader2 size={13} className="animate-spin" /> : <ChevronRight size={13} />}
                       Siguiente Ronda
@@ -333,7 +333,7 @@ export default function FasesAdminPage() {
               {sorteoAvanzado?.faseId === fase.id && (() => {
                 const faseOrigen = fases.find(f => f.id === sorteoAvanzado.faseOrigenId);
                 return (
-                  <div className="mb-4 p-4 rounded-[6px] bg-cyan-500/5 border border-cyan-500/20 space-y-3">
+                  <div className="mb-4 p-4 rounded-[6px] bg-acento/5 border border-borde space-y-3">
                     <p className="text-xs font-semibold text-tinta-2">Sortear con los clasificados de otra fase</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
@@ -341,7 +341,7 @@ export default function FasesAdminPage() {
                         <select
                           value={sorteoAvanzado.faseOrigenId}
                           onChange={e => setSorteoAvanzado(s => s && { ...s, faseOrigenId: e.target.value ? Number(e.target.value) : '' })}
-                          className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs focus:outline-none focus:border-cyan-500"
+                          className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs focus:outline-none focus:border-borde-fuerte"
                         >
                           <option value="">Elegir...</option>
                           {fases.filter(f => f.id !== fase.id).map(f => (
@@ -357,7 +357,7 @@ export default function FasesAdminPage() {
                             value={sorteoAvanzado.cuposPorGrupo}
                             onChange={e => setSorteoAvanzado(s => s && { ...s, cuposPorGrupo: e.target.value })}
                             placeholder={String(faseOrigen.config?.cupos_avance ?? '8')}
-                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-borde-fuerte"
                           />
                           {faseOrigen.formato === 'suizo' && faseOrigen.config?.meta_victorias && (
                             <p className="text-[10px] text-tinta-4 mt-1">
@@ -373,7 +373,7 @@ export default function FasesAdminPage() {
                             type="number" min={1}
                             value={sorteoAvanzado.rondaOrigen}
                             onChange={e => setSorteoAvanzado(s => s && { ...s, rondaOrigen: e.target.value })}
-                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                            className="w-full bg-fondo border border-borde text-white rounded-[4px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-borde-fuerte"
                           />
                         </div>
                       )}
@@ -388,7 +388,7 @@ export default function FasesAdminPage() {
                         type="button"
                         onClick={handleSortearDesdeAnterior}
                         disabled={sorteando === fase.id || !faseOrigen}
-                        className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-[4px] disabled:opacity-50"
+                        className="px-3.5 py-1.5 bg-acento hover:bg-acento text-white text-xs font-bold rounded-[4px] disabled:opacity-50"
                       >
                         {sorteando === fase.id ? 'Sorteando...' : 'Confirmar Sorteo'}
                       </button>

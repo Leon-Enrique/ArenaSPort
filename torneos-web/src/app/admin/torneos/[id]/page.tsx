@@ -21,7 +21,7 @@ const ESTADOS_DISPONIBLES = [
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string }> = {
   borrador: { label: 'Borrador', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
-  inscripciones_abiertas: { label: 'Inscripciones Abiertas', color: 'bg-cyan-500/20 text-tinta-2 border-cyan-500/30' },
+  inscripciones_abiertas: { label: 'Inscripciones Abiertas', color: 'bg-elevada text-tinta-2 border-borde' },
   inscripciones_cerradas: { label: 'Inscripciones Cerradas', color: 'bg-slate-500/20 text-tinta-2 border-slate-500/30' },
   en_curso: { label: 'En Curso', color: 'bg-amber-500/20 text-atencion border-amber-500/30' },
   finalizada: { label: 'Finalizada', color: 'bg-green-500/20 text-ok border-green-500/30' },
@@ -167,7 +167,7 @@ export default function TorneoDetailPage() {
           {ediciones.map((ed) => {
             const conf = ESTADO_CONFIG[ed.estado] ?? ESTADO_CONFIG['borrador'];
             return (
-              <div key={ed.id} className="bg-superficie border border-borde rounded-[6px] p-5 hover:border-borde-fuerte transition-all">
+              <div key={ed.id} className="glass-card p-5 hover:border-borde-fuerte transition-all">
                 <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -236,7 +236,7 @@ export default function TorneoDetailPage() {
       )}
 
       {activeTab === 'config' && (
-        <div className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
+        <div className="glass-card p-6 space-y-4">
           <h2 className="text-base font-bold text-white">Configuración del torneo</h2>
           <div>
             <label className="block text-xs font-semibold text-tinta-3 uppercase tracking-wider mb-2">Nombre</label>

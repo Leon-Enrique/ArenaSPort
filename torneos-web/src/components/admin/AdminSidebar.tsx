@@ -194,7 +194,7 @@ export default function AdminSidebar() {
                               key={link.href}
                               href={link.href}
                               className={`flex items-center gap-2 px-2 py-1.5 rounded-[4px] text-xs transition-all ${
-                                isActive(link.href) ? 'text-tinta-2 bg-cyan-500/10' : 'text-white/35 hover:text-white/65 hover:bg-white/5'
+                                isActive(link.href) ? 'text-tinta-2 bg-elevada' : 'text-white/35 hover:text-white/65 hover:bg-white/5'
                               }`}
                             >
                               {link.icon}

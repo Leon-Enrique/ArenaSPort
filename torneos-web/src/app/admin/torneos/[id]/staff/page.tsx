@@ -33,7 +33,7 @@ const ROL_INFO: Record<RolStaff, { label: string; desc: string; icon: React.Reac
     label: 'Árbitro',
     desc: 'El día de partido: programar, check-in, disputas, corregir resultados.',
     icon: <Gavel size={13} />,
-    color: 'bg-cyan-500/15 text-tinta-2 border-cyan-500/30',
+    color: 'bg-elevada text-tinta-2 border-borde',
   },
 };
 
@@ -149,7 +149,7 @@ export default function StaffDeTorneoPage() {
       )}
 
       {/* Buscador para sumar staff */}
-      <div className="bg-superficie border border-borde rounded-[6px] p-5 mb-6">
+      <div className="glass-card p-5 mb-6">
         <h2 className="text-sm font-bold text-white mb-3">Agregar a alguien</h2>
 
         <div className="flex gap-2 mb-3">
@@ -229,7 +229,7 @@ export default function StaffDeTorneoPage() {
       </div>
 
       {/* Staff actual */}
-      <div className="bg-superficie border border-borde rounded-[6px] p-5">
+      <div className="glass-card p-5">
         <h2 className="text-sm font-bold text-white mb-3">Staff actual</h2>
 
         {staff.length === 0 && (

@@ -260,7 +260,7 @@ export default function FasePartidasAdminPage() {
       )}
 
       {isMultiEquipo ? (
-        <div className="bg-superficie border border-borde rounded-[6px] p-6 space-y-4">
+        <div className="glass-card p-6 space-y-4">
           <div>
             <h2 className="text-lg font-bold text-white">Tabla de Posiciones (Multi-Equipo)</h2>
             <p className="text-xs text-tinta-3">La carga de resultados por caída para formatos battle royale todavía no está disponible desde este panel — usá el endpoint de la API directamente por ahora.</p>
@@ -268,7 +268,7 @@ export default function FasePartidasAdminPage() {
           <GroupStageView grupos={tabla} />
         </div>
       ) : partidas.length === 0 ? (
-        <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+        <div className="glass-card p-12 text-center text-tinta-4">
           <Swords size={36} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Esta fase todavía no tiene partidas — sorteala desde la lista de fases.</p>
         </div>
@@ -297,7 +297,7 @@ export default function FasePartidasAdminPage() {
             />
           )}
 
-          <div className="flex items-center justify-between gap-4 bg-superficie border border-borde rounded-[6px] p-4 flex-wrap">
+          <div className="flex items-center justify-between gap-4 glass-card p-4 flex-wrap">
             <div className="flex items-center gap-2">
               <Filter size={15} className="text-acento-claro" />
               <span className="text-xs font-semibold text-tinta-2">Filtrar por Ronda:</span>
@@ -390,7 +390,7 @@ export default function FasePartidasAdminPage() {
                         </span>
                       )}
                       {isBye && (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-tinta-2 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">BYE</span>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-tinta-2 bg-elevada px-2 py-0.5 rounded-full border border-borde">BYE</span>
                       )}
                       {partida.estado === 'programada' && (
                         <span className="inline-flex items-center gap-1 text-[11px] text-tinta-3 bg-white/5 px-2 py-0.5 rounded-full border border-borde">
@@ -407,7 +407,7 @@ export default function FasePartidasAdminPage() {
                         </span>
                       )}
                       {partida.estado === 'en_curso' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-tinta-2 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-tinta-2 bg-elevada px-2 py-0.5 rounded-full border border-borde">
                           <Play size={11} /> En curso
                         </span>
                       )}
@@ -430,7 +430,7 @@ export default function FasePartidasAdminPage() {
                             className={`flex items-center justify-between p-3 rounded-[6px] transition-all ${p?.es_ganador ? 'bg-green-500/10 border border-green-500/30' : 'bg-white/[0.02] border border-borde-sutil'}`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-[4px] ${idx === 0 ? 'bg-acento/30 border-borde' : 'bg-cyan-600/30 border-cyan-500/30'} border flex items-center justify-center font-bold text-xs text-white`}>
+                              <div className={`w-8 h-8 rounded-[4px] ${idx === 0 ? 'bg-acento/30 border-borde' : 'bg-acento/30 border-borde'} border flex items-center justify-center font-bold text-xs text-white`}>
                                 {(p?.equipo.tag || p?.equipo.nombre || '??').slice(0, 3)}
                               </div>
                               <p className={`text-sm font-bold leading-tight ${p?.es_ganador ? 'text-green-300' : 'text-white'}`}>{p?.equipo.nombre}</p>

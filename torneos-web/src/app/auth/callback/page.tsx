@@ -31,16 +31,16 @@ export default function AuthCallbackPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#080811] text-slate-100 gap-3 px-4 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-fondo text-tinta gap-3 px-4 text-center">
       {error ? (
         <>
-          <AlertCircle className="w-8 h-8 text-rose-400" />
-          <p className="text-sm text-white/70 max-w-sm">{error}</p>
+          <AlertCircle className="w-8 h-8 text-vivo" />
+          <p className="text-sm text-tinta-2 max-w-sm">{error}</p>
         </>
       ) : (
         <>
-          <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
-          <p className="text-sm text-white/50">Completando inicio de sesión...</p>
+          <Loader2 className="w-8 h-8 text-acento-claro animate-spin" />
+          <p className="text-sm text-tinta-3">Completando inicio de sesión...</p>
         </>
       )}
     </div>

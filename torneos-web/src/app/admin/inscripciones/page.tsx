@@ -123,7 +123,7 @@ export default function AdminGlobalInscripcionesPage() {
         </div>
       )}
 
-      <div className="bg-superficie border border-borde rounded-[6px] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search size={15} className="absolute left-3.5 top-3 text-tinta-4" />
           <input
@@ -160,7 +160,7 @@ export default function AdminGlobalInscripcionesPage() {
 
       <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+          <div className="glass-card p-12 text-center text-tinta-4">
             <Users size={36} className="mx-auto mb-2 opacity-30 text-acento-claro" />
             <p className="text-sm font-semibold text-tinta-2">No se encontraron inscripciones con estos filtros</p>
           </div>
@@ -168,7 +168,7 @@ export default function AdminGlobalInscripcionesPage() {
           filtered.map(({ inscripcion: ins, edicion }) => {
             const isExpanded = expandedId === ins.id;
             return (
-              <div key={ins.id} className="bg-superficie border border-borde rounded-[6px] overflow-hidden hover:border-borde-fuerte transition-all">
+              <div key={ins.id} className="glass-card overflow-hidden hover:border-borde-fuerte transition-all">
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
                     <div className="w-10 h-10 rounded-[6px] bg-acento flex items-center justify-center font-black text-white text-xs flex-shrink-0">

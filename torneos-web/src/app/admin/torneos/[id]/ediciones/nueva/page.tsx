@@ -91,7 +91,7 @@ export default function NuevaEdicionPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-superficie border border-borde rounded-[6px] p-6 space-y-6 shadow-xl">
+      <form onSubmit={handleSubmit} className="glass-card p-6 space-y-6 shadow-xl">
         <div>
           <label className="block text-xs font-semibold text-tinta-2 mb-1.5 flex items-center gap-1.5">
             <Gamepad2 size={13} className="text-acento-claro" /> Juego
@@ -99,7 +99,7 @@ export default function NuevaEdicionPage() {
           <select
             value={juegoId}
             onChange={(e) => setJuegoId(e.target.value)}
-            className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500"
+            className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-borde-fuerte"
           >
             {juegos.map(j => <option key={j.id} value={j.id}>{j.nombre}</option>)}
           </select>
@@ -110,7 +110,7 @@ export default function NuevaEdicionPage() {
           <input
             type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej. Season 3 - Gran Final de Apertura"
-            className="w-full bg-fondo border border-borde rounded-[6px] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500"
+            className="w-full bg-fondo border border-borde rounded-[6px] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-borde-fuerte"
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function NuevaEdicionPage() {
             <input
               type="text" value={bolsaPremios} onChange={(e) => setBolsaPremios(e.target.value)}
               placeholder="Ej. $1,500 USD"
-              className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono font-bold"
+              className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-borde-fuerte font-mono font-bold"
             />
           </div>
           <div>
@@ -128,7 +128,7 @@ export default function NuevaEdicionPage() {
             <input
               type="number" min={2} max={256} value={maxEquipos}
               onChange={(e) => setMaxEquipos(Number(e.target.value))}
-              className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono font-bold"
+              className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-borde-fuerte font-mono font-bold"
               required
             />
           </div>
@@ -140,7 +140,7 @@ export default function NuevaEdicionPage() {
           </label>
           <input
             type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)}
-            className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono"
+            className="w-full bg-fondo border border-borde rounded-[6px] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-borde-fuerte font-mono"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function NuevaEdicionPage() {
           </Link>
           <button
             type="submit" disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-acento hover:from-cyan-500 hover:to-violet-500 text-white text-sm font-bold rounded-[6px] transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 bg-acento text-white text-sm font-bold rounded-[6px] transition-all disabled:opacity-50"
           >
             {loading ? <span>Creando...</span> : <><Save size={16} /> Publicar Nueva Edición</>}
           </button>

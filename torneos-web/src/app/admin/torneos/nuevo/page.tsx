@@ -365,7 +365,7 @@ export default function NuevoTorneoPage() {
 
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/80 border border-borde text-acento-claro text-xs font-semibold mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevada/80 border border-borde text-acento-claro text-xs font-semibold mb-2">
           <Sparkles size={13} />
           <span>Constructor Multi-Fase</span>
         </div>
@@ -434,7 +434,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => setJuegoCodigo('mlbb')}
                 className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'mlbb'
-                    ? 'bg-purple-950/50 border-acento ring-1 ring-purple-500'
+                    ? 'bg-elevada/50 border-acento ring-1 ring-purple-500'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -468,7 +468,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => setJuegoCodigo('codm')}
                 className={`p-4 rounded-[6px] border cursor-pointer transition-all ${
                   juegoCodigo === 'codm'
-                    ? 'bg-cyan-950/50 border-cyan-500 ring-1 ring-cyan-500'
+                    ? 'bg-elevada/50 border-borde-fuerte ring-1 ring-cyan-500'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -510,7 +510,7 @@ export default function NuevoTorneoPage() {
           <div className="flex justify-end pt-4 border-t border-borde">
             <button
               type="submit"
-              className="px-6 py-3 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all"
+              className="px-6 py-3 rounded-[6px] bg-acento text-white font-bold text-xs flex items-center gap-2 transition-all"
             >
               <span>Continuar a Fases y Equipos</span>
               <ChevronRight size={16} />
@@ -542,7 +542,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('8')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '8'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -556,7 +556,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('16')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '16'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -570,7 +570,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('32')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '32'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -584,7 +584,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('64')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '64'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -598,7 +598,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('128')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '128'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -612,7 +612,7 @@ export default function NuevoTorneoPage() {
                 onClick={() => aplicarPlantilla('40_grupos')}
                 className={`p-3 rounded-[6px] border text-left transition-all ${
                   plantillaActiva === '40_grupos'
-                    ? 'bg-elevada border-acento ring-2 ring-purple-500/50'
+                    ? 'bg-elevada border-acento ring-2 ring-acento'
                     : 'bg-fondo border-borde hover:border-borde-fuerte'
                 }`}
               >
@@ -698,7 +698,7 @@ export default function NuevoTorneoPage() {
               <button
                 type="button"
                 onClick={handleAddFase}
-                className="px-3.5 py-1.5 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all"
+                className="px-3.5 py-1.5 rounded-[6px] bg-acento text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all"
               >
                 <Plus size={14} /> Añadir Siguiente Etapa
               </button>
@@ -709,7 +709,7 @@ export default function NuevoTorneoPage() {
               <div key={fase.id} className="bg-superficie rounded-[6px] p-6 border border-borde space-y-4">
                 <div className="flex items-center justify-between border-b border-borde pb-3">
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="w-6 h-6 rounded-[4px] bg-purple-950 border border-borde text-acento-claro font-black text-xs flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-[4px] bg-elevada border border-borde text-acento-claro font-black text-xs flex items-center justify-center">
                       {index + 1}
                     </span>
                     <input
@@ -782,7 +782,7 @@ export default function NuevoTorneoPage() {
                           onClick={() => updateFase(index, { bo })}
                           className={`flex-1 py-2.5 rounded-[4px] text-xs font-bold border transition-all ${
                             fase.bo === bo
-                              ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                              ? 'border-borde-fuerte bg-elevada text-tinta-2'
                               : 'border-borde bg-fondo text-tinta-4 hover:border-borde-fuerte'
                           }`}
                         >
@@ -849,7 +849,7 @@ export default function NuevoTorneoPage() {
                                   }}
                                   className={`flex-1 py-1.5 rounded-[4px] font-bold border transition-all ${
                                     tramo.bo === bo
-                                      ? 'border-cyan-500 bg-cyan-500/20 text-tinta-2'
+                                      ? 'border-borde-fuerte bg-elevada text-tinta-2'
                                       : 'border-borde bg-fondo text-tinta-4 hover:border-borde-fuerte'
                                   }`}
                                 >
@@ -917,7 +917,7 @@ export default function NuevoTorneoPage() {
                 {(fase.formato === 'eliminacion_simple' || fase.formato === 'eliminacion_doble') &&
                   fase.equiposEntran > 1 &&
                   (fase.equiposEntran & (fase.equiposEntran - 1)) !== 0 && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-[4px] bg-cyan-950/30 border border-cyan-500/40 text-[11px] text-tinta-2">
+                  <div className="flex items-center gap-2 p-2.5 rounded-[4px] bg-elevada/30 border border-borde text-[11px] text-tinta-2">
                     <span className="text-tinta-2">✨</span>
                     <span>
                       <span>
@@ -944,7 +944,7 @@ export default function NuevoTorneoPage() {
             <button
               type="button"
               onClick={() => setStep(3)}
-              className="px-6 py-3 rounded-[6px] bg-acento hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all"
+              className="px-6 py-3 rounded-[6px] bg-acento text-white font-bold text-xs flex items-center gap-2 transition-all"
             >
               <span>Continuar al Paso 3 (Premios y Publicar)</span>
               <ChevronRight size={16} />
@@ -1053,7 +1053,7 @@ export default function NuevoTorneoPage() {
                   ? 'bg-emerald-600'
                   : isSubmitting
                   ? 'bg-purple-700 opacity-90'
-                  : 'bg-acento hover:from-emerald-500 hover:to-cyan-500'
+                  : 'bg-acento'
               }`}
             >
               <Sparkles size={16} />

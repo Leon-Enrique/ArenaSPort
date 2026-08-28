@@ -125,7 +125,7 @@ export default function EdicionDisputasAdminPage() {
           <h3 className="text-xs font-bold uppercase tracking-wider text-tinta-3 mb-2">Disputas Registradas ({disputas.length})</h3>
 
           {disputas.length === 0 && (
-            <div className="bg-superficie border border-borde rounded-[6px] p-8 text-center text-tinta-4 text-xs">
+            <div className="glass-card p-8 text-center text-tinta-4 text-xs">
               No hay disputas registradas en esta edición.
             </div>
           )}
@@ -158,7 +158,7 @@ export default function EdicionDisputasAdminPage() {
 
         <div className="lg:col-span-7">
           {selectedDisputa ? (
-            <div className="bg-superficie border border-borde rounded-[6px] p-6 space-y-6">
+            <div className="glass-card p-6 space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-borde-sutil">
                 <div>
                   <span className="text-xs text-acento-claro font-semibold">Partida #{selectedDisputa.partida_id}</span>
@@ -228,7 +228,7 @@ export default function EdicionDisputasAdminPage() {
                     <button
                       onClick={() => handleResolve('walkover', eqB.equipo.id)}
                       disabled={resolviendo}
-                      className="px-3 py-2.5 bg-cyan-600/30 hover:bg-cyan-600 border border-cyan-500/40 text-cyan-200 hover:text-white rounded-[6px] text-xs font-bold transition-all disabled:opacity-50"
+                      className="px-3 py-2.5 bg-acento/30 hover:bg-acento border border-borde text-tinta-2 hover:text-white rounded-[6px] text-xs font-bold transition-all disabled:opacity-50"
                     >
                       ✓ Fallo a favor de {eqB.equipo.tag || eqB.equipo.nombre}
                     </button>
@@ -244,7 +244,7 @@ export default function EdicionDisputasAdminPage() {
               )}
             </div>
           ) : (
-            <div className="bg-superficie border border-borde rounded-[6px] p-12 text-center text-tinta-4">
+            <div className="glass-card p-12 text-center text-tinta-4">
               Selecciona una disputa de la lista para analizar el caso.
             </div>
           )}

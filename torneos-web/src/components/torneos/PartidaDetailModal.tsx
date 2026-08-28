@@ -181,19 +181,19 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md" onClick={onClose}>
-      <div className="w-full max-w-md bg-[#11111f] border border-slate-700 rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-fondo/80 backdrop-blur-md" onClick={onClose}>
+      <div className="w-full max-w-md bg-superficie border border-borde-fuerte rounded-[6px] shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-4 bg-fondo border-b border-borde flex items-center justify-between">
           <h3 className="font-extrabold text-sm text-white">Partida #{partida.id}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-tinta-3 hover:text-white">
             <X size={16} />
           </button>
         </div>
 
         <div className="p-5 space-y-2">
           {partida.participaciones.map((p) => (
-            <div key={p.id} className={`flex items-center justify-between p-3 rounded-xl border text-sm ${p.esGanador ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-slate-950 border-slate-800'}`}>
-              <span className={p.esGanador ? 'text-white font-bold' : 'text-slate-300'}>{p.equipo?.nombre || 'Por definir'}</span>
+            <div key={p.id} className={`flex items-center justify-between p-3 rounded-[6px] border text-sm ${p.esGanador ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-fondo border-borde'}`}>
+              <span className={p.esGanador ? 'text-white font-bold' : 'text-tinta-2'}>{p.equipo?.nombre || 'Por definir'}</span>
               <span className="font-mono font-black text-white">{p.mapasGanados ?? '—'}</span>
             </div>
           ))}
@@ -201,31 +201,31 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
         <div className="px-5 pb-5 space-y-3">
           {success && (
-            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-[6px] bg-emerald-950/40 border border-emerald-500/40 text-ok text-xs flex items-center gap-2">
               <CheckCircle2 size={14} /> {success}
             </div>
           )}
           {error && (
-            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-[6px] bg-rose-950/60 border border-rose-500/40 text-vivo text-xs flex items-center gap-2">
               <AlertCircle size={14} /> {error}
             </div>
           )}
 
           {checking ? (
-            <div className="flex items-center gap-2 text-white/40 text-xs py-2"><Loader2 size={14} className="animate-spin" /> Verificando sesión...</div>
+            <div className="flex items-center gap-2 text-tinta-3 text-xs py-2"><Loader2 size={14} className="animate-spin" /> Verificando sesión...</div>
           ) : !usuario ? (
-            <div className="p-3 rounded-xl bg-violet-950/30 border border-violet-500/30 text-xs text-violet-200 flex items-center gap-2">
+            <div className="p-3 rounded-[6px] bg-elevada/30 border border-acento/30 text-xs text-tinta-2 flex items-center gap-2">
               <LogIn size={14} className="shrink-0" /> Iniciá sesión como capitán para reportar resultados o hacer check-in de esta partida.
             </div>
           ) : !soyCapitan ? (
-            <p className="text-xs text-slate-400">Solo los capitanes de estos dos equipos pueden reportar esta partida.</p>
+            <p className="text-xs text-tinta-3">Solo los capitanes de estos dos equipos pueden reportar esta partida.</p>
           ) : !success && (
             <>
               {partida.estado === 'check_in' && (
                 <button
                   onClick={handleCheckIn}
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-[6px] bg-elevada text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Confirmar Presencia
                 </button>
@@ -233,25 +233,25 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
               {partida.estado === 'en_curso' && (
                 <form onSubmit={handleReportar} className="space-y-2.5">
-                  <p className="text-xs text-white/50">Reportá el marcador final de tu partida.</p>
+                  <p className="text-xs text-tinta-3">Reportá el marcador final de tu partida.</p>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[11px] text-white/40 mb-1">{miParticipacion?.equipo?.nombre ?? 'Tu equipo'} (vos)</label>
+                      <label className="block text-[11px] text-tinta-3 mb-1">{miParticipacion?.equipo?.nombre ?? 'Tu equipo'} (vos)</label>
                       <input type="number" min={0} max={5} value={marcadorPropio} onChange={e => setMarcadorPropio(Number(e.target.value))}
-                        className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-center font-mono font-bold text-white" />
+                        className="w-full bg-fondo border border-borde rounded-[4px] px-3 py-2 text-center font-mono font-bold text-white" />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-white/40 mb-1">{rivalParticipacion?.equipo?.nombre || 'Rival'}</label>
+                      <label className="block text-[11px] text-tinta-3 mb-1">{rivalParticipacion?.equipo?.nombre || 'Rival'}</label>
                       <input type="number" min={0} max={5} value={marcadorRival} onChange={e => setMarcadorRival(Number(e.target.value))}
-                        className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-center font-mono font-bold text-white" />
+                        className="w-full bg-fondo border border-borde rounded-[4px] px-3 py-2 text-center font-mono font-bold text-white" />
                     </div>
                   </div>
                   <input
                     type="text" value={evidenciaUrl} onChange={e => setEvidenciaUrl(e.target.value)}
                     placeholder="Link de la captura (opcional, pero recomendado)"
-                    className="w-full bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
+                    className="w-full bg-fondo border border-borde rounded-[4px] px-3 py-2 text-xs text-white"
                   />
-                  <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+                  <button type="submit" disabled={loading} className="w-full py-2.5 rounded-[6px] bg-acento text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
                     {loading ? <Loader2 size={14} className="animate-spin" /> : <Trophy size={14} />} Reportar Resultado
                   </button>
                 </form>
@@ -259,12 +259,12 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
 
               {partida.estado === 'reportada' && !showDisputa && (
                 <div className="space-y-2">
-                  <p className="text-xs text-white/50">El rival reportó un marcador. Confirmalo si es correcto, o abrí una disputa.</p>
+                  <p className="text-xs text-tinta-3">El rival reportó un marcador. Confirmalo si es correcto, o abrí una disputa.</p>
                   <div className="flex gap-2">
-                    <button onClick={handleConfirmar} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+                    <button onClick={handleConfirmar} disabled={loading} className="flex-1 py-2.5 rounded-[6px] bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50">
                       {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Confirmar
                     </button>
-                    <button onClick={() => setShowDisputa(true)} className="flex-1 py-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-2">
+                    <button onClick={() => setShowDisputa(true)} className="flex-1 py-2.5 rounded-[6px] bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 text-atencion text-xs font-bold flex items-center justify-center gap-2">
                       <AlertTriangle size={14} /> Disputar
                     </button>
                   </div>
@@ -276,12 +276,12 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                   <textarea
                     value={motivoDisputa} onChange={e => setMotivoDisputa(e.target.value)}
                     placeholder="Explicá por qué el marcador reportado está mal..."
-                    className="w-full bg-[#0a0a14] border border-amber-500/30 rounded-lg px-3 py-2 text-xs text-white h-20 resize-none"
+                    className="w-full bg-fondo border border-amber-500/30 rounded-[4px] px-3 py-2 text-xs text-white h-20 resize-none"
                     required
                   />
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setShowDisputa(false)} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white/60 text-xs rounded-xl">Cancelar</button>
-                    <button type="submit" disabled={loading} className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs rounded-xl disabled:opacity-50">
+                    <button type="button" onClick={() => setShowDisputa(false)} className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-tinta-2 text-xs rounded-[6px]">Cancelar</button>
+                    <button type="submit" disabled={loading} className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs rounded-[6px] disabled:opacity-50">
                       {loading ? 'Enviando...' : 'Enviar Disputa'}
                     </button>
                   </div>
@@ -289,7 +289,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
               )}
 
               {(partida.estado === 'programada' || partida.estado === 'confirmada' || partida.estado === 'en_disputa') && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-tinta-3">
                   {partida.estado === 'programada' && 'El check-in todavía no se abrió para esta partida.'}
                   {partida.estado === 'confirmada' && 'Esta partida ya tiene un resultado confirmado.'}
                   {partida.estado === 'en_disputa' && 'Esta partida está en disputa — el organizador la va a resolver.'}
@@ -299,19 +299,19 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
           )}
 
           {puedoChatear && (
-            <div className="pt-1 border-t border-slate-800 mt-1">
-              <p className="text-[11px] font-semibold text-slate-400 pt-3 pb-1.5">
+            <div className="pt-1 border-t border-borde mt-1">
+              <p className="text-[11px] font-semibold text-tinta-3 pt-3 pb-1.5">
                 {soyOrganizador && !soyCapitan ? 'Chat de la partida (viendo como organizador)' : 'Chat con el rival'}
               </p>
-              <div ref={mensajesRef} className="h-36 overflow-y-auto space-y-1.5 bg-[#0a0a14] border border-slate-800 rounded-lg p-2.5">
+              <div ref={mensajesRef} className="h-36 overflow-y-auto space-y-1.5 bg-fondo border border-borde rounded-[4px] p-2.5">
                 {mensajes.length === 0 ? (
-                  <p className="text-[11px] text-slate-600 text-center py-4">Todavía no hay mensajes.</p>
+                  <p className="text-[11px] text-tinta-4 text-center py-4">Todavía no hay mensajes.</p>
                 ) : (
                   mensajes.map(m => {
                     if (m.equipo_id === null) {
                       return (
                         <div key={m.id} className="flex justify-center">
-                          <div className="max-w-[90%] rounded-lg px-2.5 py-1.5 text-xs bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                          <div className="max-w-[90%] rounded-[4px] px-2.5 py-1.5 text-xs bg-amber-500/10 border border-amber-500/20 text-amber-200">
                             <p className="text-[10px] font-semibold opacity-70 mb-0.5">{m.autor_nombre}</p>
                             <p className="break-words">{m.texto}</p>
                           </div>
@@ -321,7 +321,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                     const esMio = miParticipacion ? m.equipo_id === Number(miParticipacion.equipoId) : false;
                     return (
                       <div key={m.id} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs ${esMio ? 'bg-violet-600/30 text-white' : 'bg-slate-800 text-slate-200'}`}>
+                        <div className={`max-w-[80%] rounded-[4px] px-2.5 py-1.5 text-xs ${esMio ? 'bg-acento/30 text-white' : 'bg-elevada text-tinta'}`}>
                           <p className="text-[10px] font-semibold opacity-60 mb-0.5">{m.autor_nombre}</p>
                           <p className="break-words">{m.texto}</p>
                         </div>
@@ -331,7 +331,7 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                 )}
               </div>
               {errorChat && (
-                <p className="text-[11px] text-rose-300 pt-2 flex items-center gap-1.5">
+                <p className="text-[11px] text-vivo pt-2 flex items-center gap-1.5">
                   <AlertCircle size={12} className="shrink-0" /> {errorChat}
                 </p>
               )}
@@ -340,11 +340,11 @@ export default function PartidaDetailModal({ partida, onClose, onUpdated }: Prop
                   type="text" value={nuevoMensaje} onChange={e => setNuevoMensaje(e.target.value)}
                   placeholder={soyOrganizador && !soyCapitan ? 'Escribir como organizador...' : 'Escribí un mensaje...'}
                   maxLength={500}
-                  className="flex-1 bg-[#0a0a14] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="flex-1 bg-fondo border border-borde rounded-[4px] px-3 py-2 text-xs text-white focus:outline-none focus:border-acento"
                 />
                 <button
                   type="submit" disabled={enviandoMensaje || !nuevoMensaje.trim()}
-                  className="px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-bold disabled:opacity-50"
+                  className="px-3 py-2 accion-principal text-white rounded-[4px] text-xs font-bold disabled:opacity-50"
                 >
                   <Send size={13} />
                 </button>

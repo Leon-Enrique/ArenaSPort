@@ -102,25 +102,24 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
   return (
     <>
       {/* HEADER HERO */}
-      <section className="relative overflow-hidden bg-slate-950 border-b border-slate-800">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/40 via-slate-950 to-cyan-950/20" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative py-10 space-y-3">
+      <section className="bg-fondo border-b border-borde-sutil">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-purple-950/90 border border-purple-500 text-purple-300">
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-elevada/90 border border-acento text-acento-claro">
               {edicion.juego.nombre}
             </span>
-            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-950/90 border border-emerald-500 text-emerald-300">
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-950/90 border border-emerald-500 text-ok">
               {ESTADO_LABEL[edicion.estado] || edicion.estado}
             </span>
             {activeFase && (
-              <span className="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-800">
+              <span className="text-xs font-mono text-tinta-3 bg-superficie px-2.5 py-1 rounded border border-borde">
                 Formato: {formatoTexto}
               </span>
             )}
             {enVivo && (
               <span
                 title="Los resultados se actualizan solos, sin recargar la página."
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-950/60 border border-rose-500/40 text-rose-300"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-950/60 border border-rose-500/40 text-vivo"
               >
                 <Radio size={11} className="animate-pulse" /> EN VIVO
               </span>
@@ -130,18 +129,18 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">{edicion.nombre}</h1>
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-            <div className="flex flex-wrap items-center gap-6 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center gap-6 text-xs text-tinta-2">
               {edicion.bolsaPremios && (
-                <span className="flex items-center gap-2 text-amber-300 font-extrabold font-mono text-sm">
-                  <Award className="w-4 h-4 text-amber-400" /> Bolsa: {edicion.bolsaPremios}
+                <span className="flex items-center gap-2 text-atencion font-extrabold font-mono text-sm">
+                  <Award className="w-4 h-4 text-atencion" /> Bolsa: {edicion.bolsaPremios}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-purple-400" /> {edicion.equiposInscritosCount}{edicion.maxEquipos ? ` / ${edicion.maxEquipos}` : ''} Equipos
+                <Users className="w-4 h-4 text-acento-claro" /> {edicion.equiposInscritosCount}{edicion.maxEquipos ? ` / ${edicion.maxEquipos}` : ''} Equipos
               </span>
               {edicion.fechaInicio && (
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-cyan-400" /> Inicio: {new Date(edicion.fechaInicio).toLocaleDateString('es-BO')}
+                  <Calendar className="w-4 h-4 text-tinta-2" /> Inicio: {new Date(edicion.fechaInicio).toLocaleDateString('es-BO')}
                 </span>
               )}
             </div>
@@ -149,9 +148,9 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
             {edicion.estado === 'inscripciones_abiertas' && (
               <Link
                 href={`/torneos/${edicion.slug}/inscribirse`}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-all hover:scale-[1.02]"
+                className="px-5 py-2.5 rounded-[6px] bg-acento text-white font-bold text-xs flex items-center gap-2 transition-all hover:scale-[1.02]"
               >
-                <Trophy size={14} className="text-amber-300" /> Inscribir mi Squad
+                <Trophy size={14} className="text-atencion" /> Inscribir mi Squad
               </Link>
             )}
           </div>
@@ -159,26 +158,26 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
       </section>
 
       {/* TABS */}
-      <section className="sticky top-16 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+      <section className="sticky top-16 z-40 bg-fondo/90 backdrop-blur-md border-b border-borde">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto py-3 text-xs font-bold">
             <button
               onClick={() => setActiveTab('brackets')}
-              className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${activeTab === 'brackets' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+              className={`px-4 py-2 rounded-[6px] flex items-center gap-2 transition-all ${activeTab === 'brackets' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white hover:bg-superficie'}`}
             >
               <Sword className="w-4 h-4" /> {esFaseDeTabla ? 'Tabla de Posiciones' : 'Cuadro de Brackets'}
             </button>
             <button
               onClick={() => setActiveTab('teams')}
-              className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${activeTab === 'teams' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+              className={`px-4 py-2 rounded-[6px] flex items-center gap-2 transition-all ${activeTab === 'teams' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white hover:bg-superficie'}`}
             >
-              <Users className="w-4 h-4 text-cyan-400" /> Equipos ({edicion.equiposInscritosCount})
+              <Users className="w-4 h-4 text-tinta-2" /> Equipos ({edicion.equiposInscritosCount})
             </button>
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${activeTab === 'overview' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+              className={`px-4 py-2 rounded-[6px] flex items-center gap-2 transition-all ${activeTab === 'overview' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white hover:bg-superficie'}`}
             >
-              <FileText className="w-4 h-4 text-purple-400" /> Reglamento
+              <FileText className="w-4 h-4 text-acento-claro" /> Reglamento
             </button>
           </div>
         </div>
@@ -189,7 +188,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
         {activeTab === 'brackets' && (
           <div className="space-y-6">
             {fases.length === 0 ? (
-              <div className="bg-[#0e101d] border border-slate-800 rounded-2xl p-10 text-center text-xs text-white/40">
+              <div className="bg-[#0e101d] border border-borde rounded-[6px] p-10 text-center text-xs text-tinta-3">
                 {edicion.estado === 'inscripciones_abiertas'
                   ? 'Las llaves se van a sortear cuando cierren las inscripciones.'
                   : 'Este torneo todavía no tiene fases configuradas.'}
@@ -197,18 +196,18 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
             ) : (
               <div className="space-y-6">
                 {fases.length > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto bg-[#0e101d] p-3 rounded-2xl border border-purple-500/30 shadow-lg">
-                    <span className="text-xs font-black uppercase text-purple-400 px-2 flex items-center gap-1.5 shrink-0 font-mono">
+                  <div className="flex items-center gap-2 overflow-x-auto bg-[#0e101d] p-3 rounded-[6px] border border-acento/30 shadow-lg">
+                    <span className="text-xs font-black uppercase text-acento-claro px-2 flex items-center gap-1.5 shrink-0 font-mono">
                       <Layers size={15} /> Etapas ({fases.length}):
                     </span>
                     {fases.map((f, i) => (
                       <button
                         key={f.id}
                         onClick={() => setActiveFaseId(f.id)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                        className={`px-4 py-2 rounded-[6px] text-xs font-bold shrink-0 transition-all ${
                           (activeFaseId ?? fases[0].id) === f.id
-                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30 ring-1 ring-purple-400'
-                            : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                            ? 'bg-acento text-white ring-1 ring-purple-400'
+                            : 'bg-superficie text-tinta-3 hover:text-white hover:bg-elevada'
                         }`}
                       >
                         Paso {i + 1}: {f.nombre}
@@ -218,16 +217,16 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
                 )}
 
                 {esFaseSuiza && !loadingFaseData && (
-                  <div className="flex items-center gap-2 bg-[#0e101d] p-1.5 rounded-xl border border-slate-800 w-fit">
+                  <div className="flex items-center gap-2 bg-[#0e101d] p-1.5 rounded-[6px] border border-borde w-fit">
                     <button
                       onClick={() => setVistaSuizo('cruces')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${vistaSuizo === 'cruces' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-3.5 py-1.5 rounded-[4px] text-xs font-bold transition-all ${vistaSuizo === 'cruces' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white'}`}
                     >
                       Cruces
                     </button>
                     <button
                       onClick={() => setVistaSuizo('tabla')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${vistaSuizo === 'tabla' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-3.5 py-1.5 rounded-[4px] text-xs font-bold transition-all ${vistaSuizo === 'tabla' ? 'bg-acento text-white' : 'text-tinta-3 hover:text-white'}`}
                     >
                       Tabla de Posiciones
                     </button>
@@ -235,7 +234,7 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
                 )}
 
                 {loadingFaseData ? (
-                  <div className="flex items-center justify-center gap-2 text-white/40 text-xs py-20">
+                  <div className="flex items-center justify-center gap-2 text-tinta-3 text-xs py-20">
                     <Loader2 className="animate-spin" size={16} /> Cargando datos de la fase...
                   </div>
                 ) : esFaseSuiza ? (
@@ -271,34 +270,34 @@ export default function TorneoDetailClient({ resumenInicial }: { resumenInicial:
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+              <div className="glass-card rounded-[6px] p-6 border border-borde space-y-4">
                 <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-purple-400" /> Reglamento Oficial
+                  <Shield className="w-5 h-5 text-acento-claro" /> Reglamento Oficial
                 </h3>
                 {edicion.reglamentoUrl ? (
                   <a
                     href={edicion.reglamentoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-semibold underline"
+                    className="inline-flex items-center gap-2 text-xs text-tinta-2 hover:text-tinta-2 font-semibold underline"
                   >
                     <FileText size={14} /> Ver reglamento completo
                   </a>
                 ) : (
-                  <p className="text-xs text-slate-400">El organizador todavía no publicó el reglamento de este torneo.</p>
+                  <p className="text-xs text-tinta-3">El organizador todavía no publicó el reglamento de este torneo.</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+              <div className="glass-card rounded-[6px] p-6 border border-borde space-y-4">
                 <h4 className="font-bold text-sm text-white flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-amber-400" /> Identidad de Juego
+                  <Trophy className="w-4 h-4 text-atencion" /> Identidad de Juego
                 </h4>
-                <div className="space-y-2 text-xs text-slate-300">
+                <div className="space-y-2 text-xs text-tinta-2">
                   {edicion.juego.camposIdentidad.map((campo) => (
-                    <div key={campo.key} className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                      <span className="font-semibold text-purple-300 block">{campo.label}</span>
+                    <div key={campo.key} className="bg-fondo p-2.5 rounded-[4px] border border-borde">
+                      <span className="font-semibold text-acento-claro block">{campo.label}</span>
                     </div>
                   ))}
                 </div>

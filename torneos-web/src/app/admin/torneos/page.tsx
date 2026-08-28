@@ -40,7 +40,7 @@ export default function TorneosAdminPage() {
         </div>
         <Link
           href="/admin/torneos/nuevo"
-          className="flex items-center gap-2 px-4 py-2.5 bg-acento hover:from-violet-500 hover:to-violet-400 text-white text-sm font-semibold rounded-[6px] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-acento text-white text-sm font-semibold rounded-[6px] transition-all"
         >
           <Plus size={16} /> Nuevo Torneo
         </Link>
@@ -51,7 +51,7 @@ export default function TorneosAdminPage() {
           const edicionesDelTorneo = ediciones.filter(e => e.torneo_id === torneo.id);
           const activo = edicionesDelTorneo.some(e => e.estado === 'en_curso' || e.estado === 'inscripciones_abiertas');
           return (
-            <div key={torneo.id} className="group bg-superficie border border-borde rounded-[6px] overflow-hidden hover:border-white/20 transition-all">
+            <div key={torneo.id} className="group glass-card overflow-hidden hover:border-white/20 transition-all">
               <div className="relative h-24 bg-acento flex items-center justify-center">
                 <span className="text-3xl font-black text-tinta-4">{torneo.nombre.slice(0, 2).toUpperCase()}</span>
                 <div className="absolute inset-0 bg-superficie/80" />
